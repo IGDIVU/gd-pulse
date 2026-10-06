@@ -5,6 +5,7 @@ from PIL import Image
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "gd_pulse_secret_key_2025")
+app.config["MAX_CONTENT_LENGTH"] = 25 * 1024 * 1024  # 25 MB max upload
 
 # Hardcoded users (abhi ke liye)
 USERS = {
@@ -113,7 +114,6 @@ def photo_to_pdf_process():
         if not files:
             return "Koi image select nahi ki", 400
 
-        # Sab images ko RGB me convert karo
         images = []
         for f in files:
             img = Image.open(f.stream)
@@ -123,7 +123,6 @@ def photo_to_pdf_process():
                 img = img.convert("RGB")
             images.append(img)
 
-        # Pehli image ko base banao, baaki append karo
         first = images[0]
         rest = images[1:]
 
@@ -140,6 +139,50 @@ def photo_to_pdf_process():
 
     except Exception as e:
         return f"Error: {str(e)}", 500
+
+@app.route("/tools/video-to-mp3")
+def video_to_mp3_tool():
+    return render_template("video-to-mp3.html")
+
+@app.route("/tools/video-to-mp3/process", methods=["POST"])
+def video_to_mp3_process():
+    try:
+        file = request.files.get("video")
+        if not file or file.filename == "":
+            return "Koi video select nahi ki", 400
+
+        # Video ko temp me save karo
+        temp_dir = "/tmp"
+        input_path = os.path.join(temp_dir, "input_video")
+        output_path = os.path.join(temp_dir, "output_audio.mp3")
+
+        file.save(input_path)
+
+        # MoviePy se audio extract karo
+        from moviepy.editor import VideoFileClip
+        clip = VideoFileClip(input_path)
+        clip.audio.write_audiofile(output_path, codec="mp3", verbose=False, logger=None)
+        clip.close()
+
+        # MP3 file bhejo
+        original_name = os.path.splitext(file.filename)[0]
+        download_name = f"{original_name}.mp3"
+
+        return send_file(
+            output_path,
+            mimetype="audio/mpeg",
+            as_attachment=True,
+            download_name=download_name
+        )
+
+    except Exception as e:
+        return f"Error: {str(e)}", 500
+
+# ---------- Error Handler ----------
+
+@app.errorhandler(413)
+def too_large(e):
+    return "File bahut badi hai. Max 25MB allowed hai.", 413
 
 # ---------- Run ----------
 
