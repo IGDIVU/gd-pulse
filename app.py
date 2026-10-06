@@ -5,9 +5,9 @@ from PIL import Image
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "gd_pulse_secret_key_2025")
-app.config["MAX_CONTENT_LENGTH"] = 25 * 1024 * 1024  # 25 MB max upload
+app.config["MAX_CONTENT_LENGTH"] = 25 * 1024 * 1024  # 25 MB
 
-# Hardcoded users (abhi ke liye)
+# Hardcoded users
 USERS = {
     "admin": {"password": "gdadmin123", "role": "admin"},
     "user":  {"password": "user123",    "role": "public"}
@@ -25,7 +25,6 @@ def login():
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "").strip()
-
         if username in USERS and USERS[username]["password"] == password:
             session["user"] = username
             session["role"] = USERS[username]["role"]
@@ -34,7 +33,6 @@ def login():
             return redirect(url_for("dashboard"))
         else:
             error = "Galat username ya password"
-
     return render_template("login.html", error=error)
 
 @app.route("/admin")
@@ -48,7 +46,7 @@ def logout():
     session.clear()
     return redirect(url_for("dashboard"))
 
-# ---------- Tools ----------
+# ---------- Calculators ----------
 
 @app.route("/tools/gst")
 def gst_tool():
@@ -57,6 +55,24 @@ def gst_tool():
 @app.route("/tools/emi")
 def emi_tool():
     return render_template("emi.html")
+
+@app.route("/tools/age")
+def age_tool():
+    return render_template("age.html")
+
+@app.route("/tools/number-to-words")
+def number_to_words_tool():
+    return render_template("number-to-words.html")
+
+@app.route("/tools/unit-converter")
+def unit_converter_tool():
+    return render_template("unit-converter.html")
+
+@app.route("/tools/text-tools")
+def text_tools():
+    return render_template("text-tools.html")
+
+# ---------- Image Tools ----------
 
 @app.route("/tools/image-resize")
 def image_resize_tool():
@@ -68,15 +84,12 @@ def image_resize_process():
         file = request.files.get("image")
         if not file or file.filename == "":
             return "Koi image select nahi ki", 400
-
         width = int(request.form.get("width", 0))
         height = int(request.form.get("height", 0))
         if width <= 0 or height <= 0:
             return "Sahi width/height daalo", 400
-
         img = Image.open(file.stream)
         resized = img.resize((width, height), Image.LANCZOS)
-
         output = io.BytesIO()
         fmt = img.format if img.format else "PNG"
         if fmt not in ("JPEG", "PNG", "WEBP", "GIF", "BMP"):
@@ -85,19 +98,10 @@ def image_resize_process():
             resized = resized.convert("RGB")
         resized.save(output, format=fmt)
         output.seek(0)
-
-        original_name = file.filename
-        base = os.path.splitext(original_name)[0]
+        base = os.path.splitext(file.filename)[0]
         ext = fmt.lower() if fmt != "JPEG" else "jpg"
-        download_name = f"{base}_{width}x{height}.{ext}"
-
-        return send_file(
-            output,
-            mimetype=f"image/{ext}",
-            as_attachment=True,
-            download_name=download_name
-        )
-
+        return send_file(output, mimetype=f"image/{ext}", as_attachment=True,
+                         download_name=f"{base}_{width}x{height}.{ext}")
     except Exception as e:
         return f"Error: {str(e)}", 500
 
@@ -110,35 +114,100 @@ def photo_to_pdf_process():
     try:
         files = request.files.getlist("images")
         files = [f for f in files if f and f.filename != ""]
-
         if not files:
             return "Koi image select nahi ki", 400
-
         images = []
         for f in files:
             img = Image.open(f.stream)
-            if img.mode in ("RGBA", "P", "LA"):
-                img = img.convert("RGB")
-            elif img.mode != "RGB":
+            if img.mode != "RGB":
                 img = img.convert("RGB")
             images.append(img)
-
         first = images[0]
         rest = images[1:]
-
         output = io.BytesIO()
         first.save(output, format="PDF", save_all=True, append_images=rest)
         output.seek(0)
-
-        return send_file(
-            output,
-            mimetype="application/pdf",
-            as_attachment=True,
-            download_name="gd-pulse-images.pdf"
-        )
-
+        return send_file(output, mimetype="application/pdf", as_attachment=True,
+                         download_name="gd-pulse-images.pdf")
     except Exception as e:
         return f"Error: {str(e)}", 500
+
+@app.route("/tools/image-compress")
+def image_compress_tool():
+    return render_template("image-compress.html")
+
+@app.route("/tools/image-compress/process", methods=["POST"])
+def image_compress_process():
+    try:
+        file = request.files.get("image")
+        if not file or file.filename == "":
+            return "Koi image select nahi ki", 400
+
+        quality = int(request.form.get("quality", 70))
+        if quality < 1 or quality > 100:
+            return "Quality 1 se 100 ke beech honi chahiye", 400
+
+        img = Image.open(file.stream)
+        if img.mode in ("RGBA", "P", "LA"):
+            img = img.convert("RGB")
+
+        output = io.BytesIO()
+        img.save(output, format="JPEG", quality=quality, optimize=True)
+        output.seek(0)
+
+        base = os.path.splitext(file.filename)[0]
+        return send_file(output, mimetype="image/jpeg", as_attachment=True,
+                         download_name=f"{base}_compressed.jpg")
+    except Exception as e:
+        return f"Error: {str(e)}", 500
+
+@app.route("/tools/image-crop")
+def image_crop_tool():
+    return render_template("image-crop.html")
+
+@app.route("/tools/image-crop/process", methods=["POST"])
+def image_crop_process():
+    try:
+        file = request.files.get("image")
+        if not file or file.filename == "":
+            return "Koi image select nahi ki", 400
+
+        x = int(request.form.get("x", 0))
+        y = int(request.form.get("y", 0))
+        width = int(request.form.get("width", 0))
+        height = int(request.form.get("height", 0))
+
+        if width <= 0 or height <= 0:
+            return "Sahi width/height daalo", 400
+
+        img = Image.open(file.stream)
+        img_w, img_h = img.size
+
+        # Boundary check
+        x = max(0, min(x, img_w - 1))
+        y = max(0, min(y, img_h - 1))
+        width = min(width, img_w - x)
+        height = min(height, img_h - y)
+
+        cropped = img.crop((x, y, x + width, y + height))
+
+        output = io.BytesIO()
+        fmt = img.format if img.format else "PNG"
+        if fmt not in ("JPEG", "PNG", "WEBP", "GIF", "BMP"):
+            fmt = "PNG"
+        if fmt == "JPEG" and cropped.mode in ("RGBA", "P"):
+            cropped = cropped.convert("RGB")
+        cropped.save(output, format=fmt)
+        output.seek(0)
+
+        base = os.path.splitext(file.filename)[0]
+        ext = fmt.lower() if fmt != "JPEG" else "jpg"
+        return send_file(output, mimetype=f"image/{ext}", as_attachment=True,
+                         download_name=f"{base}_cropped.{ext}")
+    except Exception as e:
+        return f"Error: {str(e)}", 500
+
+# ---------- Video Tools ----------
 
 @app.route("/tools/video-to-mp3")
 def video_to_mp3_tool():
@@ -151,30 +220,18 @@ def video_to_mp3_process():
         if not file or file.filename == "":
             return "Koi video select nahi ki", 400
 
-        # Video ko temp me save karo
-        temp_dir = "/tmp"
-        input_path = os.path.join(temp_dir, "input_video")
-        output_path = os.path.join(temp_dir, "output_audio.mp3")
-
+        input_path = "/tmp/input_video"
+        output_path = "/tmp/output_audio.mp3"
         file.save(input_path)
 
-        # MoviePy se audio extract karo
         from moviepy.editor import VideoFileClip
         clip = VideoFileClip(input_path)
         clip.audio.write_audiofile(output_path, codec="mp3", verbose=False, logger=None)
         clip.close()
 
-        # MP3 file bhejo
-        original_name = os.path.splitext(file.filename)[0]
-        download_name = f"{original_name}.mp3"
-
-        return send_file(
-            output_path,
-            mimetype="audio/mpeg",
-            as_attachment=True,
-            download_name=download_name
-        )
-
+        base = os.path.splitext(file.filename)[0]
+        return send_file(output_path, mimetype="audio/mpeg", as_attachment=True,
+                         download_name=f"{base}.mp3")
     except Exception as e:
         return f"Error: {str(e)}", 500
 
