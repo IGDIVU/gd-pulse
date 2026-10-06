@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unit Converter — GD Pulse</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+  body { background: #0a0f1a; color: #e6edf5; min-height: 100vh; }
+  body::before {
+    content: ""; position: fixed; inset: 0;
+    background: radial-gradient(circle at 20% 30%, rgba(0,184,148,0.12), transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(108,92,231,0.12), transparent 40%);
+    z-index: -1;
+  }
+  header {
+    background: rgba(15,23,36,0.75); backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    color: white; padding: 16px 30px;
+    display: flex; justify-content: space-between; align-items: center;
+    position: sticky; top: 0; z-index: 100;
+  }
+  header h1 { font-size: 20px; }
+  .btn {
+    background: linear-gradient(135deg, #00b894, #019875); color: white;
+    padding: 10px 22px; border: none; border-radius: 30px;
+    cursor: pointer; font-size: 14px; font-weight: bold;
+    text-decoration: none; box-shadow: 0 4px 14px rgba(0,184,148,0.35);
+  }
+  .btn:hover { transform: translateY(-2px); }
+  main { padding: 30px; max-width: 650px; margin: 0 auto; }
+  .box {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    padding: 30px; border-radius: 18px;
+    backdrop-filter: blur(12px);
+  }
+  h2 { margin-bottom: 22px; font-size: 22px; }
+  label { display: block; font-size: 14px; color: #a0aec0; margin-bottom: 8px; margin-top: 15px; }
+  select, input {
+    width: 100%; padding: 12px; margin-bottom: 10px;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px; background: rgba(255,255,255,0.05);
+    color: #e6edf5; font-size: 15px;
+  }
+  select option { background: #1e2a38; color: white; }
+  select:focus, input:focus { outline: none; border-color: #00b894; }
+  .row { display: flex; gap: 12px; }
+  .row > div { flex: 1; }
+  .calc-btn {
+    width: 100%; padding: 15px; margin-top: 20px;
+    background: linear-gradient(135deg, #00b894, #019875);
+    color: white; border: none; border-radius: 10px;
+    font-size: 16px; cursor: pointer; font-weight: bold;
+    box-shadow: 0 4px 14px rgba(0,184,148,0.35);
+  }
+  .calc-btn:hover { transform: translateY(-2px); }
+  .result {
+    margin-top: 25px; padding: 20px;
+    background: rgba(0,184,148,0.08);
+    border-left: 4px solid #00b894; border-radius: 8px;
+    font-size: 20px; font-weight: bold; color: #00b894;
+    text-align: center;
+  }
+  .back { display: inline-block; margin-top: 20px; color: #a0aec0; text-decoration: none; font-size: 14px; }
+  .back:hover { color: #00b894; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>📏 Unit Converter</h1>
+    <a href="/" class="btn">← Dashboard</a>
+  </header>
+  <main>
+    <div class="box">
+      <h2>Units Convert Karo</h2>
+
+      <label>Category</label>
+      <select id="category" onchange="updateUnits()">
+        <option value="length">Length</option>
+        <option value="weight">Weight</option>
+        <option value="temperature">Temperature</option>
+        <option value="area">Area</option>
+        <option value="volume">Volume</option>
+      </select>
+
+      <label>Value</label>
+      <input type="number" id="value" placeholder="Jaise: 100" step="any">
+
+      <div class="row">
+        <div>
+          <label>From</label>
+          <select id="fromUnit"></select>
+        </div>
+        <div>
+          <label>To</label>
+          <select id="toUnit"></select>
+        </div>
+      </div>
+
+      <button class="calc-btn" onclick="convertUnit()">Convert</button>
+      <div id="result" class="result" style="display:none;"></div>
+      <a href="/" class="back">← Back to Dashboard</a>
+    </div>
+  </main>
+  <script>
+    const units = {
+      length: {
+        Meter: 1, Kilometer: 1000, Centimeter: 0.01, Millimeter: 0.001,
+        Mile: 1609.344, Yard: 0.9144, Foot: 0.3048, Inch: 0.0254
+      },
+      weight: {
+        Kilogram: 1, Gram: 0.001, Milligram: 0.000001,
+        Pound: 0.453592, Ounce: 0.0283495, Ton: 1000, Quintal: 100
+      },
+      temperature: { Celsius: "C", Fahrenheit: "F", Kelvin: "K" },
+      area: {
+        "Square Meter": 1, "Square Kilometer": 1000000, "Square Foot": 0.092903,
+        "Square Yard": 0.836127, Acre: 4046.86, Hectare: 10000, "Square Mile": 2589988
+      },
+      volume: {
+        Liter: 1, Milliliter: 0.001, "Cubic Meter": 1000,
+        Gallon: 3.78541, Quart: 0.946353, Pint: 0.473176, Cup: 0.236588
+      }
+    };
+
+    function updateUnits() {
+      const cat = document.getElementById("category").value;
+      const fromSel = document.getElementById("fromUnit");
+      const toSel = document.getElementById("toUnit");
+      fromSel.innerHTML = "";
+      toSel.innerHTML = "";
+      Object.keys(units[cat]).forEach(u => {
+        fromSel.innerHTML += `<option value="${u}">${u}</option>`;
+        toSel.innerHTML += `<option value="${u}">${u}</option>`;
+      });
+      toSel.selectedIndex = 1;
+    }
+
+    function convertUnit() {
+      const cat = document.getElementById("category").value;
+      const val = parseFloat(document.getElementById("value").value);
+      const from = document.getElementById("fromUnit").value;
+      const to = document.getElementById("toUnit").value;
+
+      if (isNaN(val)) { alert("Sahi value daalo"); return; }
+
+      let result;
+
+      if (cat === "temperature") {
+        // Celsius as base
+        let celsius;
+        if (from === "Celsius") celsius = val;
+        else if (from === "Fahrenheit") celsius = (val - 32) * 5/9;
+        else celsius = val - 273.15;
+
+        if (to === "Celsius") result = celsius;
+        else if (to === "Fahrenheit") result = celsius * 9/5 + 32;
+        else result = celsius + 273.15;
+      } else {
+        const base = val * units[cat][from];
+        result = base / units[cat][to];
+      }
+
+      const res = document.getElementById("result");
+      res.innerHTML = `${val} ${from} = <br>${result.toFixed(4).replace(/\.?0+$/,"")} ${to}`;
+      res.style.display = "block";
+    }
+
+    updateUnits();
+  </script>
+</body>
+</html>
