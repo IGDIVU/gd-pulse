@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Number to Words — GD Pulse</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+  body { background: #0a0f1a; color: #e6edf5; min-height: 100vh; }
+  body::before {
+    content: ""; position: fixed; inset: 0;
+    background: radial-gradient(circle at 20% 30%, rgba(0,184,148,0.12), transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(108,92,231,0.12), transparent 40%);
+    z-index: -1;
+  }
+  header {
+    background: rgba(15,23,36,0.75); backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    color: white; padding: 16px 30px;
+    display: flex; justify-content: space-between; align-items: center;
+    position: sticky; top: 0; z-index: 100;
+  }
+  header h1 { font-size: 20px; }
+  .btn {
+    background: linear-gradient(135deg, #00b894, #019875); color: white;
+    padding: 10px 22px; border: none; border-radius: 30px;
+    cursor: pointer; font-size: 14px; font-weight: bold;
+    text-decoration: none; transition: 0.25s;
+    box-shadow: 0 4px 14px rgba(0,184,148,0.35);
+  }
+  .btn:hover { transform: translateY(-2px); }
+  main { padding: 30px; max-width: 650px; margin: 0 auto; }
+  .box {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    padding: 30px; border-radius: 18px;
+    backdrop-filter: blur(12px);
+  }
+  h2 { margin-bottom: 22px; font-size: 22px; }
+  label { display: block; font-size: 14px; color: #a0aec0; margin-bottom: 8px; }
+  input {
+    width: 100%; padding: 14px; margin-bottom: 18px;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px; background: rgba(255,255,255,0.05);
+    color: #e6edf5; font-size: 18px;
+  }
+  input:focus { outline: none; border-color: #00b894; }
+  .calc-btn {
+    width: 100%; padding: 15px;
+    background: linear-gradient(135deg, #00b894, #019875);
+    color: white; border: none; border-radius: 10px;
+    font-size: 16px; cursor: pointer; font-weight: bold;
+    box-shadow: 0 4px 14px rgba(0,184,148,0.35);
+  }
+  .calc-btn:hover { transform: translateY(-2px); }
+  .result {
+    margin-top: 25px; padding: 20px;
+    background: rgba(0,184,148,0.08);
+    border-left: 4px solid #00b894; border-radius: 8px;
+    font-size: 18px; line-height: 1.6; word-break: break-word;
+  }
+  .back { display: inline-block; margin-top: 20px; color: #a0aec0; text-decoration: none; font-size: 14px; }
+  .back:hover { color: #00b894; }
+  .hint { font-size: 12px; color: #7d8a9c; margin-top: -10px; margin-bottom: 15px; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>🔢 Number to Words</h1>
+    <a href="/" class="btn">← Dashboard</a>
+  </header>
+  <main>
+    <div class="box">
+      <h2>Number ko Words me Badlo</h2>
+      <label>Number Daalo (max 99,99,99,999)</label>
+      <input type="number" id="num" placeholder="Jaise: 1234567">
+      <div class="hint">Indian numbering system (Lakh, Crore) me convert hoga</div>
+      <button class="calc-btn" onclick="convert()">Convert to Words</button>
+      <div id="result" class="result" style="display:none;"></div>
+      <a href="/" class="back">← Back to Dashboard</a>
+    </div>
+  </main>
+  <script>
+    const ones = ["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine",
+                  "Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen",
+                  "Seventeen","Eighteen","Nineteen"];
+    const tens = ["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
+
+    function twoDigits(n) {
+      if (n < 20) return ones[n];
+      return tens[Math.floor(n/10)] + (n%10 ? " " + ones[n%10] : "");
+    }
+
+    function threeDigits(n) {
+      let str = "";
+      if (n > 99) {
+        str += ones[Math.floor(n/100)] + " Hundred";
+        n = n % 100;
+        if (n > 0) str += " ";
+      }
+      if (n > 0) str += twoDigits(n);
+      return str;
+    }
+
+    function numberToWords(num) {
+      if (num === 0) return "Zero";
+      let str = "";
+      const crore = Math.floor(num / 10000000);
+      num = num % 10000000;
+      const lakh = Math.floor(num / 100000);
+      num = num % 100000;
+      const thousand = Math.floor(num / 1000);
+      num = num % 1000;
+      const hundred = num;
+
+      if (crore > 0) str += threeDigits(crore) + " Crore ";
+      if (lakh > 0) str += threeDigits(lakh) + " Lakh ";
+      if (thousand > 0) str += threeDigits(thousand) + " Thousand ";
+      if (hundred > 0) str += threeDigits(hundred);
+
+      return str.trim();
+    }
+
+    function convert() {
+      const val = document.getElementById("num").value;
+      if (val === "" || val === null) { alert("Number daalo"); return; }
+      const num = parseInt(val);
+      if (isNaN(num) || num < 0) { alert("Sahi positive number daalo"); return; }
+      if (num > 9999999999) { alert("Number bahut bada hai (max 99,99,99,999)"); return; }
+
+      const words = numberToWords(num);
+      const result = document.getElementById("result");
+      result.innerHTML = "<b>" + words + "</b><br><span style='font-size:13px; color:#7d8a9c;'>Rupees " + words + " Only</span>";
+      result.style.display = "block";
+    }
+  </script>
+</body>
+</html>
