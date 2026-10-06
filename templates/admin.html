@@ -4,38 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin — GD Pulse</title>
+<link rel="stylesheet" href="/static/style.css">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
-  body { background: #f4f6f9; color: #222; }
-  header {
-    background: #0f1a24; color: white; padding: 15px 30px;
-    display: flex; justify-content: space-between; align-items: center;
-  }
-  header h1 { font-size: 22px; }
-  .btn {
-    background: #e74c3c; color: white; padding: 8px 20px;
-    border: none; border-radius: 6px; cursor: pointer;
-    font-size: 14px; text-decoration: none;
-  }
-  .btn:hover { background: #c0392b; }
-  main { padding: 30px; }
-  .section-title {
-    font-size: 18px; margin-bottom: 15px; color: #0f1a24;
-    border-left: 4px solid #e74c3c; padding-left: 10px;
-  }
-  .grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 18px;
-  }
-  .card {
-    background: white; padding: 25px 20px; border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06); cursor: pointer;
-    transition: 0.2s; text-align: center; border-top: 4px solid #0f1a24;
-  }
-  .card:hover { transform: translateY(-4px); box-shadow: 0 6px 14px rgba(0,0,0,0.12); }
-  .card .icon { font-size: 30px; margin-bottom: 10px; }
-  .card .title { font-size: 15px; font-weight: bold; color: #0f1a24; }
-  .card .desc { font-size: 12px; color: #777; margin-top: 5px; }
+  /* Admin-specific override */
+  header { background: rgba(20, 5, 30, 0.75); }
+  .section-title { border-left-color: var(--accent); }
+  .section-title::after { background: linear-gradient(90deg, var(--accent), transparent); }
+  .card { border-top: 3px solid var(--accent); }
+  .card:hover { border-color: var(--accent); box-shadow: 0 20px 50px rgba(236, 72, 153, 0.25), 0 0 30px rgba(236, 72, 153, 0.3); }
+  .card::before { background: radial-gradient(circle at 50% 0%, rgba(236, 72, 153, 0.25), transparent 70%); }
 </style>
 </head>
 <body>
@@ -46,22 +23,41 @@
   </header>
 
   <main>
+    <div class="welcome">
+      <h1>Admin Panel</h1>
+      <p>Business modules aur projects yahan se manage karo.</p>
+    </div>
+
     <h2 class="section-title">Business Modules</h2>
     <div class="grid">
-      <div class="card" onclick="alert('Retail module coming soon')">
+      <div class="card tilt" onclick="alert('Retail module coming soon')">
         <div class="icon">🏪</div><div class="title">Retail Store</div>
         <div class="desc">Item, Purchase, Sale, Stock</div>
       </div>
-      <div class="card" onclick="alert('Restaurant module coming soon')">
+      <div class="card tilt" onclick="alert('Restaurant module coming soon')">
         <div class="icon">🍽️</div><div class="title">Restaurant / Hotel</div>
         <div class="desc">Indent, Store, GRN</div>
       </div>
-      <div class="card" onclick="alert('Sand Business module coming soon')">
+      <div class="card tilt" onclick="alert('Sand Business module coming soon')">
         <div class="icon">🚛</div><div class="title">Sand Business</div>
         <div class="desc">Stock, Truck, Challan, Billing</div>
       </div>
     </div>
   </main>
+
+  <script>
+    document.querySelectorAll(".tilt").forEach(card => {
+      card.addEventListener("mousemove", (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const rotateX = ((y - rect.height / 2) / (rect.height / 2)) * -10;
+        const rotateY = ((x - rect.width / 2) / (rect.width / 2)) * 10;
+        card.style.transform = `perspective(900px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-6px) scale(1.04)`;
+      });
+      card.addEventListener("mouseleave", () => { card.style.transform = ""; });
+    });
+  </script>
 
 </body>
 </html>
