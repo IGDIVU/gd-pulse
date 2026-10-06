@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session
 import os
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "gd_pulse_secret_key_2025")  # ise baad me change kar sakte ho
+app.secret_key = os.environ.get("SECRET_KEY", "gd_pulse_secret_key_2025")
 
 # Hardcoded users (abhi ke liye)
 USERS = {
@@ -45,7 +45,14 @@ def logout():
     session.clear()
     return redirect(url_for("dashboard"))
 
+# ---------- Tools ----------
+
+@app.route("/tools/gst")
+def gst_tool():
+    return render_template("gst.html")
+
 # ---------- Run ----------
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
