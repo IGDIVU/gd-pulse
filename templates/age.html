@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Age Calculator — GD Pulse</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+  body { background: #0a0f1a; color: #e6edf5; min-height: 100vh; }
+  body::before {
+    content: ""; position: fixed; inset: 0;
+    background: radial-gradient(circle at 20% 30%, rgba(0,184,148,0.12), transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(108,92,231,0.12), transparent 40%);
+    z-index: -1;
+  }
+  header {
+    background: rgba(15,23,36,0.75); backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    color: white; padding: 16px 30px;
+    display: flex; justify-content: space-between; align-items: center;
+    position: sticky; top: 0; z-index: 100;
+  }
+  header h1 { font-size: 20px; }
+  .btn {
+    background: linear-gradient(135deg, #00b894, #019875); color: white;
+    padding: 10px 22px; border: none; border-radius: 30px;
+    cursor: pointer; font-size: 14px; font-weight: bold;
+    text-decoration: none; transition: 0.25s;
+    box-shadow: 0 4px 14px rgba(0,184,148,0.35);
+  }
+  .btn:hover { transform: translateY(-2px); }
+  main { padding: 30px; max-width: 600px; margin: 0 auto; }
+  .box {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    padding: 30px; border-radius: 18px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  }
+  h2 { margin-bottom: 22px; font-size: 22px; }
+  label { display: block; font-size: 14px; color: #a0aec0; margin-bottom: 8px; }
+  input {
+    width: 100%; padding: 12px; margin-bottom: 18px;
+    border: 1px solid rgba(255,255,255,0.15);
