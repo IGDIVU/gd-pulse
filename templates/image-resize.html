@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image Resize — GD Pulse</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+  body { background: #f4f6f9; color: #222; }
+  header {
+    background: #1e2a38; color: white; padding: 15px 30px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  header h1 { font-size: 20px; }
+  .btn {
+    background: #00b894; color: white; padding: 8px 20px;
+    border: none; border-radius: 6px; cursor: pointer;
+    font-size: 14px; text-decoration: none;
+  }
+  .btn:hover { background: #019875; }
+  .btn-outline { background: transparent; border: 1px solid #00b894; color: #00b894; }
+  main { padding: 30px; max-width: 600px; margin: 0 auto; }
+  .box {
+    background: white; padding: 30px; border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+  }
+  h2 { color: #1e2a38; margin-bottom: 20px; font-size: 22px; }
+  label { display: block; font-size: 14px; color: #555; margin-bottom: 6px; }
+  input {
+    width: 100%; padding: 12px; margin-bottom: 18px;
+    border: 1px solid #ccc; border-radius: 6px; font-size: 15px;
+  }
+  input:focus { outline: none; border-color: #00b894; }
+  .row { display: flex; gap: 15px; }
+  .row > div { flex: 1; }
+  .calc-btn {
+    width: 100%; padding: 14px; background: #00b894; color: white;
+    border: none; border-radius: 6px; font-size: 16px; cursor: pointer;
+    font-weight: bold;
+  }
+  .calc-btn:hover { background: #019875; }
+  .calc-btn:disabled { background: #aaa; cursor: not-allowed; }
+  .back { display: inline-block; margin-top: 20px; color: #1e2a38; text-decoration: none; font-size: 14px; }
+  .info { font-size: 13px; color: #777; margin-top: 10px; }
+  .loading { text-align: center; color: #00b894; margin-top: 15px; display: none; }
+</style>
+</head>
+<body>
+
+  <header>
+    <h1>🖼️ Image Resize</h1>
+    <a href="/" class="btn btn-outline" style="color:white; border-color:white;">← Dashboard</a>
+  </header>
+
+  <main>
+    <div class="box">
+      <h2>Image Resize Karo</h2>
+
+      <form id="resizeForm" method="POST" action="/tools/image-resize/process" enctype="multipart/form-data">
+        <label>Image Select Karo (JPG, PNG, WEBP, GIF, BMP)</label>
+        <input type="file" name="image" id="imageInput" accept="image/*" required>
+
+        <div class="row">
+          <div>
+            <label>Width (px)</label>
+            <input type="number" name="width" placeholder="800" min="1" required>
+          </div>
+          <div>
+            <label>Height (px)</label>
+            <input type="number" name="height" placeholder="600" min="1" required>
+          </div>
+        </div>
+
+        <button type="submit" class="calc-btn" id="submitBtn">Resize & Download</button>
+      </form>
+
+      <div class="loading" id="loading">⏳ Processing... please wait</div>
+      <div class="info">Image process hoke automatically download ho jayegi.</div>
+
+      <a href="/" class="back">← Back to Dashboard</a>
+    </div>
+  </main>
+
+  <script>
+    document.getElementById("resizeForm").addEventListener("submit", function() {
+      document.getElementById("submitBtn").disabled = true;
+      document.getElementById("submitBtn").innerText = "Processing...";
+      document.getElementById("loading").style.display = "block";
+    });
+  </script>
+
+</body>
+</html>
