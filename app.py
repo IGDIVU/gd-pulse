@@ -51,6 +51,10 @@ def logout():
 def gst_tool():
     return render_template("gst.html")
 
+@app.route("/tools/emi")
+def emi_tool():
+    return render_template("emi.html")
+
 # ---------- Run ----------
 
 if __name__ == "__main__":
