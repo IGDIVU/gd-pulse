@@ -80,4 +80,18 @@
                oninput="document.getElementById('qval').innerText = this.value">
         <div class="info">Kam quality = chhoti file, lekin image blur ho sakti hai. 60-80% best hai.</div>
 
-        <button type="
+        <button type="submit" class="calc-btn" id="submitBtn">Compress & Download</button>
+      </form>
+      <div class="loading" id="loading">⏳ Compressing... please wait</div>
+      <a href="/" class="back">← Back to Dashboard</a>
+    </div>
+  </main>
+  <script>
+    document.getElementById("compressForm").addEventListener("submit", function() {
+      document.getElementById("submitBtn").disabled = true;
+      document.getElementById("submitBtn").innerText = "Processing...";
+      document.getElementById("loading").style.display = "block";
+    });
+  </script>
+</body>
+</html>
