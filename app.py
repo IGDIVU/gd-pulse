@@ -73,13 +73,9 @@ def image_resize_process():
         if width <= 0 or height <= 0:
             return "Sahi width/height daalo", 400
 
-        # Image kholo
         img = Image.open(file.stream)
-
-        # Resize karo
         resized = img.resize((width, height), Image.LANCZOS)
 
-        # Output buffer me save karo
         output = io.BytesIO()
         fmt = img.format if img.format else "PNG"
         if fmt not in ("JPEG", "PNG", "WEBP", "GIF", "BMP"):
@@ -89,7 +85,6 @@ def image_resize_process():
         resized.save(output, format=fmt)
         output.seek(0)
 
-        # Original filename ka extension nikalo
         original_name = file.filename
         base = os.path.splitext(original_name)[0]
         ext = fmt.lower() if fmt != "JPEG" else "jpg"
@@ -100,6 +95,47 @@ def image_resize_process():
             mimetype=f"image/{ext}",
             as_attachment=True,
             download_name=download_name
+        )
+
+    except Exception as e:
+        return f"Error: {str(e)}", 500
+
+@app.route("/tools/photo-to-pdf")
+def photo_to_pdf_tool():
+    return render_template("photo-to-pdf.html")
+
+@app.route("/tools/photo-to-pdf/process", methods=["POST"])
+def photo_to_pdf_process():
+    try:
+        files = request.files.getlist("images")
+        files = [f for f in files if f and f.filename != ""]
+
+        if not files:
+            return "Koi image select nahi ki", 400
+
+        # Sab images ko RGB me convert karo
+        images = []
+        for f in files:
+            img = Image.open(f.stream)
+            if img.mode in ("RGBA", "P", "LA"):
+                img = img.convert("RGB")
+            elif img.mode != "RGB":
+                img = img.convert("RGB")
+            images.append(img)
+
+        # Pehli image ko base banao, baaki append karo
+        first = images[0]
+        rest = images[1:]
+
+        output = io.BytesIO()
+        first.save(output, format="PDF", save_all=True, append_images=rest)
+        output.seek(0)
+
+        return send_file(
+            output,
+            mimetype="application/pdf",
+            as_attachment=True,
+            download_name="gd-pulse-images.pdf"
         )
 
     except Exception as e:
