@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session
 import os
 
 app = Flask(__name__)
-aapp.secret_key = os.environ.get("SECRET_KEY", "gd_pulse_secret_key_2025")  # ise baad me change kar sakte ho
+app.secret_key = os.environ.get("SECRET_KEY", "gd_pulse_secret_key_2025")  # ise baad me change kar sakte ho
 
 # Hardcoded users (abhi ke liye)
 USERS = {
