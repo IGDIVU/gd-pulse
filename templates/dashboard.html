@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GD Pulse Dashboard</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+  body { background: #f4f6f9; color: #222; }
+  header {
+    background: #1e2a38; color: white; padding: 15px 30px;
+    display: flex; justify-content: space-between; align-items: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  header h1 { font-size: 22px; }
+  .btn {
+    background: #00b894; color: white; padding: 8px 20px;
+    border: none; border-radius: 6px; cursor: pointer;
+    font-size: 14px; text-decoration: none; margin-left: 8px;
+  }
+  .btn:hover { background: #019875; }
+  .btn-outline { background: transparent; border: 1px solid #00b894; }
+  main { padding: 30px; }
+  .section-title {
+    font-size: 18px; margin-bottom: 15px; color: #1e2a38;
+    border-left: 4px solid #00b894; padding-left: 10px;
+  }
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 18px; margin-bottom: 40px;
+  }
+  .card {
+    background: white; padding: 25px 20px; border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06); cursor: pointer;
+    transition: 0.2s; text-align: center;
+  }
+  .card:hover { transform: translateY(-4px); box-shadow: 0 6px 14px rgba(0,0,0,0.12); }
+  .card .icon { font-size: 30px; margin-bottom: 10px; }
+  .card .title { font-size: 15px; font-weight: bold; color: #1e2a38; }
+  .card .desc { font-size: 12px; color: #777; margin-top: 5px; }
+  footer { text-align: center; padding: 20px; color: #888; font-size: 12px; }
+</style>
+</head>
+<body>
+
+  <header>
+    <h1>⚡ GD Pulse Dashboard</h1>
+    <div>
+      {% if user %}
+        <span style="margin-right:10px;">👤 {{ user }}</span>
+        <a href="/logout" class="btn btn-outline">Logout</a>
+      {% else %}
+        <a href="/login" class="btn">Login</a>
+      {% endif %}
+    </div>
+  </header>
+
+  <main>
+    <h2 class="section-title">Public Tools</h2>
+    <div class="grid">
+      <div class="card" onclick="alert('GST Calculator coming soon')">
+        <div class="icon">🧮</div><div class="title">GST Calculator</div>
+        <div class="desc">Quick GST calculation</div>
+      </div>
+      <div class="card" onclick="alert('Image Resize coming soon')">
+        <div class="icon">🖼️</div><div class="title">Image Resize</div>
+        <div class="desc">Resize any image</div>
+      </div>
+      <div class="card" onclick="alert('Photo to PDF coming soon')">
+        <div class="icon">📄</div><div class="title">Photo to PDF</div>
+        <div class="desc">Convert images to PDF</div>
+      </div>
+      <div class="card" onclick="alert('Video to MP3 coming soon')">
+        <div class="icon">🎵</div><div class="title">Video to MP3</div>
+        <div class="desc">Extract audio</div>
+      </div>
+      <div class="card" onclick="alert('Doc/Excel tools coming soon')">
+        <div class="icon">📊</div><div class="title">Doc / Excel</div>
+        <div class="desc">File conversion</div>
+      </div>
+      <div class="card" onclick="alert('More tools coming soon')">
+        <div class="icon">➕</div><div class="title">More Tools</div>
+        <div class="desc">Coming soon</div>
+      </div>
+    </div>
+  </main>
+
+  <footer>© 2025 GD Pulse</footer>
+</body>
+</html>
