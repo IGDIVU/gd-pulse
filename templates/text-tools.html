@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Text Tools — GD Pulse</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+  body { background: #0a0f1a; color: #e6edf5; min-height: 100vh; }
+  body::before {
+    content: ""; position: fixed; inset: 0;
+    background: radial-gradient(circle at 20% 30%, rgba(0,184,148,0.12), transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(108,92,231,0.12), transparent 40%);
+    z-index: -1;
+  }
+  header {
+    background: rgba(15,23,36,0.75); backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    color: white; padding: 16px 30px;
+    display: flex; justify-content: space-between; align-items: center;
+    position: sticky; top: 0; z-index: 100;
+  }
+  header h1 { font-size: 20px; }
+  .btn {
+    background: linear-gradient(135deg, #00b894, #019875); color: white;
+    padding: 10px 22px; border: none; border-radius: 30px;
+    cursor: pointer; font-size: 14px; font-weight: bold;
+    text-decoration: none; box-shadow: 0 4px 14px rgba(0,184,148,0.35);
+  }
+  .btn:hover { transform: translateY(-2px); }
+  main { padding: 30px; max-width: 800px; margin: 0 auto; }
+  .box {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    padding: 30px; border-radius: 18px;
+    backdrop-filter: blur(12px);
+  }
+  h2 { margin-bottom: 22px; font-size: 22px; }
+  textarea {
+    width: 100%; min-height: 180px; padding: 15px;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px; background: rgba(255,255,255,0.05);
+    color: #e6edf5; font-size: 15px; resize: vertical;
+    font-family: inherit;
+  }
+  textarea:focus { outline: none; border-color: #00b894; }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 12px; margin: 20px 0;
+  }
+  .stat-box {
+    background: rgba(0,184,148,0.08);
+    border: 1px solid rgba(0,184,148,0.2);
+    border-radius: 10px; padding: 14px; text-align: center;
+  }
+  .stat-box .label { font-size: 11px; color: #a0aec0; text-transform: uppercase; letter-spacing: 1px; }
+  .stat-box .value { font-size: 22px; font-weight: bold; color: #00b894; margin-top: 4px; }
+  .btn-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px; margin-top: 15px;
+  }
+  .action-btn {
+    padding: 12px; border: 1px solid rgba(0,184,148,0.3);
+    background: rgba(0,184,148,0.08);
+    color: #e6edf5; border-radius: 8px;
+    cursor: pointer; font-size: 13px;
+    transition: 0.25s; font-weight: 500;
+  }
+  .action-btn:hover {
+    background: rgba(0,184,148,0.2);
+    border-color: #00b894;
+    transform: translateY(-2px);
+  }
+  .back { display: inline-block; margin-top: 20px; color: #a0aec0; text-decoration: none; font-size: 14px; }
+  .back:hover { color: #00b894; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>🔤 Text Tools</h1>
+    <a href="/" class="btn">← Dashboard</a>
+  </header>
+  <main>
+    <div class="box">
+      <h2>Text ke Saath Kaam Karo</h2>
+      <textarea id="text" placeholder="Yahan apna text likho ya paste karo..." oninput="updateStats()"></textarea>
+
+      <div class="stats">
+        <div class="stat-box"><div class="label">Words</div><div class="value" id="s-words">0</div></div>
+        <div class="stat-box"><div class="label">Chars</div><div class="value" id="s-chars">0</div></div>
+        <div class="stat-box"><div class="label">No Space</div><div class="value" id="s-nospace">0</div></div>
+        <div class="stat-box"><div class="label">Lines</div><div class="value" id="s-lines">0</div></div>
+      </div>
+
+      <div class="btn-grid">
+        <button class="action-btn" onclick="toUpper()">UPPERCASE</button>
+        <button class="action-btn" onclick="toLower()">lowercase</button>
+        <button class="action-btn" onclick="toTitle()">Title Case</button>
+        <button class="action-btn" onclick="toSentence()">Sentence case</button>
+        <button class="action-btn" onclick="reverseText()">Reverse Text</button>
+        <button class="action-btn" onclick="removeSpaces()">Remove Extra Spaces</button>
+        <button class="action-btn" onclick="removeLineBreaks()">Remove Line Breaks</button>
+        <button class="action-btn" onclick="copyText()">📋 Copy</button>
+        <button class="action-btn" onclick="clearText()">🗑️ Clear</button>
+        <button class="action-btn" onclick="downloadText()">⬇️ Download .txt</button>
+      </div>
+
+      <a href="/" class="back">← Back to Dashboard</a>
+    </div>
+  </main>
+  <script>
+    const txt = document.getElementById("text");
+
+    function updateStats() {
+      const t = txt.value;
+      const words = t.trim() ? t.trim().split(/\s+/).length : 0;
+      document.getElementById("s-words").innerText = words;
+      document.getElementById("s-chars").innerText = t.length;
+      document.getElementById("s-nospace").innerText = t.replace(/\s/g, "").length;
+      document.getElementById("s-lines").innerText = t ? t.split("\n").length : 0;
+    }
+
+    function toUpper() { txt.value = txt.value.toUpperCase(); updateStats(); }
+    function toLower() { txt.value = txt.value.toLowerCase(); updateStats(); }
+    function toTitle() {
+      txt.value = txt.value.replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.substr(1).toLowerCase());
+      updateStats();
+    }
+    function toSentence() {
+      txt.value = txt.value.toLowerCase().replace(/(^\s*\w|[.!?]\s*\w)/g, c => c.toUpperCase());
+      updateStats();
+    }
+    function reverseText() { txt.value = txt.value.split("").reverse().join(""); updateStats(); }
+    function removeSpaces() { txt.value = txt.value.replace(/[ \t]+/g, " ").trim(); updateStats(); }
+    function removeLineBreaks() { txt.value = txt.value.replace(/\n+/g, " ").trim(); updateStats(); }
+    function clearText() { if (confirm("Text clear karna hai?")) { txt.value = ""; updateStats(); } }
+
+    function copyText() {
+      if (!txt.value) { alert("Kuch text toh likho"); return; }
+      txt.select();
+      document.execCommand("copy");
+      alert("Copy ho gaya! ✅");
+    }
+
+    function downloadText() {
+      if (!txt.value) { alert("Kuch text toh likho"); return; }
+      const blob = new Blob([txt.value], { type: "text/plain" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "gd-pulse-text.txt";
+      a.click();
+    }
+  </script>
+</body>
+</html>
