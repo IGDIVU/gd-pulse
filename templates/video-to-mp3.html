@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Video to MP3 — GD Pulse</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+  body {
+    background: #0a0f1a;
+    color: #e6edf5;
+    min-height: 100vh;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(0, 184, 148, 0.12), transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(108, 92, 231, 0.12), transparent 40%);
+    z-index: -1;
+  }
+  header {
+    background: rgba(15, 23, 36, 0.75);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    color: white;
+    padding: 16px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  header h1 { font-size: 20px; display: flex; align-items: center; gap: 8px; }
+  .btn {
+    background: linear-gradient(135deg, #00b894, #019875);
+    color: white;
+    padding: 10px 22px;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: 0.25s;
+    box-shadow: 0 4px 14px rgba(0, 184, 148, 0.35);
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 184, 148, 0.5); }
+  main { padding: 30px; max-width: 650px; margin: 0 auto; }
+  .box {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 30px;
+    border-radius: 18px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  }
+  h2 { color: #e6edf5; margin-bottom: 22px; font-size: 22px; }
+  label { display: block; font-size: 14px; color: #a0aec0; margin-bottom: 8px; }
+  input[type="file"] {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 1px dashed rgba(0, 184, 148, 0.5);
+    border-radius: 10px;
+    background: rgba(0, 184, 148, 0.05);
+    color: #e6edf5;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  input[type="file"]:focus { outline: none; border-color: #00b894; }
+  .calc-btn {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #00b894, #019875);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.25s;
+    box-shadow: 0 4px 14px rgba(0, 184, 148, 0.35);
+  }
+  .calc-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 184, 148, 0.5); }
+  .calc-btn:disabled { background: #555; cursor: not-allowed; box-shadow: none; transform: none; }
+  .back { display: inline-block; margin-top: 20px; color: #a0aec0; text-decoration: none; font-size: 14px; }
+  .back:hover { color: #00b894; }
+  .info {
+    font-size: 13px;
+    color: #7d8a9c;
+    margin-top: 12px;
+    line-height: 1.5;
+    padding: 12px;
+    background: rgba(255, 193, 7, 0.08);
+    border-left: 3px solid #ffc107;
+    border-radius: 6px;
+  }
+  .loading {
+    text-align: center;
+    color: #00b894;
+    margin-top: 15px;
+    display: none;
+    font-size: 14px;
+    padding: 12px;
+    background: rgba(0, 184, 148, 0.08);
+    border-radius: 8px;
+  }
+</style>
+</head>
+<body>
+
+  <header>
+    <h1>🎵 Video to MP3</h1>
+    <a href="/" class="btn">← Dashboard</a>
+  </header>
+
+  <main>
+    <div class="box">
+      <h2>Video se Audio Nikalo</h2>
+
+      <form id="mp3Form" method="POST" action="/tools/video-to-mp3/process" enctype="multipart/form-data">
+        <label>Video Select Karo (MP4, AVI, MOV, MKV — max 25MB)</label>
+        <input type="file" name="video" id="videoInput" accept="video/*" required>
+
+        <button type="submit" class="calc-btn" id="submitBtn">Convert to MP3</button>
+      </form>
+
+      <div class="loading" id="loading">⏳ Video process ho raha hai... 10-30 second lag sakte hain</div>
+
+      <div class="info">
+        ⚠️ <b>Zaroori:</b> File 25MB se choti honi chahiye. Bade videos me Render free server crash ho jata hai.
+        Agar file badi hai, toh pehle video ko chhota karo (phone me trim karo) phir upload karo.
+      </div>
+
+      <a href="/" class="back">← Back to Dashboard</a>
+    </div>
+  </main>
+
+  <script>
+    document.getElementById("mp3Form").addEventListener("submit", function() {
+      document.getElementById("submitBtn").disabled = true;
+      document.getElementById("submitBtn").innerText = "Processing...";
+      document.getElementById("loading").style.display = "block";
+    });
+  </script>
+
+</body>
+</html>
