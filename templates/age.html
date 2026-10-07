@@ -6,6 +6,10 @@
 <title>Age Calculator — GD Pulse</title>
 <link rel="icon" type="image/png" href="/static/favicon.png">
 <link rel="stylesheet" href="/static/style.css">
+<style>
+  .box h2 { display: flex; align-items: center; gap: 10px; }
+  .box h2 [data-icon] { width: 26px; height: 26px; color: var(--primary); }
+</style>
 </head>
 <body>
 
@@ -13,14 +17,15 @@
     <a href="/" class="logo"><img src="/static/logo-horizontal.png" alt="GD Pulse"></a>
     <nav class="nav-links"><a href="/tools">Tools</a></nav>
     <div class="header-right">
-      <a href="/tools" class="btn btn-outline">← Back</a>
+      <button class="theme-toggle" onclick="toggleTheme(event)" title="Toggle theme"></button>
+      <a href="#" onclick="confirmLogout(event)" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
     </div>
   </header>
 
   <main>
     <div class="container" style="max-width: 600px;">
-      <div class="box">
-        <h2>📅 Apni Exact Age Jaano</h2>
+      <div class="box reveal">
+        <h2><span data-icon="age"></span> Apni Exact Age Jaano</h2>
 
         <label>Date of Birth</label>
         <input type="date" id="dob">
@@ -45,33 +50,28 @@
 
   <footer><p>© 2025 GD Pulse</p></footer>
 
+  <script src="/static/icons.js"></script>
   <script>
     document.getElementById("upto").valueAsDate = new Date();
-
     function calcAge() {
       const dobVal = document.getElementById("dob").value;
       const uptoVal = document.getElementById("upto").value;
       if (!dobVal) { alert("DOB select karo"); return; }
-
       const dob = new Date(dobVal);
       const upto = uptoVal ? new Date(uptoVal) : new Date();
       if (dob > upto) { alert("DOB aaj se aage nahi ho sakti"); return; }
-
       let years = upto.getFullYear() - dob.getFullYear();
       let months = upto.getMonth() - dob.getMonth();
       let days = upto.getDate() - dob.getDate();
-
       if (days < 0) {
         months--;
         const prevMonth = new Date(upto.getFullYear(), upto.getMonth(), 0);
         days += prevMonth.getDate();
       }
       if (months < 0) { years--; months += 12; }
-
       const totalMs = upto - dob;
       const totalDays = Math.floor(totalMs / (1000 * 60 * 60 * 24));
       const totalHours = Math.floor(totalMs / (1000 * 60 * 60));
-
       document.getElementById("r-years").innerText = years;
       document.getElementById("r-months").innerText = months;
       document.getElementById("r-days").innerText = days;
@@ -79,6 +79,7 @@
       document.getElementById("r-totalhours").innerText = totalHours.toLocaleString();
       document.getElementById("result").style.display = "block";
     }
+    document.addEventListener("DOMContentLoaded", () => { if (window.renderIcons) window.renderIcons(); });
   </script>
 
 </body>
