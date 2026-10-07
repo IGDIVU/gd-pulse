@@ -17,7 +17,7 @@
   }
   .tab-btn:hover { color: var(--primary); }
   .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
-  .tab-btn svg { width: 18px; height: 18px; }
+  .tab-btn [data-icon] { width: 18px; height: 18px; }
   .tab-content { display: none; }
   .tab-content.active { display: block; animation: fadeInUp 0.5s ease; }
   .section-label {
@@ -60,9 +60,11 @@
     display: inline-block; padding: 3px 12px; border-radius: 20px;
     font-size: 11px; font-weight: 700; text-transform: uppercase;
   }
-  .badge-role.owner { background: rgba(236, 72, 153, 0.15); color: #ec4899; }
-  .badge-role.admin { background: rgba(139, 92, 246, 0.15); color: var(--primary); }
-  .badge-role.staff { background: rgba(34, 211, 238, 0.15); color: #22d3ee; }
+  .badge-role.admin { background: rgba(236, 72, 153, 0.15); color: #ec4899; }
+  .badge-role.owner { background: rgba(139, 92, 246, 0.15); color: var(--primary); }
+  .badge-role.manager { background: rgba(34, 211, 238, 0.15); color: #22d3ee; }
+  .badge-role.hr { background: rgba(251, 191, 36, 0.15); color: #f59e0b; }
+  .badge-role.staff { background: rgba(16, 185, 129, 0.15); color: #10b981; }
   .badge-role.user  { background: rgba(107, 114, 128, 0.15); color: #6b7280; }
 
   .action-btn-sm {
@@ -70,10 +72,11 @@
     font-size: 11px; font-weight: 700;
     border: 1px solid var(--border); background: transparent;
     color: var(--text-dim); cursor: pointer; transition: all 0.25s;
-    margin-right: 5px; text-decoration: none; display: inline-block;
+    margin-right: 5px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;
   }
   .action-btn-sm:hover { background: var(--primary); color: white; border-color: var(--primary); }
   .action-btn-sm.danger:hover { background: var(--danger); border-color: var(--danger); }
+  .action-btn-sm [data-icon] { width: 12px; height: 12px; }
 
   .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
   .alert { padding: 12px 18px; border-radius: 10px; margin-bottom: 20px; font-size: 14px; }
@@ -108,7 +111,7 @@
     </nav>
     <div class="header-right">
       <button class="theme-toggle" onclick="toggleTheme(event)" title="Toggle theme"></button>
-      <a href="/logout" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
+      <a href="#" onclick="confirmLogout(event)" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
     </div>
   </header>
 
@@ -116,18 +119,22 @@
     <div class="container">
 
       <div class="welcome reveal" style="background: linear-gradient(135deg, rgba(236,72,153,0.12), rgba(139,92,246,0.15));">
-        <h1>Owner Panel <span class="god-badge">GOD MODE</span></h1>
-        <p>Welcome, <b>{{ name }}</b>. Pura website control karo.</p>
+        <h1>Owner Panel <span class="god-badge">God Mode</span></h1>
+        <p>Welcome, <b>{{ name }}</b>. Frontend + Management control.</p>
       </div>
 
       {% if request.args.get('success') == 'added' %}
-        <div class="alert success">✅ User added successfully!</div>
+        <div class="alert success">User added successfully!</div>
       {% elif request.args.get('success') == 'deleted' %}
-        <div class="alert success">✅ User deleted!</div>
+        <div class="alert success">User deleted!</div>
       {% elif request.args.get('success') == 'updated' %}
-        <div class="alert success">✅ Role updated!</div>
+        <div class="alert success">Role updated!</div>
       {% elif request.args.get('error') == 'missing' %}
-        <div class="alert error">⚠️ Fields missing</div>
+        <div class="alert error">Fields missing</div>
+      {% elif request.args.get('error') == 'self' %}
+        <div class="alert error">Apne aap ko delete nahi kar sakte</div>
+      {% elif request.args.get('error') == 'protected' %}
+        <div class="alert error">Ye user protected hai</div>
       {% endif %}
 
       <div class="stats">
@@ -139,16 +146,16 @@
 
       <div class="tab-bar">
         <button class="tab-btn active" onclick="switchTab('overview', this)">
-          <span data-icon="grid" style="width:18px;height:18px;display:inline-flex;"></span> Overview
+          <span data-icon="grid"></span> Overview
         </button>
         <button class="tab-btn" onclick="switchTab('roles', this)">
-          <span data-icon="users" style="width:18px;height:18px;display:inline-flex;"></span> Roles & Users
+          <span data-icon="users"></span> Roles & Users
         </button>
         <button class="tab-btn" onclick="switchTab('theme', this)">
-          <span data-icon="design" style="width:18px;height:18px;display:inline-flex;"></span> Theme
+          <span data-icon="design"></span> Theme
         </button>
         <button class="tab-btn" onclick="switchTab('settings', this)">
-          <span data-icon="tools" style="width:18px;height:18px;display:inline-flex;"></span> Settings
+          <span data-icon="settings"></span> Settings
         </button>
       </div>
 
@@ -179,35 +186,27 @@
         </div>
       </div>
 
-      <!-- ROLES & USERS -->
+      <!-- ROLES -->
       <div class="tab-content" id="tab-roles">
         <div class="section-label">Role Management</div>
 
         <div class="box reveal" style="margin-bottom:25px;">
-          <h2 style="font-size:18px;margin-bottom:15px;">➕ Add New User (Any Role)</h2>
+          <h2 style="font-size:18px;margin-bottom:15px;"><span data-icon="plus" style="width:20px;height:20px;display:inline-flex;vertical-align:middle;color:var(--primary);"></span> Add New User</h2>
           <form method="POST" action="/owner/add-user">
             <div class="form-grid">
-              <div>
-                <label>Username</label>
-                <input type="text" name="username" placeholder="newuser" required>
-              </div>
-              <div>
-                <label>Password</label>
-                <input type="text" name="password" placeholder="password123" required>
-              </div>
+              <div><label>Username</label><input type="text" name="username" placeholder="newuser" required></div>
+              <div><label>Password</label><input type="text" name="password" placeholder="password123" required></div>
             </div>
             <div class="form-grid">
-              <div>
-                <label>Name</label>
-                <input type="text" name="name" placeholder="Full Name">
-              </div>
+              <div><label>Name</label><input type="text" name="name" placeholder="Full Name"></div>
               <div>
                 <label>Role</label>
                 <select name="role">
                   <option value="user">User (portfolio only)</option>
                   <option value="staff">Staff (tools + prompts)</option>
-                  <option value="admin">Admin (full management)</option>
-                  <option value="owner">Owner (god mode)</option>
+                  <option value="hr">HR (management)</option>
+                  <option value="manager">Manager (frontend)</option>
+                  <option value="owner">Owner (frontend + mgmt)</option>
                 </select>
               </div>
             </div>
@@ -227,13 +226,17 @@
                 <td>{{ udata.name }}</td>
                 <td><span class="badge-role {{ udata.role }}">{{ udata.role }}</span></td>
                 <td>
-                  {% if uname != 'owner' %}
+                  {% if uname != 'admin' and uname != user %}
                   <form method="POST" action="/owner/update-role" style="display:inline-flex;gap:5px;align-items:center;">
                     <input type="hidden" name="username" value="{{ uname }}">
                     <select name="role" style="padding:6px 10px;font-size:12px;margin:0;width:auto;border-radius:20px;">
                       <option value="user" {% if udata.role=='user' %}selected{% endif %}>User</option>
                       <option value="staff" {% if udata.role=='staff' %}selected{% endif %}>Staff</option>
-                      <option value="admin" {% if udata.role=='admin' %}selected{% endif %}>Admin</option>
+                      <option value="hr" {% if udata.role=='hr' %}selected{% endif %}>HR</option>
+                      <option value="manager" {% if udata.role=='manager' %}selected{% endif %}>Manager</option>
+                      {% if role == 'admin' %}
+                      <option value="owner" {% if udata.role=='owner' %}selected{% endif %}>Owner</option>
+                      {% endif %}
                     </select>
                     <button type="submit" class="action-btn-sm">Update</button>
                   </form>
@@ -242,8 +245,8 @@
                   {% endif %}
                 </td>
                 <td>
-                  {% if uname != 'owner' %}
-                  <a href="/owner/delete-user/{{ uname }}" class="action-btn-sm danger" onclick="return confirm('Delete {{ uname }}?')">Delete</a>
+                  {% if uname != 'admin' and uname != user %}
+                  <a href="#" onclick="confirmDeleteUser('{{ uname }}');return false;" class="action-btn-sm danger"><span data-icon="trash"></span> Delete</a>
                   {% else %}
                   <span style="font-size:11px;color:var(--text-mute);">Protected</span>
                   {% endif %}
@@ -259,11 +262,11 @@
       <div class="tab-content" id="tab-theme">
         <div class="section-label">Theme Editor</div>
         <div class="info reveal" style="margin-bottom:20px;">
-          <b>Coming soon:</b> Colors aur fonts UI se change honge. Abhi preview.
+          <b>Coming soon:</b> Colors aur fonts UI se change honge.
         </div>
 
         <div class="box reveal" style="margin-bottom:20px;">
-          <h2 style="font-size:18px;margin-bottom:15px;">🎨 Primary Color</h2>
+          <h2 style="font-size:18px;margin-bottom:15px;">Primary Color</h2>
           <div class="color-preview">
             <div class="color-swatch" style="background:#8b5cf6;" onclick="alert('Coming soon')"><span>Purple</span></div>
             <div class="color-swatch" style="background:#ec4899;" onclick="alert('Coming soon')"><span>Pink</span></div>
@@ -274,8 +277,8 @@
         </div>
 
         <div class="box reveal">
-          <h2 style="font-size:18px;margin-bottom:15px;">🌙 Theme Mode</h2>
-          <p style="font-size:13px;color:var(--text-dim);">Use the 🌙 button in header to toggle light/dark mode.</p>
+          <h2 style="font-size:18px;margin-bottom:15px;">Theme Mode</h2>
+          <p style="font-size:13px;color:var(--text-dim);">Header me theme toggle button use karo.</p>
         </div>
       </div>
 
@@ -295,7 +298,20 @@
     </div>
   </main>
 
-  <footer><p>© 2025 GD Pulse — Owner Panel (God Mode)</p></footer>
+  <!-- Confirm Dialog -->
+  <div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-box">
+      <div class="warn-icon"><span data-icon="warning"></span></div>
+      <h3 id="confirmTitle">Are you sure?</h3>
+      <p id="confirmMessage">This action cannot be undone.</p>
+      <div class="confirm-actions">
+        <button class="btn-cancel" onclick="closeConfirm()">Cancel</button>
+        <button class="btn-confirm" id="confirmYes">Yes</button>
+      </div>
+    </div>
+  </div>
+
+  <footer><p>© 2025 GD Pulse — Owner Panel</p></footer>
 
   <script src="/static/icons.js"></script>
   <script src="/static/animations.js"></script>
@@ -306,6 +322,33 @@
       document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
       document.getElementById("tab-" + tab).classList.add("active");
       if (window.renderIcons) window.renderIcons();
+    }
+    let pendingAction = null;
+    function showConfirm(title, message, btnText, callback) {
+      document.getElementById("confirmTitle").innerText = title;
+      document.getElementById("confirmMessage").innerText = message;
+      document.getElementById("confirmYes").innerText = btnText;
+      pendingAction = callback;
+      document.getElementById("confirmOverlay").classList.add("active");
+      if (window.renderIcons) window.renderIcons();
+    }
+    function closeConfirm() {
+      document.getElementById("confirmOverlay").classList.remove("active");
+      pendingAction = null;
+    }
+    document.getElementById("confirmYes").addEventListener("click", () => {
+      if (pendingAction) { const action = pendingAction; closeConfirm(); action(); }
+    });
+    function confirmDeleteUser(uname) {
+      showConfirm("Delete User?", `"${uname}" ko delete karna hai? Ye undo nahi ho sakta.`, "Yes, Delete", () => {
+        window.location.href = `/owner/delete-user/${uname}`;
+      });
+    }
+    function confirmLogout(e) {
+      if (e) e.preventDefault();
+      showConfirm("Logout?", "Kya tum sach me logout karna chahte ho?", "Yes, Logout", () => {
+        window.location.href = "/logout";
+      });
     }
     document.addEventListener("DOMContentLoaded", () => {
       if (window.renderIcons) window.renderIcons();
