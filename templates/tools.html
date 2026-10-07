@@ -21,10 +21,7 @@
     border-radius: 12px; color: white;
     box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3);
   }
-  .category-header .cat-info h2 {
-    font-size: 20px; font-weight: 800; color: var(--text);
-    margin: 0 0 4px; letter-spacing: -0.5px;
-  }
+  .category-header .cat-info h2 { font-size: 20px; font-weight: 800; color: var(--text); margin: 0 0 4px; }
   .category-header .cat-info p { font-size: 13px; color: var(--text-dim); margin: 0; }
   .category-header .cat-count {
     margin-left: auto; background: var(--primary); color: white;
@@ -33,7 +30,9 @@
   }
   .tool-icon { width: 26px; height: 26px; color: var(--primary); margin-bottom: 12px; transition: all 0.4s; }
   .tool-card:hover .tool-icon { color: white; transform: translateY(-4px) scale(1.15); }
+  .cat-icon [data-icon] { width: 26px; height: 26px; }
   .cat-icon svg { width: 26px; height: 26px; color: white; }
+  .search-box .search-icon svg { width: 16px; height: 16px; }
 </style>
 </head>
 <body>
@@ -46,12 +45,8 @@
     <nav class="nav-links">
       <a href="/tools" class="active">Tools</a>
       <a href="/prompts">Prompts</a>
-      {% if role in ('owner', 'admin') %}
-        <a href="/admin">Admin</a>
-      {% endif %}
-      {% if role == 'owner' %}
-        <a href="/owner">Owner</a>
-      {% endif %}
+      {% if role in ('admin', 'owner') %}<a href="/admin">Admin</a>{% endif %}
+      {% if role == 'owner' %}<a href="/owner">Owner</a>{% endif %}
     </nav>
     <div class="header-right">
       <div class="search-box">
@@ -59,7 +54,7 @@
         <span class="search-icon" data-icon="search"></span>
       </div>
       <button class="theme-toggle" onclick="toggleTheme(event)" title="Toggle theme"></button>
-      <a href="/logout" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
+      <a href="#" onclick="confirmLogout(event)" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
     </div>
   </header>
 
@@ -68,7 +63,7 @@
 
       <div class="welcome reveal">
         <h1>Welcome, <span class="highlight">{{ name }}</span></h1>
-        <p>Aapke saare tools — organized categories me.</p>
+        <p>Aapke saare tools — 2 categories me organized.</p>
       </div>
 
       <div class="stats">
@@ -79,7 +74,7 @@
       </div>
 
       <div class="category-header reveal">
-        <div class="cat-icon" data-icon="tools"></div>
+        <div class="cat-icon"><span data-icon="tools"></span></div>
         <div class="cat-info">
           <h2>GD Workspace</h2>
           <p>Office tools — GST, PDF, Image, Calculator, Text</p>
@@ -103,7 +98,7 @@
       </div>
 
       <div class="category-header reveal">
-        <div class="cat-icon" data-icon="video"></div>
+        <div class="cat-icon"><span data-icon="video"></span></div>
         <div class="cat-info">
           <h2>GD Studio</h2>
           <p>Media tools — Video, Audio, Downloader (coming soon)</p>
@@ -113,30 +108,86 @@
 
       <div class="grid grid-4">
         <a href="/tools/video-to-mp3" class="tool-card reveal"><span class="tool-icon" data-icon="audio"></span><div class="title">Video to MP3</div><div class="desc">Extract audio</div></a>
-        <div class="tool-card reveal" onclick="alert('Video Converter — coming soon! 🚧')" style="opacity: 0.6;">
+        <div class="tool-card reveal" onclick="alert('Video Converter — coming soon!')" style="opacity: 0.6;">
           <span class="tool-icon" data-icon="video"></span><div class="title">Video Converter</div><div class="desc">MP4, AVI, MOV</div>
         </div>
-        <div class="tool-card reveal" onclick="alert('YouTube Downloader — coming soon! 🚧')" style="opacity: 0.6;">
+        <div class="tool-card reveal" onclick="alert('YouTube Downloader — coming soon!')" style="opacity: 0.6;">
           <span class="tool-icon" data-icon="download"></span><div class="title">YouTube Downloader</div><div class="desc">MP3/MP4</div>
         </div>
-        <div class="tool-card reveal" onclick="alert('Instagram Downloader — coming soon! 🚧')" style="opacity: 0.6;">
+        <div class="tool-card reveal" onclick="alert('Instagram Downloader — coming soon!')" style="opacity: 0.6;">
           <span class="tool-icon" data-icon="download"></span><div class="title">Instagram Downloader</div><div class="desc">Reels, Posts</div>
         </div>
       </div>
 
+      {% if role in ('admin', 'owner') %}
+      <div class="category-header reveal">
+        <div class="cat-icon"><span data-icon="software"></span></div>
+        <div class="cat-info">
+          <h2>GD Business</h2>
+          <p>Business software — Retail, Restaurant, Sand (coming soon)</p>
+        </div>
+        <div class="cat-count">3 Projects</div>
+      </div>
+
+      <div class="grid grid-4">
+        <div class="tool-card reveal" onclick="alert('Retail Store — coming soon!')" style="opacity: 0.6;">
+          <span class="tool-icon" data-icon="retail"></span><div class="title">Retail Store</div><div class="desc">Gofrugal style POS</div>
+        </div>
+        <div class="tool-card reveal" onclick="alert('Restaurant POS — coming soon!')" style="opacity: 0.6;">
+          <span class="tool-icon" data-icon="restaurant"></span><div class="title">Restaurant POS</div><div class="desc">Ezee Optimum style</div>
+        </div>
+        <div class="tool-card reveal" onclick="alert('Sand Business — coming soon!')" style="opacity: 0.6;">
+          <span class="tool-icon" data-icon="sand"></span><div class="title">Sand Business</div><div class="desc">Stock, Truck, Billing</div>
+        </div>
+      </div>
+      {% endif %}
+
     </div>
   </main>
+
+  <!-- Confirm Dialog -->
+  <div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-box">
+      <div class="warn-icon"><span data-icon="warning"></span></div>
+      <h3 id="confirmTitle">Are you sure?</h3>
+      <p id="confirmMessage">This action cannot be undone.</p>
+      <div class="confirm-actions">
+        <button class="btn-cancel" onclick="closeConfirm()">Cancel</button>
+        <button class="btn-confirm" id="confirmYes">Yes</button>
+      </div>
+    </div>
+  </div>
 
   <footer><p>© 2025 GD Pulse — Creative Digital Studio</p></footer>
 
   <script src="/static/icons.js"></script>
   <script>
     document.getElementById("searchInput").addEventListener("keypress", (e) => {
-      if (e.key === "Enter") alert("Search feature jald aa raha hai! 🔍");
+      if (e.key === "Enter") alert("Search feature jald aa raha hai!");
     });
-    document.addEventListener("DOMContentLoaded", () => {
+    let pendingAction = null;
+    function showConfirm(title, message, btnText, callback) {
+      document.getElementById("confirmTitle").innerText = title;
+      document.getElementById("confirmMessage").innerText = message;
+      document.getElementById("confirmYes").innerText = btnText;
+      pendingAction = callback;
+      document.getElementById("confirmOverlay").classList.add("active");
       if (window.renderIcons) window.renderIcons();
+    }
+    function closeConfirm() {
+      document.getElementById("confirmOverlay").classList.remove("active");
+      pendingAction = null;
+    }
+    document.getElementById("confirmYes").addEventListener("click", () => {
+      if (pendingAction) { const action = pendingAction; closeConfirm(); action(); }
     });
+    function confirmLogout(e) {
+      if (e) e.preventDefault();
+      showConfirm("Logout?", "Kya tum sach me logout karna chahte ho?", "Yes, Logout", () => {
+        window.location.href = "/logout";
+      });
+    }
+    document.addEventListener("DOMContentLoaded", () => { if (window.renderIcons) window.renderIcons(); });
   </script>
 
 </body>
