@@ -195,12 +195,15 @@
       <a href="/tools">Tools</a>
     </nav>
     <div class="header-right">
-      <button class="theme-toggle" onclick="toggleTheme(event)" title="Toggle theme"></button>
-      <div class="avatar" title="{{ name }}">{{ name[0]|upper }}</div>
-      <a href="/logout" class="btn btn-outline" style="display:inline-flex;align-items:center;gap:6px;">
-        <span data-icon="logout" style="width:16px;height:16px;display:inline-flex;"></span>
-      </a>
-    </div>
+            <button class="theme-toggle" onclick="toggleTheme(event)" title="Toggle theme"></button>
+      <a href="/tools" class="btn btn-outline">Tools</a>
+      {% if role in ('owner', 'admin') %}
+        <a href="/admin" class="btn btn-outline">Admin</a>
+      {% endif %}
+      {% if role == 'owner' %}
+        <a href="/owner" class="btn btn-primary">Owner</a>
+      {% endif %}
+      <a href="/logout" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
   </header>
 
   <main>
