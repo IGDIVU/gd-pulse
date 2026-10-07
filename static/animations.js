@@ -1,8 +1,66 @@
 /* ============================================
-   GD PULSE — ANIMATIONS & INTERACTIONS
+   GD PULSE — HYBRID ANIMATIONS
+   Elegant + Wow effects
    ============================================ */
 
-// ===== THEME TOGGLE (Dark/Light) =====
+// ===== SCROLL PROGRESS BAR =====
+(function initScrollProgress() {
+  const bar = document.createElement('div');
+  bar.className = 'scroll-progress';
+  document.body.appendChild(bar);
+
+  window.addEventListener('scroll', () => {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    bar.style.width = progress + '%';
+  });
+})();
+
+// ===== CUSTOM CURSOR =====
+(function initCustomCursor() {
+  if (window.innerWidth < 900) return;
+
+  const dot = document.createElement('div');
+  dot.className = 'cursor-dot';
+  const ring = document.createElement('div');
+  ring.className = 'cursor-ring';
+  document.body.appendChild(dot);
+  document.body.appendChild(ring);
+
+  let mouseX = 0, mouseY = 0;
+  let ringX = 0, ringY = 0;
+
+  document.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    dot.style.left = mouseX + 'px';
+    dot.style.top = mouseY + 'px';
+  });
+
+  function animateRing() {
+    ringX += (mouseX - ringX) * 0.15;
+    ringY += (mouseY - ringY) * 0.15;
+    ring.style.left = ringX + 'px';
+    ring.style.top = ringY + 'px';
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  // Hover effect on interactive elements
+  document.addEventListener('mouseover', (e) => {
+    if (e.target.closest('a, button, .card, .tool-card, .tab, input, .avatar')) {
+      ring.classList.add('hover');
+    }
+  });
+  document.addEventListener('mouseout', (e) => {
+    if (e.target.closest('a, button, .card, .tool-card, .tab, input, .avatar')) {
+      ring.classList.remove('hover');
+    }
+  });
+})();
+
+// ===== THEME TOGGLE =====
 (function initTheme() {
   const savedTheme = localStorage.getItem('gd-theme') || 'light';
   document.documentElement.setAttribute('data-theme', savedTheme);
@@ -17,27 +75,18 @@ function toggleTheme() {
 }
 
 function updateThemeIcon(theme) {
-  const btns = document.querySelectorAll('.theme-toggle');
-  btns.forEach(btn => {
+  document.querySelectorAll('.theme-toggle').forEach(btn => {
     btn.innerText = theme === 'dark' ? '☀️' : '🌙';
     btn.title = theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode';
   });
 }
 
-// Update icon on page load
-document.addEventListener('DOMContentLoaded', () => {
-  const theme = document.documentElement.getAttribute('data-theme') || 'light';
-  updateThemeIcon(theme);
-});
-
-// ===== SCROLL REVEAL ANIMATIONS =====
+// ===== SCROLL REVEAL =====
 (function initScrollReveal() {
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         entry.target.classList.add('active');
-        // Optional: unobserve after reveal (one-time animation)
-        // observer.unobserve(entry.target);
       }
     });
   }, {
@@ -45,22 +94,24 @@ document.addEventListener('DOMContentLoaded', () => {
     rootMargin: '0px 0px -50px 0px'
   });
 
-  document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale')
+  function observeAll() {
+    document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale, .stagger')
       .forEach(el => observer.observe(el));
-  });
+  }
+
+  document.addEventListener('DOMContentLoaded', observeAll);
+  setTimeout(observeAll, 500); // fallback for dynamic content
 })();
 
-// ===== COUNT-UP ANIMATION for Stats =====
+// ===== COUNT-UP ANIMATION =====
 function animateCount(el, target, duration = 2000) {
-  const start = 0;
   const startTime = performance.now();
   const suffix = el.getAttribute('data-suffix') || '';
 
   function update(currentTime) {
     const elapsed = currentTime - startTime;
     const progress = Math.min(elapsed / duration, 1);
-    const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+    const eased = 1 - Math.pow(1 - progress, 3);
     const current = Math.floor(eased * target);
     el.innerText = current + suffix;
     if (progress < 1) requestAnimationFrame(update);
@@ -90,7 +141,7 @@ function animateCount(el, target, duration = 2000) {
   });
 })();
 
-// ===== PARALLAX ORB (follows mouse) =====
+// ===== PARALLAX ORB =====
 (function initParallax() {
   const orbs = document.querySelectorAll('.parallax-orb');
   if (!orbs.length) return;
@@ -105,10 +156,10 @@ function animateCount(el, target, duration = 2000) {
   });
 })();
 
-// ===== RIPPLE EFFECT on Buttons =====
+// ===== RIPPLE EFFECT =====
 (function initRipple() {
   document.addEventListener('click', (e) => {
-    const btn = e.target.closest('.calc-btn, .action-btn, .btn');
+    const btn = e.target.closest('.calc-btn, .action-btn, .btn, .login-box button, .tab');
     if (!btn) return;
 
     const ripple = document.createElement('span');
@@ -140,7 +191,6 @@ function animateCount(el, target, duration = 2000) {
     setTimeout(() => ripple.remove(), 700);
   });
 
-  // Add keyframes
   const style = document.createElement('style');
   style.textContent = `
     @keyframes rippleAnim {
@@ -150,21 +200,43 @@ function animateCount(el, target, duration = 2000) {
   document.head.appendChild(style);
 })();
 
-// ===== TYPEWRITER EFFECT for Hero (optional) =====
-function typewriter(el, text, speed = 60) {
-  el.innerText = '';
-  let i = 0;
-  function type() {
-    if (i < text.length) {
-      el.innerText += text.charAt(i);
-      i++;
-      setTimeout(type, speed);
-    }
-  }
-  type();
-}
+// ===== MAGNETIC BUTTONS =====
+(function initMagnetic() {
+  if (window.innerWidth < 900) return;
 
-// ===== SMOOTH SCROLL for Nav Links =====
+  document.querySelectorAll('.btn, .icon-btn, .theme-toggle, .avatar').forEach(btn => {
+    btn.addEventListener('mousemove', (e) => {
+      const rect = btn.getBoundingClientRect();
+      const x = e.clientX - rect.left - rect.width / 2;
+      const y = e.clientY - rect.top - rect.height / 2;
+      btn.style.transform = `translate(${x * 0.25}px, ${y * 0.25}px)`;
+    });
+    btn.addEventListener('mouseleave', () => {
+      btn.style.transform = '';
+    });
+  });
+})();
+
+// ===== CARD 3D TILT =====
+(function initTilt() {
+  if (window.innerWidth < 900) return;
+
+  document.querySelectorAll('.card, .tool-card, .stat-card').forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const rotX = ((y - rect.height / 2) / (rect.height / 2)) * -6;
+      const rotY = ((x - rect.width / 2) / (rect.width / 2)) * 6;
+      card.style.transform = `perspective(1000px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateY(-6px) scale(1.02)`;
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = '';
+    });
+  });
+})();
+
+// ===== SMOOTH SCROLL for Nav =====
 (function initSmoothScroll() {
   document.addEventListener('click', (e) => {
     const link = e.target.closest('a[href^="#"]');
@@ -177,7 +249,7 @@ function typewriter(el, text, speed = 60) {
   });
 })();
 
-// ===== ACTIVE NAV LINK on Scroll =====
+// ===== ACTIVE NAV on Scroll =====
 (function initActiveNav() {
   const sections = document.querySelectorAll('section[id]');
   if (!sections.length) return;
@@ -199,8 +271,10 @@ function typewriter(el, text, speed = 60) {
 // ===== PAGE LOAD FADE-IN =====
 document.addEventListener('DOMContentLoaded', () => {
   document.body.style.opacity = '0';
-  document.body.style.transition = 'opacity 0.4s ease';
+  document.body.style.transition = 'opacity 0.5s ease';
   requestAnimationFrame(() => {
     document.body.style.opacity = '1';
   });
+  const theme = document.documentElement.getAttribute('data-theme') || 'light';
+  updateThemeIcon(theme);
 });
