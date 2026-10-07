@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edit Prompt — GD Pulse</title>
+<link rel="icon" type="image/png" href="/static/favicon.png">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+  <div class="parallax-orb" style="top: 10%; left: 5%;"></div>
+  <div class="parallax-orb" style="bottom: 10%; right: 5%;"></div>
+
+  <header>
+    <a href="/" class="logo"><img src="/static/logo-horizontal.png" alt="GD Pulse"></a>
+    <nav class="nav-links">
+      <a href="/tools">Tools</a>
+      <a href="/prompts">Prompts</a>
+      <a href="/admin" class="active">Admin</a>
+      {% if role == 'owner' %}<a href="/owner">Owner</a>{% endif %}
+    </nav>
+    <div class="header-right">
+      <button class="theme-toggle" onclick="toggleTheme(event)" title="Toggle theme"></button>
+      <a href="#" onclick="confirmLogout(event)" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="container" style="max-width: 800px;">
+      <div class="box reveal">
+        <h2><span data-icon="edit" style="width:24px;height:24px;display:inline-flex;vertical-align:middle;margin-right:8px;color:var(--primary);"></span> Edit Prompt</h2>
+        <p style="color:var(--text-dim);font-size:13px;margin-bottom:20px;">Key: <b style="color:var(--primary);">{{ key }}</b></p>
+
+        <form method="POST">
+          <label>Title</label>
+          <input type="text" name="title" value="{{ prompt.title }}" required>
+
+          <label>Subtitle</label>
+          <input type="text" name="sub" value="{{ prompt.sub }}">
+
+          <label>Category</label>
+          <select name="cat">
+            <option value="single" {% if prompt.cat=='single' %}selected{% endif %}>Single (Image)</option>
+            <option value="multi" {% if prompt.cat=='multi' %}selected{% endif %}>Multi-Step (Video)</option>
+            <option value="system" {% if prompt.cat=='system' %}selected{% endif %}>System (AI)</option>
+          </select>
+
+          <label>Prompt Text</label>
+          <textarea name="text" style="min-height:200px;" required>{{ prompt.steps[0].text if prompt.steps else '' }}</textarea>
+
+          <div style="display:flex;gap:10px;margin-top:15px;">
+            <button type="submit" class="calc-btn" style="flex:1;">Save Changes</button>
+            <a href="/prompts" class="btn btn-outline" style="flex:1;text-align:center;justify-content:center;">Cancel</a>
+          </div>
+        </form>
+
+        <a href="/prompts" class="back">← Back to Prompts</a>
+      </div>
+    </div>
+  </main>
+
+  <!-- Confirm Dialog -->
+  <div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-box">
+      <div class="warn-icon"><span data-icon="warning"></span></div>
+      <h3 id="confirmTitle">Are you sure?</h3>
+      <p id="confirmMessage">This action cannot be undone.</p>
+      <div class="confirm-actions">
+        <button class="btn-cancel" onclick="closeConfirm()">Cancel</button>
+        <button class="btn-confirm" id="confirmYes">Yes</button>
+      </div>
+    </div>
+  </div>
+
+  <footer><p>© 2025 GD Pulse — Edit Prompt</p></footer>
+
+  <script src="/static/icons.js"></script>
+  <script>
+    let pendingAction = null;
+    function showConfirm(title, message, btnText, callback) {
+      document.getElementById("confirmTitle").innerText = title;
+      document.getElementById("confirmMessage").innerText = message;
+      document.getElementById("confirmYes").innerText = btnText;
+      pendingAction = callback;
+      document.getElementById("confirmOverlay").classList.add("active");
+      if (window.renderIcons) window.renderIcons();
+    }
+    function closeConfirm() {
+      document.getElementById("confirmOverlay").classList.remove("active");
+      pendingAction = null;
+    }
+    document.getElementById("confirmYes").addEventListener("click", () => {
+      if (pendingAction) { const action = pendingAction; closeConfirm(); action(); }
+    });
+    function confirmLogout(e) {
+      if (e) e.preventDefault();
+      showConfirm("Logout?", "Kya tum sach me logout karna chahte ho?", "Yes, Logout", () => {
+        window.location.href = "/logout";
+      });
+    }
+    document.addEventListener("DOMContentLoaded", () => { if (window.renderIcons) window.renderIcons(); });
+  </script>
+
+</body>
+</html>
