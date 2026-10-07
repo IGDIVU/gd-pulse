@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, send_file, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, send_file
 import os
 import io
 from PIL import Image
@@ -21,7 +21,8 @@ def current_role(): return session.get("role")
 def current_name(): return session.get("name", session.get("user"))
 
 def require_login():  return current_role() in ("owner", "admin", "staff", "user")
-def require_staff():  return current_role() in ("owner", "admin", "staff")
+def require_staff():  return current_role() in ("owner", "admin")   # Sirf admin+owner tools use kare
+def require_prompts(): return current_role() in ("owner", "admin", "staff")  # Staff bhi prompts dekh sake
 def require_admin():  return current_role() in ("owner", "admin")
 def require_owner():  return current_role() == "owner"
 
@@ -64,7 +65,7 @@ def login():
             elif role == "admin":
                 return redirect(url_for("admin"))
             elif role == "staff":
-                return redirect(url_for("tools"))
+                return redirect(url_for("prompts"))
             else:
                 return redirect(url_for("portfolio"))
         else:
@@ -77,7 +78,17 @@ def logout():
     return redirect(url_for("portfolio"))
 
 # ============================================
-# STAFF/ADMIN/OWNER ROUTES
+# PROMPTS (Owner + Admin + Staff)
+# ============================================
+
+@app.route("/prompts")
+def prompts():
+    if not require_prompts():
+        return redirect(url_for("login"))
+    return render_template("prompts.html", user=current_user(), role=current_role(), name=current_name())
+
+# ============================================
+# TOOLS (Sirf Owner + Admin)
 # ============================================
 
 @app.route("/tools")
@@ -86,14 +97,8 @@ def tools():
         return redirect(url_for("login"))
     return render_template("tools.html", user=current_user(), role=current_role(), name=current_name())
 
-@app.route("/prompts")
-def prompts():
-    if not require_staff():
-        return redirect(url_for("login"))
-    return render_template("prompts.html", user=current_user(), role=current_role(), name=current_name())
-
 # ============================================
-# ADMIN PANEL
+# ADMIN PANEL (Owner + Admin)
 # ============================================
 
 @app.route("/admin")
@@ -103,7 +108,7 @@ def admin():
     return render_template("admin.html", user=current_user(), role=current_role(), name=current_name())
 
 # ============================================
-# OWNER PANEL (GOD MODE)
+# OWNER PANEL (God Mode)
 # ============================================
 
 @app.route("/owner")
@@ -113,46 +118,47 @@ def owner():
     return render_template("owner.html", user=current_user(), role=current_role(), name=current_name())
 
 # ============================================
-# TOOLS
+# TOOLS (Owner + Admin only)
 # ============================================
 
 @app.route("/tools/gst")
 def gst_tool():
-    if not require_login(): return redirect(url_for("login"))
+    if not require_staff(): return redirect(url_for("login"))
     return render_template("gst.html", name=current_name())
 
 @app.route("/tools/emi")
 def emi_tool():
-    if not require_login(): return redirect(url_for("login"))
+    if not require_staff(): return redirect(url_for("login"))
     return render_template("emi.html", name=current_name())
 
 @app.route("/tools/age")
 def age_tool():
-    if not require_login(): return redirect(url_for("login"))
+    if not require_staff(): return redirect(url_for("login"))
     return render_template("age.html", name=current_name())
 
 @app.route("/tools/number-to-words")
 def number_to_words_tool():
-    if not require_login(): return redirect(url_for("login"))
+    if not require_staff(): return redirect(url_for("login"))
     return render_template("number-to-words.html", name=current_name())
 
 @app.route("/tools/unit-converter")
 def unit_converter_tool():
-    if not require_login(): return redirect(url_for("login"))
+    if not require_staff(): return redirect(url_for("login"))
     return render_template("unit-converter.html", name=current_name())
 
 @app.route("/tools/text-tools")
 def text_tools():
-    if not require_login(): return redirect(url_for("login"))
+    if not require_staff(): return redirect(url_for("login"))
     return render_template("text-tools.html", name=current_name())
 
 @app.route("/tools/qr-code")
 def qr_code_tool():
-    if not require_login(): return redirect(url_for("login"))
+    if not require_staff(): return redirect(url_for("login"))
     return render_template("qr-code.html", name=current_name())
 
 @app.route("/tools/qr-code/process", methods=["POST"])
 def qr_code_process():
+    if not require_staff(): return redirect(url_for("login"))
     try:
         import qrcode
         text = request.form.get("text", "").strip()
@@ -169,11 +175,12 @@ def qr_code_process():
 
 @app.route("/tools/image-resize")
 def image_resize_tool():
-    if not require_login(): return redirect(url_for("login"))
+    if not require_staff(): return redirect(url_for("login"))
     return render_template("image-resize.html", name=current_name())
 
 @app.route("/tools/image-resize/process", methods=["POST"])
 def image_resize_process():
+    if not require_staff(): return redirect(url_for("login"))
     try:
         file = request.files.get("image")
         if not file or file.filename == "": return "Koi image select nahi ki", 400
@@ -190,11 +197,12 @@ def image_resize_process():
 
 @app.route("/tools/image-compress")
 def image_compress_tool():
-    if not require_login(): return redirect(url_for("login"))
+    if not require_staff(): return redirect(url_for("login"))
     return render_template("image-compress.html", name=current_name())
 
 @app.route("/tools/image-compress/process", methods=["POST"])
 def image_compress_process():
+    if not require_staff(): return redirect(url_for("login"))
     try:
         file = request.files.get("image")
         if not file or file.filename == "": return "Koi image select nahi ki", 400
@@ -209,11 +217,12 @@ def image_compress_process():
 
 @app.route("/tools/image-crop")
 def image_crop_tool():
-    if not require_login(): return redirect(url_for("login"))
+    if not require_staff(): return redirect(url_for("login"))
     return render_template("image-crop.html", name=current_name())
 
 @app.route("/tools/image-crop/process", methods=["POST"])
 def image_crop_process():
+    if not require_staff(): return redirect(url_for("login"))
     try:
         file = request.files.get("image")
         if not file or file.filename == "": return "Koi image select nahi ki", 400
@@ -234,11 +243,12 @@ def image_crop_process():
 
 @app.route("/tools/photo-to-pdf")
 def photo_to_pdf_tool():
-    if not require_login(): return redirect(url_for("login"))
+    if not require_staff(): return redirect(url_for("login"))
     return render_template("photo-to-pdf.html", name=current_name())
 
 @app.route("/tools/photo-to-pdf/process", methods=["POST"])
 def photo_to_pdf_process():
+    if not require_staff(): return redirect(url_for("login"))
     try:
         files = request.files.getlist("images")
         files = [f for f in files if f and f.filename != ""]
@@ -256,11 +266,12 @@ def photo_to_pdf_process():
 
 @app.route("/tools/pdf-merge")
 def pdf_merge_tool():
-    if not require_login(): return redirect(url_for("login"))
+    if not require_staff(): return redirect(url_for("login"))
     return render_template("pdf-merge.html", name=current_name())
 
 @app.route("/tools/pdf-merge/process", methods=["POST"])
 def pdf_merge_process():
+    if not require_staff(): return redirect(url_for("login"))
     try:
         from pypdf import PdfWriter, PdfReader
         files = request.files.getlist("pdfs")
@@ -276,11 +287,12 @@ def pdf_merge_process():
 
 @app.route("/tools/video-to-mp3")
 def video_to_mp3_tool():
-    if not require_login(): return redirect(url_for("login"))
+    if not require_staff(): return redirect(url_for("login"))
     return render_template("video-to-mp3.html", name=current_name())
 
 @app.route("/tools/video-to-mp3/process", methods=["POST"])
 def video_to_mp3_process():
+    if not require_staff(): return redirect(url_for("login"))
     try:
         file = request.files.get("video")
         if not file or file.filename == "": return "Koi video select nahi ki", 400
