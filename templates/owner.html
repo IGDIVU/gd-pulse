@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Owner — GD Pulse</title>
+<link rel="icon" type="image/png" href="/static/favicon.png">
+<link rel="stylesheet" href="/static/style.css">
+<style>
+  .tab-bar {
+    display: flex; gap: 8px; margin: 30px 0;
+    flex-wrap: wrap; border-bottom: 1px solid var(--border);
+  }
+  .tab-btn {
+    background: transparent; border: none; color: var(--text-dim);
+    padding: 12px 20px; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: all 0.3s;
+    border-bottom: 3px solid transparent; margin-bottom: -1px;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .tab-btn:hover { color: var(--primary); }
+  .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+  .tab-btn svg { width: 18px; height: 18px; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; animation: fadeInUp 0.5s ease; }
+  .section-label {
+    font-size: 13px; font-weight: 800; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--primary);
+    margin: 30px 0 15px; display: flex; align-items: center; gap: 10px;
+  }
+  .section-label::after {
+    content: ""; flex: 1; height: 1px;
+    background: linear-gradient(90deg, var(--primary), transparent);
+  }
+  .tool-icon { width: 26px; height: 26px; color: var(--primary); margin-bottom: 12px; transition: all 0.4s; }
+  .tool-card:hover .tool-icon { color: white; transform: translateY(-4px) scale(1.15); }
+
+  .god-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #ec4899, #8b5cf6);
+    color: white; padding: 4px 14px; border-radius: 20px;
+    font-size: 11px; font-weight: 800; letter-spacing: 1.5px;
+    text-transform: uppercase; margin-left: 10px;
+    box-shadow: 0 4px 14px rgba(236, 72, 153, 0.4);
+  }
+
+  .color-preview {
+    display: flex; gap: 10px; margin: 15px 0; flex-wrap: wrap;
+  }
+  .color-swatch {
+    width: 60px; height: 60px; border-radius: 12px;
+    border: 2px solid var(--border); cursor: pointer;
+    transition: all 0.3s; position: relative;
+  }
+  .color-swatch:hover { transform: scale(1.1); box-shadow: var(--shadow-md); }
+  .color-swatch span {
+    position: absolute; bottom: -20px; left: 0; right: 0;
+    text-align: center; font-size: 9px; color: var(--text-dim);
+    font-weight: 700;
+  }
+
+  .empty-box {
+    text-align: center; padding: 60px 20px;
+    background: var(--card); border: 1px dashed var(--border);
+    border-radius: var(--radius); color: var(--text-dim);
+  }
+  .empty-box svg { width: 50px; height: 50px; color: var(--primary); opacity: 0.5; margin-bottom: 16px; }
+</style>
+</head>
+<body>
+
+  <div class="parallax-orb" style="top: 10%; left: 5%;"></div>
+  <div class="parallax-orb" style="bottom: 10%; right: 5%;"></div>
+
+  <header>
+    <a href="/" class="logo"><img src="/static/logo-horizontal.png" alt="GD Pulse"></a>
+    <nav class="nav-links">
+      <a href="/tools">Tools</a>
+      <a href="/prompts">Prompts</a>
+      <a href="/admin">Admin</a>
+      <a href="/owner" class="active">Owner</a>
+    </nav>
+    <div class="header-right">
+      <button class="theme-toggle" onclick="toggleTheme(event)" title="Toggle theme"></button>
+      <a href="/logout" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+
+      <div class="welcome reveal" style="background: linear-gradient(135deg, rgba(236,72,153,0.12), rgba(139,92,246,0.15));">
+        <h1>Owner Panel <span class="god-badge">GOD MODE</span></h1>
+        <p>Welcome, <b>{{ name }}</b>. Yahan se pura website control karo — theme, roles, structure, everything.</p>
+      </div>
+
+      <div class="stats">
+        <div class="stat-card reveal"><div class="value">4</div><div class="label">Total Roles</div></div>
+        <div class="stat-card reveal"><div class="value">4</div><div class="label">Active Users</div></div>
+        <div class="stat-card reveal"><div class="value">14+</div><div class="label">Tools</div></div>
+        <div class="stat-card reveal"><div class="value">15+</div><div class="label">Prompts</div></div>
+      </div>
+
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('overview', this)">
+          <span data-icon="grid" style="width:18px;height:18px;display:inline-flex;"></span> Overview
+        </button>
+        <button class="tab-btn" onclick="switchTab('theme', this)">
+          <span data-icon="design" style="width:18px;height:18px;display:inline-flex;"></span> Theme Editor
+        </button>
+        <button class="tab-btn" onclick="switchTab('roles', this)">
+          <span data-icon="users" style="width:18px;height:18px;display:inline-flex;"></span> Roles & Access
+        </button>
+        <button class="tab-btn" onclick="switchTab('structure', this)">
+          <span data-icon="software" style="width:18px;height:18px;display:inline-flex;"></span> Site Structure
+        </button>
+        <button class="tab-btn" onclick="switchTab('pages', this)">
+          <span data-icon="grid" style="width:18px;height:18px;display:inline-flex;"></span> Pages
+        </button>
+        <button class="tab-btn" onclick="switchTab('settings', this)">
+          <span data-icon="tools" style="width:18px;height:18px;display:inline-flex;"></span> Settings
+        </button>
+      </div>
+
+      <!-- OVERVIEW -->
+      <div class="tab-content active" id="tab-overview">
+        <div class="section-label">Owner Quick Access</div>
+        <div class="grid grid-4">
+          <a href="/admin" class="tool-card reveal">
+            <span class="tool-icon" data-icon="analytics"></span>
+            <div class="title">Admin Panel</div>
+            <div class="desc">Full management</div>
+          </a>
+          <a href="/prompts" class="tool-card reveal">
+            <span class="tool-icon" data-icon="prompts"></span>
+            <div class="title">Prompts Library</div>
+            <div class="desc">15+ prompts</div>
+          </a>
+          <a href="/tools" class="tool-card reveal">
+            <span class="tool-icon" data-icon="tools"></span>
+            <div class="title">Tools Dashboard</div>
+            <div class="desc">14+ tools</div>
+          </a>
+          <a href="/" class="tool-card reveal">
+            <span class="tool-icon" data-icon="portfolio"></span>
+            <div class="title">Portfolio</div>
+            <div class="desc">Public view</div>
+          </a>
+        </div>
+
+        <div class="section-label">God Mode Features</div>
+        <div class="grid grid-3">
+          <div class="tool-card reveal" onclick="switchTab('theme', document.querySelectorAll('.tab-btn')[1])">
+            <span class="tool-icon" data-icon="design"></span>
+            <div class="title">Theme Editor</div>
+            <div class="desc">Change colors, fonts from UI</div>
+          </div>
+          <div class="tool-card reveal" onclick="switchTab('roles', document.querySelectorAll('.tab-btn')[2])">
+            <span class="tool-icon" data-icon="users"></span>
+            <div class="title">Role Management</div>
+            <div class="desc">Add staff, set permissions</div>
+          </div>
+          <div class="tool-card reveal" onclick="switchTab('structure', document.querySelectorAll('.tab-btn')[3])">
+            <span class="tool-icon" data-icon="software"></span>
+            <div class="title">Site Structure</div>
+            <div class="desc">Edit menu, sections</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- THEME EDITOR -->
+      <div class="tab-content" id="tab-theme">
+        <div class="section-label">Theme Editor</div>
+        <div class="info reveal" style="margin-bottom:20px;">
+          <b>Coming soon:</b> Ye section fully functional hoga — colors, fonts, aur themes yahan se change ho payenge. Abhi preview dikha rahe hain.
+        </div>
+
+        <div class="box reveal" style="margin-bottom:20px;">
+          <h2 style="font-size:18px;margin-bottom:15px;">🎨 Primary Color</h2>
+          <div class="color-preview">
+            <div class="color-swatch" style="background:#8b5cf6;" onclick="alert('Color picker coming soon')"><span>Purple</span></div>
+            <div class="color-swatch" style="background:#ec4899;" onclick="alert('Color picker coming soon')"><span>Pink</span></div>
+            <div class="color-swatch" style="background:#22d3ee;" onclick="alert('Color picker coming soon')"><span>Cyan</span></div>
+            <div class="color-swatch" style="background:#10b981;" onclick="alert('Color picker coming soon')"><span>Green</span></div>
+            <div class="color-swatch" style="background:#f59e0b;" onclick="alert('Color picker coming soon')"><span>Amber</span></div>
+          </div>
+        </div>
+
+        <div class="box reveal" style="margin-bottom:20px;">
+          <h2 style="font-size:18px;margin-bottom:15px;">🔤 Typography</h2>
+          <label>Heading Font</label>
+          <select disabled>
+            <option>Inter (default)</option>
+            <option>Poppins</option>
+            <option>Montserrat</option>
+            <option>Playfair Display</option>
+          </select>
+          <label>Body Font</label>
+          <select disabled>
+            <option>Inter (default)</option>
+            <option>Open Sans</option>
+            <option>Roboto</option>
+          </select>
+          <div class="info">Font changer coming soon</div>
+        </div>
+
+        <div class="box reveal">
+          <h2 style="font-size:18px;margin-bottom:15px;">🌙 Theme Mode</h2>
+          <div class="color-preview">
+            <div class="color-swatch" style="background:#f5f5f7;border:2px solid #8b5cf6;" onclick="alert('Light theme — active')"><span style="color:#666;">Light</span></div>
+            <div class="color-swatch" style="background:#0f0a1f;" onclick="alert('Dark theme — via toggle button')"><span style="color:#aaa;">Dark</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROLES & ACCESS -->
+      <div class="tab-content" id="tab-roles">
+        <div class="section-label">Roles & Access Control</div>
+        <div class="info reveal" style="margin-bottom:20px;">
+          <b>Coming soon:</b> Yahan se naye roles banaoge, staff add karoge, aur kisko kya dikhega wo set karoge.
+        </div>
+
+        <div class="grid grid-2">
+          <div class="box reveal">
+            <h2 style="font-size:18px;margin-bottom:15px;">Current Roles</h2>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:rgba(236,72,153,0.08);border-radius:10px;">
+                <b>Owner</b><span style="font-size:12px;color:var(--text-dim);">Full + God Mode</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:rgba(139,92,246,0.08);border-radius:10px;">
+                <b>Admin</b><span style="font-size:12px;color:var(--text-dim);">Full Management</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:rgba(34,211,238,0.08);border-radius:10px;">
+                <b>Staff</b><span style="font-size:12px;color:var(--text-dim);">Tools + Prompts</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:rgba(107,114,128,0.08);border-radius:10px;">
+                <b>User</b><span style="font-size:12px;color:var(--text-dim);">Portfolio only</span>
+              </div>
+            </div>
+            <button class="btn btn-primary" style="margin-top:20px;" onclick="alert('Add Role — coming soon')">+ Add New Role</button>
+          </div>
+
+          <div class="box reveal">
+            <h2 style="font-size:18px;margin-bottom:15px;">Access Control</h2>
+            <p style="font-size:13px;color:var(--text-dim);margin-bottom:15px;">
+              Yahan se set karoge ki kis role ko kya dikhe:
+            </p>
+            <div style="font-size:13px;line-height:2;">
+              <div>✅ Tools — Owner, Admin, Staff</div>
+              <div>✅ Prompts — Owner, Admin, Staff</div>
+              <div>✅ Admin Panel — Owner, Admin</div>
+              <div>✅ Owner Panel — Owner only</div>
+              <div>❌ Business — Coming soon</div>
+            </div>
+            <button class="btn btn-primary" style="margin-top:20px;" onclick="alert('Edit Access — coming soon')">Edit Access</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SITE STRUCTURE -->
+      <div class="tab-content" id="tab-structure">
+        <div class="section-label">Site Structure</div>
+        <div class="info reveal" style="margin-bottom:20px;">
+          <b>Coming soon:</b> Menu items, sections, footer links — sab yahan se edit kar paoge.
+        </div>
+        <div class="empty-box reveal">
+          <span data-icon="software" style="width:50px;height:50px;color:var(--primary);opacity:0.5;"></span>
+          <h3 style="margin-bottom:8px;color:var(--text);">Site Structure Editor</h3>
+          <p>Menu, sections, aur layout editing — coming soon</p>
+        </div>
+      </div>
+
+      <!-- PAGES -->
+      <div class="tab-content" id="tab-pages">
+        <div class="section-label">Pages Management</div>
+        <div class="info reveal" style="margin-bottom:20px;">
+          <b>Coming soon:</b> Naye pages add karo, existing pages edit karo, hide/show karo.
+        </div>
+        <div class="grid grid-3">
+          <div class="tool-card reveal">
+            <span class="tool-icon" data-icon="portfolio"></span>
+            <div class="title">Portfolio</div>
+            <div class="desc">Active · Public</div>
+          </div>
+          <div class="tool-card reveal">
+            <span class="tool-icon" data-icon="tools"></span>
+            <div class="title">Tools</div>
+            <div class="desc">Active · Staff+</div>
+          </div>
+          <div class="tool-card reveal">
+            <span class="tool-icon" data-icon="prompts"></span>
+            <div class="title">Prompts</div>
+            <div class="desc">Active · Staff+</div>
+          </div>
+          <div class="tool-card reveal">
+            <span class="tool-icon" data-icon="analytics"></span>
+            <div class="title">Admin</div>
+            <div class="desc">Active · Admin+</div>
+          </div>
+          <div class="tool-card reveal" onclick="alert('Add Page — coming soon')" style="opacity:0.6;">
+            <span class="tool-icon" data-icon="sparkle"></span>
+            <div class="title">+ Add Page</div>
+            <div class="desc">Coming soon</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="tab-content" id="tab-settings">
+        <div class="section-label">Site Settings</div>
+        <div class="box reveal">
+          <h2 style="font-size:18px;margin-bottom:15px;">General Settings</h2>
+          <label>Site Name</label>
+          <input type="text" value="GD Pulse" disabled>
+          <label>Tagline</label>
+          <input type="text" value="Creative Digital Studio" disabled>
+          <label>Contact Email</label>
+          <input type="email" value="hello@gdpulse.com" disabled>
+          <div class="info">Settings editor coming soon</div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer><p>© 2025 GD Pulse — Owner Panel (God Mode)</p></footer>
+
+  <script src="/static/icons.js"></script>
+  <script src="/static/animations.js"></script>
+  <script>
+    function switchTab(tab, btn) {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+      document.getElementById("tab-" + tab).classList.add("active");
+      if (window.renderIcons) window.renderIcons();
+    }
+    document.addEventListener("DOMContentLoaded", () => {
+      if (window.renderIcons) window.renderIcons();
+    });
+  </script>
+
+</body>
+</html>
