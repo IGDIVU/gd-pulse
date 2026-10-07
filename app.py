@@ -70,7 +70,7 @@ def login():
                 return redirect(url_for("portfolio"))
         else:
             error = "Galat username ya password"
-    return render_template("login.html", error=error)
+    return render_template("login.html", error=error, name="", user="", role="")
 
 @app.route("/logout")
 def logout():
