@@ -1,6 +1,6 @@
 /* ============================================
    GD PULSE — HYBRID ANIMATIONS
-   Elegant + Wow effects
+   With MAGIC theme transition
    ============================================ */
 
 // ===== SCROLL PROGRESS BAR =====
@@ -17,61 +17,58 @@
   });
 })();
 
-// ===== CUSTOM CURSOR =====
-(function initCustomCursor() {
-  if (window.innerWidth < 900) return;
-
-  const dot = document.createElement('div');
-  dot.className = 'cursor-dot';
-  const ring = document.createElement('div');
-  ring.className = 'cursor-ring';
-  document.body.appendChild(dot);
-  document.body.appendChild(ring);
-
-  let mouseX = 0, mouseY = 0;
-  let ringX = 0, ringY = 0;
-
-  document.addEventListener('mousemove', (e) => {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
-    dot.style.left = mouseX + 'px';
-    dot.style.top = mouseY + 'px';
-  });
-
-  function animateRing() {
-    ringX += (mouseX - ringX) * 0.15;
-    ringY += (mouseY - ringY) * 0.15;
-    ring.style.left = ringX + 'px';
-    ring.style.top = ringY + 'px';
-    requestAnimationFrame(animateRing);
-  }
-  animateRing();
-
-  // Hover effect on interactive elements
-  document.addEventListener('mouseover', (e) => {
-    if (e.target.closest('a, button, .card, .tool-card, .tab, input, .avatar')) {
-      ring.classList.add('hover');
-    }
-  });
-  document.addEventListener('mouseout', (e) => {
-    if (e.target.closest('a, button, .card, .tool-card, .tab, input, .avatar')) {
-      ring.classList.remove('hover');
-    }
-  });
-})();
-
-// ===== THEME TOGGLE =====
+// ===== THEME TOGGLE with MAGIC animation =====
 (function initTheme() {
   const savedTheme = localStorage.getItem('gd-theme') || 'light';
   document.documentElement.setAttribute('data-theme', savedTheme);
 })();
 
-function toggleTheme() {
+function toggleTheme(e) {
   const current = document.documentElement.getAttribute('data-theme') || 'light';
   const next = current === 'light' ? 'dark' : 'light';
-  document.documentElement.setAttribute('data-theme', next);
-  localStorage.setItem('gd-theme', next);
-  updateThemeIcon(next);
+
+  // Get click position for ripple origin
+  let x = window.innerWidth / 2;
+  let y = window.innerHeight / 2;
+  if (e && e.clientX) {
+    x = e.clientX;
+    y = e.clientY;
+  }
+
+  // Create magic ripple
+  createThemeRipple(x, y);
+
+  // Spin the toggle button
+  const btn = e ? e.target.closest('.theme-toggle') : null;
+  if (btn) {
+    btn.classList.add('spinning');
+    setTimeout(() => btn.classList.remove('spinning'), 800);
+  }
+
+  // Wait a tiny bit before changing theme (so ripple starts first)
+  setTimeout(() => {
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('gd-theme', next);
+    updateThemeIcon(next);
+  }, 150);
+}
+
+function createThemeRipple(x, y) {
+  const ripple = document.createElement('div');
+  ripple.className = 'theme-ripple active';
+  ripple.style.left = x + 'px';
+  ripple.style.top = y + 'px';
+  ripple.style.width = '100px';
+  ripple.style.height = '100px';
+  ripple.style.marginLeft = '-50px';
+  ripple.style.marginTop = '-50px';
+  ripple.style.background = `radial-gradient(circle, ${
+    document.documentElement.getAttribute('data-theme') === 'dark'
+      ? '#a78bfa'
+      : '#8b5cf6'
+  } 0%, transparent 70%)`;
+  document.body.appendChild(ripple);
+  setTimeout(() => ripple.remove(), 1000);
 }
 
 function updateThemeIcon(theme) {
@@ -100,7 +97,7 @@ function updateThemeIcon(theme) {
   }
 
   document.addEventListener('DOMContentLoaded', observeAll);
-  setTimeout(observeAll, 500); // fallback for dynamic content
+  setTimeout(observeAll, 500);
 })();
 
 // ===== COUNT-UP ANIMATION =====
