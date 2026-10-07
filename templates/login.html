@@ -3,23 +3,179 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login — GD Pulse</title>
+<title>Admin — GD Pulse</title>
+<link rel="icon" type="image/png" href="/static/favicon.png">
 <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 
-  <div class="login-page">
-    <div class="login-box">
-      <h2>🔐 Login</h2>
-      {% if error %}<div class="error">{{ error }}</div>{% endif %}
-      <form method="POST">
-        <input type="text" name="username" placeholder="Username" required>
-        <input type="password" name="password" placeholder="Password" required>
-        <button type="submit">Login</button>
-      </form>
-      <a href="/" class="back">← Back to Dashboard</a>
+  <header>
+    <a href="/" class="logo">
+      <img src="/static/logo-horizontal.png" alt="GD Pulse">
+    </a>
+    <nav class="nav-links">
+      <a href="/tools">Tools</a>
+      <a href="/admin" class="active">Admin</a>
+    </nav>
+    <div class="header-right">
+      <button class="icon-btn" title="Notifications" onclick="alert('Notifications coming soon')">
+        🔔<span class="badge">3</span>
+      </button>
+      <div class="avatar" title="{{ user }}">{{ user[0]|upper }}</div>
+      <a href="/logout" class="btn btn-outline">Logout</a>
     </div>
-  </div>
+  </header>
+
+  <main>
+    <div class="container">
+
+      <div class="welcome">
+        <h1>Admin Panel, <span class="highlight">{{ user }}</span> 👑</h1>
+        <p>Yahan se saare projects, resources aur analytics manage karo.</p>
+      </div>
+
+      <div class="stats">
+        <div class="stat-card"><div class="value">12+</div><div class="label">Tools Live</div></div>
+        <div class="stat-card"><div class="value">3</div><div class="label">Software Projects</div></div>
+        <div class="stat-card"><div class="value">25+</div><div class="label">Prompts</div></div>
+        <div class="stat-card"><div class="value">50+</div><div class="label">Assets</div></div>
+      </div>
+
+      <!-- SECTION: TOOLS -->
+      <div class="section-header" style="margin-top: 50px;">
+        <span class="section-tag">Section 01</span>
+        <h2 class="section-title">🛠️ <span class="highlight">Tools</span></h2>
+        <p class="section-subtitle">Saare utility tools — staff aur admin dono ke liye.</p>
+      </div>
+      <div class="grid grid-4">
+        <a href="/tools/gst" class="tool-card">
+          <div class="icon">🧮</div><div class="title">GST Calculator</div>
+        </a>
+        <a href="/tools/emi" class="tool-card">
+          <div class="icon">💰</div><div class="title">EMI Calculator</div>
+        </a>
+        <a href="/tools/image-resize" class="tool-card">
+          <div class="icon">🖼️</div><div class="title">Image Resize</div>
+        </a>
+        <a href="/tools/photo-to-pdf" class="tool-card">
+          <div class="icon">📄</div><div class="title">Photo to PDF</div>
+        </a>
+      </div>
+      <a href="/tools" class="btn btn-outline" style="margin-top: 20px;">View All Tools →</a>
+
+      <!-- SECTION: SOFTWARE PROJECTS -->
+      <div class="section-header" style="margin-top: 60px;">
+        <span class="section-tag">Section 02</span>
+        <h2 class="section-title">💼 <span class="highlight">Software Projects</span></h2>
+        <p class="section-subtitle">Future me banane wale business software — abhi concept stage me.</p>
+      </div>
+      <div class="grid grid-3">
+        <div class="card" onclick="alert('Retail Software — coming soon')">
+          <div class="icon">🏪</div>
+          <div class="title">Retail Store</div>
+          <div class="desc">Item, Purchase, Sale, Stock — complete retail management.</div>
+          <span class="soon">SOON</span>
+        </div>
+        <div class="card" onclick="alert('Restaurant Software — coming soon')">
+          <div class="icon">🍽️</div>
+          <div class="title">Restaurant / Hotel</div>
+          <div class="desc">Indent, Store, GRN — multi-outlet inventory system.</div>
+          <span class="soon">SOON</span>
+        </div>
+        <div class="card" onclick="alert('Sand Business Software — coming soon')">
+          <div class="icon">🚛</div>
+          <div class="title">Sand Business</div>
+          <div class="desc">Stock, Truck, Challan, Client Billing — complete tracking.</div>
+          <span class="soon">SOON</span>
+        </div>
+      </div>
+
+      <!-- SECTION: MASTER PROMPTS -->
+      <div class="section-header" style="margin-top: 60px;">
+        <span class="section-tag">Section 03</span>
+        <h2 class="section-title">📝 <span class="highlight">Master Prompts</span></h2>
+        <p class="section-subtitle">Ready-made AI prompts — one click me copy karo.</p>
+      </div>
+      <div class="grid grid-3">
+        <div class="card" onclick="alert('Prompt copy ho gaya! (demo)')">
+          <div class="icon">🎨</div>
+          <div class="title">Logo Design Prompt</div>
+          <div class="desc">Professional brand identity prompt for AI image generation.</div>
+          <span class="tag">Copy →</span>
+        </div>
+        <div class="card" onclick="alert('Prompt copy ho gaya! (demo)')">
+          <div class="icon">🎬</div>
+          <div class="title">Cinematic Video Prompt</div>
+          <div class="desc">AI video generation prompt for cinematic automotive content.</div>
+          <span class="tag">Copy →</span>
+        </div>
+        <div class="card" onclick="alert('Prompt copy ho gaya! (demo)')">
+          <div class="icon">📱</div>
+          <div class="title">Social Media Caption</div>
+          <div class="desc">Instagram caption prompt for any brand or product.</div>
+          <span class="tag">Copy →</span>
+        </div>
+      </div>
+
+      <!-- SECTION: ASSETS -->
+      <div class="section-header" style="margin-top: 60px;">
+        <span class="section-tag">Section 04</span>
+        <h2 class="section-title">🎨 <span class="highlight">Assets</span></h2>
+        <p class="section-subtitle">PNG, sound effects, templates aur resources — sab yahan.</p>
+      </div>
+      <div class="grid grid-4">
+        <div class="tool-card" onclick="alert('PNG assets — coming soon')">
+          <div class="icon">🖼️</div>
+          <div class="title">PNG Library</div>
+          <div class="desc">Transparent images</div>
+        </div>
+        <div class="tool-card" onclick="alert('Sound effects — coming soon')">
+          <div class="icon">🔊</div>
+          <div class="title">Sound Effects</div>
+          <div class="desc">Audio library</div>
+        </div>
+        <div class="tool-card" onclick="alert('Templates — coming soon')">
+          <div class="icon">📋</div>
+          <div class="title">Templates</div>
+          <div class="desc">Design templates</div>
+        </div>
+        <div class="tool-card" onclick="alert('Fonts — coming soon')">
+          <div class="icon">🔤</div>
+          <div class="title">Fonts</div>
+          <div class="desc">Typography library</div>
+        </div>
+      </div>
+
+      <!-- SECTION: YOUTUBE ANALYTICS -->
+      <div class="section-header" style="margin-top: 60px;">
+        <span class="section-tag">Section 05</span>
+        <h2 class="section-title">📊 <span class="highlight">YouTube Analytics</span></h2>
+        <p class="section-subtitle">Channel ki live stats — hourly update.</p>
+      </div>
+      <div class="stats">
+        <div class="stat-card"><div class="value">--</div><div class="label">Subscribers</div></div>
+        <div class="stat-card"><div class="value">--</div><div class="label">Total Views</div></div>
+        <div class="stat-card"><div class="value">--</div><div class="label">Watch Hours</div></div>
+        <div class="stat-card"><div class="value">--</div><div class="label">Engagement</div></div>
+      </div>
+      <div class="info" style="margin-top: 20px;">
+        💡 <b>Coming soon:</b> YouTube Data API connect karke live stats — last 3-5 videos ke views, likes, comments, subscribers yahan dikhenge.
+      </div>
+
+      <!-- SECTION: PORTFOLIO (Public Preview) -->
+      <div class="section-header" style="margin-top: 60px;">
+        <span class="section-tag">Section 06</span>
+        <h2 class="section-title">🌐 <span class="highlight">Portfolio</span></h2>
+        <p class="section-subtitle">Public portfolio page — jo visitors dekhte hain.</p>
+      </div>
+      <a href="/" class="btn btn-primary">View Public Portfolio →</a>
+
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2025 GD Pulse — Admin Panel</p>
+  </footer>
 
 </body>
 </html>
