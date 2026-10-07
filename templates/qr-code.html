@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR Code Generator — GD Pulse</title>
+<link rel="icon" type="image/png" href="/static/favicon.png">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+  <header>
+    <a href="/" class="logo"><img src="/static/logo-horizontal.png" alt="GD Pulse"></a>
+    <nav class="nav-links"><a href="/tools">Tools</a></nav>
+    <div class="header-right">
+      <a href="/tools" class="btn btn-outline">← Back</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="container" style="max-width: 600px;">
+      <div class="box">
+        <h2>📱 QR Code Generator</h2>
+
+        <label>Text ya URL daalo</label>
+        <input type="text" id="qrText" placeholder="https://example.com ya koi bhi text" style="font-size: 15px;">
+
+        <label>Size (px)</label>
+        <select id="qrSize">
+          <option value="200">200 x 200</option>
+          <option value="300" selected>300 x 300</option>
+          <option value="400">400 x 400</option>
+          <option value="500">500 x 500</option>
+        </select>
+
+        <button class="calc-btn" onclick="generateQR()">Generate QR Code</button>
+
+        <div id="qrResult" class="result" style="display:none; text-align: center;">
+          <div id="qrCanvasHolder" style="display: inline-block; background: white; padding: 16px; border-radius: 12px;"></div>
+          <div style="margin-top: 15px;">
+            <button class="btn btn-primary" onclick="downloadQR()" style="margin-right: 8px;">⬇️ Download PNG</button>
+          </div>
+        </div>
+
+        <div class="info">
+          💡 Tip: QR code me website URL, text, phone number, ya WiFi details daal sakte ho.
+        </div>
+
+        <a href="/tools" class="back">← Back to Tools</a>
+      </div>
+    </div>
+  </main>
+
+  <footer><p>© 2025 GD Pulse</p></footer>
+
+  <!-- QR Code library -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+
+  <script>
+    let currentCanvas = null;
+
+    function generateQR() {
+      const text = document.getElementById("qrText").value.trim();
+      const size = parseInt(document.getElementById("qrSize").value);
+
+      if (!text) {
+        alert("Kuch text ya URL daalo");
+        return;
+      }
+
+      const holder = document.getElementById("qrCanvasHolder");
+      holder.innerHTML = "";
+
+      const canvas = document.createElement("canvas");
+      holder.appendChild(canvas);
+
+      QRCode.toCanvas(canvas, text, {
+        width: size,
+        margin: 2,
+        color: {
+          dark: "#1a1a1a",
+          light: "#ffffff"
+        }
+      }, function(error) {
+        if (error) {
+          alert("QR generate nahi hua: " + error);
+          return;
+        }
+        currentCanvas = canvas;
+        document.getElementById("qrResult").style.display = "block";
+      });
+    }
+
+    function downloadQR() {
+      if (!currentCanvas) {
+        alert("Pehle QR generate karo");
+        return;
+      }
+      const link = document.createElement("a");
+      link.download = "gd-pulse-qr.png";
+      link.href = currentCanvas.toDataURL("image/png");
+      link.click();
+    }
+  </script>
+
+</body>
+</html>
