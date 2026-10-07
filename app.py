@@ -26,10 +26,9 @@ def require_staff():
 def require_admin():
     return current_role() == "admin"
 
-# ---------- Auto-Inject animations.js into all HTML pages ----------
+# ---------- Auto-Inject animations.js ----------
 @app.after_request
 def inject_animations(response):
-    """Automatically inject animations.js before </body> in all HTML responses."""
     if (
         response.content_type
         and "text/html" in response.content_type
@@ -37,7 +36,6 @@ def inject_animations(response):
     ):
         try:
             html = response.get_data(as_text=True)
-            # Only inject if not already present
             if "animations.js" not in html and "</body>" in html:
                 script_tag = '  <script src="/static/animations.js"></script>\n</body>'
                 html = html.replace("</body>", script_tag, 1)
@@ -90,7 +88,7 @@ def admin():
         return redirect(url_for("login"))
     return render_template("admin.html", user=current_user())
 
-# ---------- Tools ----------
+# ---------- OFFICE TOOLS ----------
 
 @app.route("/tools/gst")
 def gst_tool():
@@ -121,6 +119,11 @@ def unit_converter_tool():
 def text_tools():
     if not require_staff(): return redirect(url_for("login"))
     return render_template("text-tools.html")
+
+@app.route("/tools/qr-code")
+def qr_code_tool():
+    if not require_staff(): return redirect(url_for("login"))
+    return render_template("qr-code.html")
 
 @app.route("/tools/image-resize")
 def image_resize_tool():
@@ -246,6 +249,34 @@ def photo_to_pdf_process():
                          download_name="gd-pulse-images.pdf")
     except Exception as e:
         return f"Error: {str(e)}", 500
+
+@app.route("/tools/pdf-merge")
+def pdf_merge_tool():
+    if not require_staff(): return redirect(url_for("login"))
+    return render_template("pdf-merge.html")
+
+@app.route("/tools/pdf-merge/process", methods=["POST"])
+def pdf_merge_process():
+    try:
+        from pypdf import PdfWriter, PdfReader
+        files = request.files.getlist("pdfs")
+        files = [f for f in files if f and f.filename != ""]
+        if len(files) < 2:
+            return "Kam se kam 2 PDF files select karo", 400
+        writer = PdfWriter()
+        for f in files:
+            reader = PdfReader(f.stream)
+            for page in reader.pages:
+                writer.add_page(page)
+        output = io.BytesIO()
+        writer.write(output)
+        output.seek(0)
+        return send_file(output, mimetype="application/pdf", as_attachment=True,
+                         download_name="gd-pulse-merged.pdf")
+    except Exception as e:
+        return f"Error: {str(e)}", 500
+
+# ---------- MEDIA TOOLS ----------
 
 @app.route("/tools/video-to-mp3")
 def video_to_mp3_tool():
