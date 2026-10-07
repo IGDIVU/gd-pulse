@@ -6,6 +6,10 @@
 <title>Unit Converter — GD Pulse</title>
 <link rel="icon" type="image/png" href="/static/favicon.png">
 <link rel="stylesheet" href="/static/style.css">
+<style>
+  .box h2 { display: flex; align-items: center; gap: 10px; }
+  .box h2 [data-icon] { width: 26px; height: 26px; color: var(--primary); }
+</style>
 </head>
 <body>
 
@@ -13,14 +17,15 @@
     <a href="/" class="logo"><img src="/static/logo-horizontal.png" alt="GD Pulse"></a>
     <nav class="nav-links"><a href="/tools">Tools</a></nav>
     <div class="header-right">
-      <a href="/tools" class="btn btn-outline">← Back</a>
+      <button class="theme-toggle" onclick="toggleTheme(event)" title="Toggle theme"></button>
+      <a href="#" onclick="confirmLogout(event)" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
     </div>
   </header>
 
   <main>
     <div class="container" style="max-width: 650px;">
-      <div class="box">
-        <h2>📏 Units Convert Karo</h2>
+      <div class="box reveal">
+        <h2><span data-icon="unit"></span> Units Convert Karo</h2>
 
         <label>Category</label>
         <select id="category" onchange="updateUnits()">
@@ -35,14 +40,8 @@
         <input type="number" id="value" placeholder="Jaise: 100" step="any">
 
         <div class="row">
-          <div>
-            <label>From</label>
-            <select id="fromUnit"></select>
-          </div>
-          <div>
-            <label>To</label>
-            <select id="toUnit"></select>
-          </div>
+          <div><label>From</label><select id="fromUnit"></select></div>
+          <div><label>To</label><select id="toUnit"></select></div>
         </div>
 
         <button class="calc-btn" onclick="convertUnit()" style="margin-top: 15px;">Convert</button>
@@ -56,6 +55,7 @@
 
   <footer><p>© 2025 GD Pulse</p></footer>
 
+  <script src="/static/icons.js"></script>
   <script>
     const units = {
       length: { Meter: 1, Kilometer: 1000, Centimeter: 0.01, Millimeter: 0.001, Mile: 1609.344, Yard: 0.9144, Foot: 0.3048, Inch: 0.0254 },
@@ -64,35 +64,29 @@
       area: { "Square Meter": 1, "Square Kilometer": 1000000, "Square Foot": 0.092903, "Square Yard": 0.836127, Acre: 4046.86, Hectare: 10000, "Square Mile": 2589988 },
       volume: { Liter: 1, Milliliter: 0.001, "Cubic Meter": 1000, Gallon: 3.78541, Quart: 0.946353, Pint: 0.473176, Cup: 0.236588 }
     };
-
     function updateUnits() {
       const cat = document.getElementById("category").value;
       const fromSel = document.getElementById("fromUnit");
       const toSel = document.getElementById("toUnit");
-      fromSel.innerHTML = "";
-      toSel.innerHTML = "";
+      fromSel.innerHTML = ""; toSel.innerHTML = "";
       Object.keys(units[cat]).forEach(u => {
         fromSel.innerHTML += `<option value="${u}">${u}</option>`;
         toSel.innerHTML += `<option value="${u}">${u}</option>`;
       });
       toSel.selectedIndex = 1;
     }
-
     function convertUnit() {
       const cat = document.getElementById("category").value;
       const val = parseFloat(document.getElementById("value").value);
       const from = document.getElementById("fromUnit").value;
       const to = document.getElementById("toUnit").value;
-
       if (isNaN(val)) { alert("Sahi value daalo"); return; }
-
       let result;
       if (cat === "temperature") {
         let celsius;
         if (from === "Celsius") celsius = val;
         else if (from === "Fahrenheit") celsius = (val - 32) * 5/9;
         else celsius = val - 273.15;
-
         if (to === "Celsius") result = celsius;
         else if (to === "Fahrenheit") result = celsius * 9/5 + 32;
         else result = celsius + 273.15;
@@ -100,13 +94,12 @@
         const base = val * units[cat][from];
         result = base / units[cat][to];
       }
-
       const res = document.getElementById("result");
       res.innerHTML = `${val} ${from} = <br>${result.toFixed(4).replace(/\.?0+$/,"")} ${to}`;
       res.style.display = "block";
     }
-
     updateUnits();
+    document.addEventListener("DOMContentLoaded", () => { if (window.renderIcons) window.renderIcons(); });
   </script>
 
 </body>
