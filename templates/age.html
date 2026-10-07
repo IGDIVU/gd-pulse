@@ -4,98 +4,48 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Age Calculator — GD Pulse</title>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
-  body { background: #0a0f1a; color: #e6edf5; min-height: 100vh; }
-  body::before {
-    content: ""; position: fixed; inset: 0;
-    background: radial-gradient(circle at 20% 30%, rgba(0,184,148,0.12), transparent 40%),
-                radial-gradient(circle at 80% 70%, rgba(108,92,231,0.12), transparent 40%);
-    z-index: -1;
-  }
-  header {
-    background: rgba(15,23,36,0.75); backdrop-filter: blur(14px);
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    color: white; padding: 16px 30px;
-    display: flex; justify-content: space-between; align-items: center;
-    position: sticky; top: 0; z-index: 100;
-  }
-  header h1 { font-size: 20px; }
-  .btn {
-    background: linear-gradient(135deg, #00b894, #019875); color: white;
-    padding: 10px 22px; border: none; border-radius: 30px;
-    cursor: pointer; font-size: 14px; font-weight: bold;
-    text-decoration: none; transition: 0.25s;
-    box-shadow: 0 4px 14px rgba(0,184,148,0.35);
-  }
-  .btn:hover { transform: translateY(-2px); }
-  main { padding: 30px; max-width: 600px; margin: 0 auto; }
-  .box {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    padding: 30px; border-radius: 18px;
-    backdrop-filter: blur(12px);
-    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-  }
-  h2 { margin-bottom: 22px; font-size: 22px; }
-  label { display: block; font-size: 14px; color: #a0aec0; margin-bottom: 8px; }
-  input {
-    width: 100%; padding: 12px; margin-bottom: 18px;
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 10px; background: rgba(255,255,255,0.05);
-    color: #e6edf5; font-size: 15px;
-  }
-  input:focus { outline: none; border-color: #00b894; }
-  .calc-btn {
-    width: 100%; padding: 15px;
-    background: linear-gradient(135deg, #00b894, #019875);
-    color: white; border: none; border-radius: 10px;
-    font-size: 16px; cursor: pointer; font-weight: bold;
-    transition: 0.25s;
-    box-shadow: 0 4px 14px rgba(0,184,148,0.35);
-  }
-  .calc-btn:hover { transform: translateY(-2px); }
-  .result {
-    margin-top: 25px; padding: 20px;
-    background: rgba(0,184,148,0.08);
-    border-left: 4px solid #00b894; border-radius: 8px;
-  }
-  .result-row {
-    display: flex; justify-content: space-between;
-    padding: 10px 0; border-bottom: 1px dashed rgba(0,184,148,0.2);
-    font-size: 15px;
-  }
-  .result-row:last-child { border-bottom: none; }
-  .result-row span:last-child { font-weight: bold; color: #00b894; }
-  .back { display: inline-block; margin-top: 20px; color: #a0aec0; text-decoration: none; font-size: 14px; }
-  .back:hover { color: #00b894; }
-</style>
+<link rel="icon" type="image/png" href="/static/favicon.png">
+<link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+
   <header>
-    <h1>📅 Age Calculator</h1>
-    <a href="/" class="btn">← Dashboard</a>
+    <a href="/" class="logo"><img src="/static/logo-horizontal.png" alt="GD Pulse"></a>
+    <nav class="nav-links"><a href="/tools">Tools</a></nav>
+    <div class="header-right">
+      <a href="/tools" class="btn btn-outline">← Back</a>
+    </div>
   </header>
+
   <main>
-    <div class="box">
-      <h2>Apni Exact Age Jaano</h2>
-      <label>Date of Birth</label>
-      <input type="date" id="dob">
-      <label>Calculate Age Upto (default: today)</label>
-      <input type="date" id="upto">
-      <button class="calc-btn" onclick="calcAge()">Calculate Age</button>
-      <div id="result" class="result" style="display:none;">
-        <div class="result-row"><span>Years</span><span id="r-years">0</span></div>
-        <div class="result-row"><span>Months</span><span id="r-months">0</span></div>
-        <div class="result-row"><span>Days</span><span id="r-days">0</span></div>
-        <div class="result-row"><span>Total Days</span><span id="r-totaldays">0</span></div>
-        <div class="result-row"><span>Total Hours</span><span id="r-totalhours">0</span></div>
+    <div class="container" style="max-width: 600px;">
+      <div class="box">
+        <h2>📅 Apni Exact Age Jaano</h2>
+
+        <label>Date of Birth</label>
+        <input type="date" id="dob">
+
+        <label>Calculate Age Upto (default: today)</label>
+        <input type="date" id="upto">
+
+        <button class="calc-btn" onclick="calcAge()">Calculate Age</button>
+
+        <div id="result" class="result" style="display:none;">
+          <div class="result-row"><span>Years</span><span id="r-years">0</span></div>
+          <div class="result-row"><span>Months</span><span id="r-months">0</span></div>
+          <div class="result-row"><span>Days</span><span id="r-days">0</span></div>
+          <div class="result-row"><span>Total Days</span><span id="r-totaldays">0</span></div>
+          <div class="result-row"><span>Total Hours</span><span id="r-totalhours">0</span></div>
+        </div>
+
+        <a href="/tools" class="back">← Back to Tools</a>
       </div>
-      <a href="/" class="back">← Back to Dashboard</a>
     </div>
   </main>
+
+  <footer><p>© 2025 GD Pulse</p></footer>
+
   <script>
-    // Set today's date as default upto
     document.getElementById("upto").valueAsDate = new Date();
 
     function calcAge() {
@@ -105,7 +55,6 @@
 
       const dob = new Date(dobVal);
       const upto = uptoVal ? new Date(uptoVal) : new Date();
-
       if (dob > upto) { alert("DOB aaj se aage nahi ho sakti"); return; }
 
       let years = upto.getFullYear() - dob.getFullYear();
@@ -131,5 +80,6 @@
       document.getElementById("result").style.display = "block";
     }
   </script>
+
 </body>
 </html>
