@@ -1,6 +1,6 @@
 /* ============================================
    GD PULSE — HYBRID PREMIUM THEME
-   Elegant + Wow (Apple + Agency style)
+   With MAGIC theme transition
    ============================================ */
 
 /* ===== LIGHT THEME ===== */
@@ -26,7 +26,6 @@
   --glass: rgba(255, 255, 255, 0.7);
   --glass-border: rgba(139, 92, 246, 0.12);
   --glow: 0 0 40px rgba(139, 92, 246, 0.15);
-  --glow-strong: 0 0 60px rgba(139, 92, 246, 0.3);
 
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
   --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.06);
@@ -37,6 +36,8 @@
   --radius-sm: 10px;
   --radius-lg: 24px;
   --radius-xl: 32px;
+
+  --transition-speed: 0.8s;
 }
 
 /* ===== DARK THEME ===== */
@@ -54,12 +55,89 @@
   --glass: rgba(139, 92, 246, 0.08);
   --glass-border: rgba(139, 92, 246, 0.2);
   --glow: 0 0 40px rgba(139, 92, 246, 0.25);
-  --glow-strong: 0 0 80px rgba(139, 92, 246, 0.4);
 
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.5);
   --shadow-purple: 0 20px 60px rgba(139, 92, 246, 0.35);
+}
+
+/* ===== MAGIC THEME TRANSITION ===== */
+/* Saare elements smoothly transition karenge */
+body,
+header,
+.card,
+.tool-card,
+.stat-card,
+.box,
+input,
+textarea,
+select,
+.login-box,
+.welcome,
+footer,
+.tab,
+.icon-btn,
+.theme-toggle,
+.avatar,
+.btn,
+p, h1, h2, h3, h4, h5, h6,
+label,
+.section-title,
+.section-subtitle,
+.nav-links a,
+.search-box input,
+.hero-text h1,
+.hero-text h2,
+.hero-text p,
+.stat-card .label,
+.stat-card .value,
+.card .title,
+.card .desc,
+.tool-card .title,
+.tool-card .desc {
+  transition:
+    background-color var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1),
+    color var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1),
+    border-color var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Ripple expand animation for theme change */
+.theme-ripple {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  pointer-events: none;
+  z-index: 9997;
+  background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+  opacity: 0;
+  transform: scale(0);
+}
+.theme-ripple.active {
+  animation: themeRipple 0.9s ease-out;
+}
+@keyframes themeRipple {
+  0% {
+    opacity: 0.4;
+    transform: scale(0);
+    border-radius: 50%;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.5);
+    border-radius: 50%;
+  }
+}
+
+/* Theme toggle icon spin */
+.theme-toggle.spinning {
+  animation: themeSpin 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+@keyframes themeSpin {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.3); }
+  100% { transform: rotate(360deg) scale(1); }
 }
 
 /* ===== RESET ===== */
@@ -80,44 +158,6 @@ body {
   position: relative;
   -webkit-font-smoothing: antialiased;
   line-height: 1.6;
-  transition: background 0.5s ease, color 0.5s ease;
-  cursor: none;
-}
-
-/* Custom cursor */
-.cursor-dot,
-.cursor-ring {
-  position: fixed;
-  pointer-events: none;
-  z-index: 9999;
-  transition: transform 0.1s ease-out;
-}
-.cursor-dot {
-  width: 6px;
-  height: 6px;
-  background: var(--primary);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-}
-.cursor-ring {
-  width: 36px;
-  height: 36px;
-  border: 2px solid var(--primary);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  transition: transform 0.15s ease-out, width 0.3s, height 0.3s, border-color 0.3s;
-  opacity: 0.6;
-}
-.cursor-ring.hover {
-  width: 60px;
-  height: 60px;
-  border-color: var(--accent);
-  opacity: 0.9;
-}
-
-@media (max-width: 900px) {
-  body { cursor: auto; }
-  .cursor-dot, .cursor-ring { display: none; }
 }
 
 /* Background gradients */
@@ -130,7 +170,7 @@ body::before {
     radial-gradient(circle at 90% 90%, rgba(196, 181, 253, 0.1), transparent 40%);
   z-index: -2;
   pointer-events: none;
-  transition: opacity 0.5s ease;
+  transition: background 0.8s ease;
 }
 [data-theme="dark"] body::before {
   background:
@@ -165,7 +205,6 @@ header {
   top: 0;
   z-index: 100;
   box-shadow: 0 2px 20px rgba(139, 92, 246, 0.08);
-  transition: all 0.5s ease;
 }
 
 .logo, header h1 {
@@ -177,7 +216,6 @@ header {
   gap: 10px;
   letter-spacing: -0.5px;
   text-decoration: none;
-  transition: transform 0.3s ease;
 }
 .logo:hover { transform: scale(1.03); }
 
@@ -206,7 +244,6 @@ header {
   font-weight: 500;
   padding: 8px 16px;
   border-radius: 30px;
-  transition: all 0.35s ease;
   position: relative;
 }
 .nav-links a::after {
@@ -252,7 +289,6 @@ header {
   font-size: 14px;
   width: 240px;
   outline: none;
-  transition: all 0.35s ease;
   line-height: 1.4;
 }
 .search-box input::placeholder { color: var(--text-mute); }
@@ -406,7 +442,7 @@ header {
 }
 .btn-white:hover { background: var(--text); color: var(--bg); }
 
-/* Shine sweep on buttons */
+/* Shine sweep */
 .btn-primary::after,
 .calc-btn::after {
   content: "";
@@ -1096,7 +1132,6 @@ input[type="range"] {
   color: var(--text);
   font-size: 15px;
   outline: none;
-  transition: all 0.3s ease;
 }
 .login-box input:focus {
   border-color: var(--primary);
@@ -1113,11 +1148,11 @@ input[type="range"] {
   font-size: 16px;
   cursor: pointer;
   font-weight: 700;
-  transition: all 0.35s ease;
   margin-top: 8px;
   box-shadow: 0 8px 20px rgba(139, 92, 246, 0.25);
   position: relative;
   overflow: hidden;
+  transition: all 0.35s ease;
 }
 .login-box button:hover {
   transform: translateY(-3px);
@@ -1167,7 +1202,6 @@ footer {
   border-radius: 30px;
   font-size: 13px;
   cursor: pointer;
-  transition: all 0.35s ease;
   font-weight: 600;
   position: relative;
   overflow: hidden;
@@ -1283,14 +1317,14 @@ footer {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   position: relative;
 }
 .theme-toggle:hover {
   background: var(--primary);
   color: white;
   border-color: var(--primary);
-  transform: translateY(-3px) rotate(180deg);
+  transform: translateY(-3px);
   box-shadow: 0 8px 20px rgba(139, 92, 246, 0.35);
 }
 
@@ -1332,7 +1366,7 @@ footer {
   transform: scale(1);
 }
 
-/* Stagger children */
+/* Stagger */
 .stagger > * {
   opacity: 0;
   transform: translateY(30px);
