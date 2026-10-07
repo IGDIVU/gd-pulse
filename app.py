@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, send_file, make_response
+from flask import Flask, render_template, request, redirect, url_for, session, send_file
 import os
 import io
 from PIL import Image
@@ -13,7 +13,7 @@ USERS = {
     "staff": {"password": "gdstaff123", "role": "staff"},
 }
 
-# ---------- Helper ----------
+# ---------- Helpers ----------
 def current_user():
     return session.get("user")
 
@@ -88,7 +88,9 @@ def admin():
         return redirect(url_for("login"))
     return render_template("admin.html", user=current_user())
 
-# ---------- OFFICE TOOLS ----------
+# ============================================
+# OFFICE TOOLS
+# ============================================
 
 @app.route("/tools/gst")
 def gst_tool():
@@ -120,6 +122,13 @@ def text_tools():
     if not require_staff(): return redirect(url_for("login"))
     return render_template("text-tools.html")
 
+# ---------- QR Code ----------
+
+@app.route("/tools/qr-code")
+def qr_code_tool():
+    if not require_staff(): return redirect(url_for("login"))
+    return render_template("qr-code.html")
+
 @app.route("/tools/qr-code/process", methods=["POST"])
 def qr_code_process():
     try:
@@ -140,8 +149,6 @@ def qr_code_process():
         qr.add_data(text)
         qr.make(fit=True)
         img = qr.make_image(fill_color="#1a1a1a", back_color="white").convert("RGB")
-
-        # Resize to requested size
         img = img.resize((size, size), Image.LANCZOS)
 
         output = io.BytesIO()
@@ -152,6 +159,8 @@ def qr_code_process():
                          download_name="gd-pulse-qr.png")
     except Exception as e:
         return f"Error: {str(e)}", 500
+
+# ---------- Image Tools ----------
 
 @app.route("/tools/image-resize")
 def image_resize_tool():
@@ -250,6 +259,8 @@ def image_crop_process():
     except Exception as e:
         return f"Error: {str(e)}", 500
 
+# ---------- PDF Tools ----------
+
 @app.route("/tools/photo-to-pdf")
 def photo_to_pdf_tool():
     if not require_staff(): return redirect(url_for("login"))
@@ -304,7 +315,9 @@ def pdf_merge_process():
     except Exception as e:
         return f"Error: {str(e)}", 500
 
-# ---------- MEDIA TOOLS ----------
+# ============================================
+# MEDIA TOOLS
+# ============================================
 
 @app.route("/tools/video-to-mp3")
 def video_to_mp3_tool():
