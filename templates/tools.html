@@ -15,7 +15,7 @@
     border: 1px solid var(--border);
   }
   .category-header .cat-icon {
-    font-size: 28px; display: flex; align-items: center; justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     width: 50px; height: 50px;
     background: linear-gradient(135deg, var(--primary), var(--primary-light));
     border-radius: 12px; color: white;
@@ -25,18 +25,13 @@
     font-size: 20px; font-weight: 800; color: var(--text);
     margin: 0 0 4px; letter-spacing: -0.5px;
   }
-  .category-header .cat-info p {
-    font-size: 13px; color: var(--text-dim); margin: 0;
-  }
+  .category-header .cat-info p { font-size: 13px; color: var(--text-dim); margin: 0; }
   .category-header .cat-count {
     margin-left: auto; background: var(--primary); color: white;
     padding: 6px 16px; border-radius: 30px;
     font-size: 13px; font-weight: 700;
   }
-  .tool-icon {
-    width: 26px; height: 26px; color: var(--primary);
-    margin-bottom: 12px; transition: all 0.4s;
-  }
+  .tool-icon { width: 26px; height: 26px; color: var(--primary); margin-bottom: 12px; transition: all 0.4s; }
   .tool-card:hover .tool-icon { color: white; transform: translateY(-4px) scale(1.15); }
   .cat-icon svg { width: 26px; height: 26px; color: white; }
 </style>
@@ -51,7 +46,9 @@
     <nav class="nav-links">
       <a href="/tools" class="active">Tools</a>
       <a href="/prompts">Prompts</a>
-      <a href="/admin">Admin</a>
+      {% if role in ('owner', 'admin') %}
+        <a href="/admin">Admin</a>
+      {% endif %}
       {% if role == 'owner' %}
         <a href="/owner">Owner</a>
       {% endif %}
@@ -71,13 +68,13 @@
 
       <div class="welcome reveal">
         <h1>Welcome, <span class="highlight">{{ name }}</span></h1>
-        <p>Aapke saare tools — 3 categories me organized.</p>
+        <p>Aapke saare tools — organized categories me.</p>
       </div>
 
       <div class="stats">
         <div class="stat-card reveal"><div class="value">14+</div><div class="label">Total Tools</div></div>
         <div class="stat-card reveal"><div class="value">{{ role }}</div><div class="label">Your Role</div></div>
-        <div class="stat-card reveal"><div class="value">3</div><div class="label">Categories</div></div>
+        <div class="stat-card reveal"><div class="value">2</div><div class="label">Categories</div></div>
         <div class="stat-card reveal"><div class="value">24/7</div><div class="label">Available</div></div>
       </div>
 
@@ -124,27 +121,6 @@
         </div>
         <div class="tool-card reveal" onclick="alert('Instagram Downloader — coming soon! 🚧')" style="opacity: 0.6;">
           <span class="tool-icon" data-icon="download"></span><div class="title">Instagram Downloader</div><div class="desc">Reels, Posts</div>
-        </div>
-      </div>
-
-      <div class="category-header reveal">
-        <div class="cat-icon" data-icon="software"></div>
-        <div class="cat-info">
-          <h2>GD Business</h2>
-          <p>Business software — Retail, Restaurant, Sand (coming soon)</p>
-        </div>
-        <div class="cat-count">3 Projects</div>
-      </div>
-
-      <div class="grid grid-4">
-        <div class="tool-card reveal" onclick="alert('Retail Store — coming soon! 🚧')" style="opacity: 0.6;">
-          <span class="tool-icon" data-icon="retail"></span><div class="title">Retail Store</div><div class="desc">Gofrugal style POS</div>
-        </div>
-        <div class="tool-card reveal" onclick="alert('Restaurant POS — coming soon! 🚧')" style="opacity: 0.6;">
-          <span class="tool-icon" data-icon="restaurant"></span><div class="title">Restaurant POS</div><div class="desc">Ezee Optimum style</div>
-        </div>
-        <div class="tool-card reveal" onclick="alert('Sand Business — coming soon! 🚧')" style="opacity: 0.6;">
-          <span class="tool-icon" data-icon="sand"></span><div class="title">Sand Business</div><div class="desc">Stock, Truck, Billing</div>
         </div>
       </div>
 
