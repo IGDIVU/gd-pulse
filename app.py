@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, send_file
+from flask import Flask, render_template, request, redirect, url_for, session, send_file, jsonify
 import os
 import io
 from PIL import Image
@@ -16,26 +16,14 @@ USERS = {
 }
 
 # ---------- Helpers ----------
-def current_user():
-    return session.get("user")
+def current_user(): return session.get("user")
+def current_role(): return session.get("role")
+def current_name(): return session.get("name", session.get("user"))
 
-def current_role():
-    return session.get("role")
-
-def current_name():
-    return session.get("name", session.get("user"))
-
-def require_login():
-    return current_role() in ("owner", "admin", "staff", "user")
-
-def require_staff():
-    return current_role() in ("owner", "admin", "staff")
-
-def require_admin():
-    return current_role() in ("owner", "admin")
-
-def require_owner():
-    return current_role() == "owner"
+def require_login():  return current_role() in ("owner", "admin", "staff", "user")
+def require_staff():  return current_role() in ("owner", "admin", "staff")
+def require_admin():  return current_role() in ("owner", "admin")
+def require_owner():  return current_role() == "owner"
 
 # ---------- Auto-Inject ----------
 @app.after_request
@@ -52,11 +40,13 @@ def inject_animations(response):
             pass
     return response
 
-# ---------- Routes ----------
+# ============================================
+# PUBLIC
+# ============================================
 
 @app.route("/")
 def portfolio():
-    return render_template("portfolio.html", user=current_user(), role=current_role())
+    return render_template("portfolio.html", user=current_user(), role=current_role(), name=current_name())
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -69,12 +59,14 @@ def login():
             session["role"] = USERS[username]["role"]
             session["name"] = USERS[username]["name"]
             role = USERS[username]["role"]
-            if role in ("owner", "admin"):
+            if role == "owner":
+                return redirect(url_for("owner"))
+            elif role == "admin":
                 return redirect(url_for("admin"))
             elif role == "staff":
-                return redirect(url_for("prompts"))
-            else:
                 return redirect(url_for("tools"))
+            else:
+                return redirect(url_for("portfolio"))
         else:
             error = "Galat username ya password"
     return render_template("login.html", error=error)
@@ -84,22 +76,25 @@ def logout():
     session.clear()
     return redirect(url_for("portfolio"))
 
-# ---------- Staff Routes ----------
+# ============================================
+# STAFF/ADMIN/OWNER ROUTES
+# ============================================
 
 @app.route("/tools")
 def tools():
-    if not require_login():
+    if not require_staff():
         return redirect(url_for("login"))
     return render_template("tools.html", user=current_user(), role=current_role(), name=current_name())
 
 @app.route("/prompts")
 def prompts():
-    """Staff bhi prompts dekh sakta hai"""
     if not require_staff():
         return redirect(url_for("login"))
     return render_template("prompts.html", user=current_user(), role=current_role(), name=current_name())
 
-# ---------- Admin Routes ----------
+# ============================================
+# ADMIN PANEL
+# ============================================
 
 @app.route("/admin")
 def admin():
@@ -107,7 +102,19 @@ def admin():
         return redirect(url_for("login"))
     return render_template("admin.html", user=current_user(), role=current_role(), name=current_name())
 
-# ---------- Tools (common) ----------
+# ============================================
+# OWNER PANEL (GOD MODE)
+# ============================================
+
+@app.route("/owner")
+def owner():
+    if not require_owner():
+        return redirect(url_for("login"))
+    return render_template("owner.html", user=current_user(), role=current_role(), name=current_name())
+
+# ============================================
+# TOOLS
+# ============================================
 
 @app.route("/tools/gst")
 def gst_tool():
@@ -150,23 +157,15 @@ def qr_code_process():
         import qrcode
         text = request.form.get("text", "").strip()
         size = int(request.form.get("size", 300))
-        if not text:
-            return "Kuch text daalo", 400
-        if size < 100 or size > 1000:
-            size = 300
-        qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_H,
-                          box_size=10, border=2)
-        qr.add_data(text)
-        qr.make(fit=True)
+        if not text: return "Kuch text daalo", 400
+        if size < 100 or size > 1000: size = 300
+        qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_H, box_size=10, border=2)
+        qr.add_data(text); qr.make(fit=True)
         img = qr.make_image(fill_color="#1a1a1a", back_color="white").convert("RGB")
         img = img.resize((size, size), Image.LANCZOS)
-        output = io.BytesIO()
-        img.save(output, format="PNG")
-        output.seek(0)
-        return send_file(output, mimetype="image/png", as_attachment=True,
-                         download_name="gd-pulse-qr.png")
-    except Exception as e:
-        return f"Error: {str(e)}", 500
+        output = io.BytesIO(); img.save(output, format="PNG"); output.seek(0)
+        return send_file(output, mimetype="image/png", as_attachment=True, download_name="gd-pulse-qr.png")
+    except Exception as e: return f"Error: {str(e)}", 500
 
 @app.route("/tools/image-resize")
 def image_resize_tool():
@@ -177,27 +176,17 @@ def image_resize_tool():
 def image_resize_process():
     try:
         file = request.files.get("image")
-        if not file or file.filename == "":
-            return "Koi image select nahi ki", 400
-        width = int(request.form.get("width", 0))
-        height = int(request.form.get("height", 0))
-        if width <= 0 or height <= 0:
-            return "Sahi width/height daalo", 400
-        img = Image.open(file.stream)
-        resized = img.resize((width, height), Image.LANCZOS)
-        output = io.BytesIO()
-        fmt = img.format if img.format else "PNG"
-        if fmt not in ("JPEG", "PNG", "WEBP", "GIF", "BMP"): fmt = "PNG"
-        if fmt == "JPEG" and resized.mode in ("RGBA", "P"):
-            resized = resized.convert("RGB")
-        resized.save(output, format=fmt)
-        output.seek(0)
-        base = os.path.splitext(file.filename)[0]
-        ext = fmt.lower() if fmt != "JPEG" else "jpg"
-        return send_file(output, mimetype=f"image/{ext}", as_attachment=True,
-                         download_name=f"{base}_{width}x{height}.{ext}")
-    except Exception as e:
-        return f"Error: {str(e)}", 500
+        if not file or file.filename == "": return "Koi image select nahi ki", 400
+        width = int(request.form.get("width", 0)); height = int(request.form.get("height", 0))
+        if width <= 0 or height <= 0: return "Sahi width/height daalo", 400
+        img = Image.open(file.stream); resized = img.resize((width, height), Image.LANCZOS)
+        output = io.BytesIO(); fmt = img.format if img.format else "PNG"
+        if fmt not in ("JPEG","PNG","WEBP","GIF","BMP"): fmt = "PNG"
+        if fmt == "JPEG" and resized.mode in ("RGBA","P"): resized = resized.convert("RGB")
+        resized.save(output, format=fmt); output.seek(0)
+        base = os.path.splitext(file.filename)[0]; ext = fmt.lower() if fmt != "JPEG" else "jpg"
+        return send_file(output, mimetype=f"image/{ext}", as_attachment=True, download_name=f"{base}_{width}x{height}.{ext}")
+    except Exception as e: return f"Error: {str(e)}", 500
 
 @app.route("/tools/image-compress")
 def image_compress_tool():
@@ -208,22 +197,15 @@ def image_compress_tool():
 def image_compress_process():
     try:
         file = request.files.get("image")
-        if not file or file.filename == "":
-            return "Koi image select nahi ki", 400
+        if not file or file.filename == "": return "Koi image select nahi ki", 400
         quality = int(request.form.get("quality", 70))
-        if quality < 1 or quality > 100:
-            return "Quality 1 se 100 ke beech honi chahiye", 400
+        if quality < 1 or quality > 100: return "Quality 1 se 100 ke beech honi chahiye", 400
         img = Image.open(file.stream)
-        if img.mode in ("RGBA", "P", "LA"):
-            img = img.convert("RGB")
-        output = io.BytesIO()
-        img.save(output, format="JPEG", quality=quality, optimize=True)
-        output.seek(0)
+        if img.mode in ("RGBA","P","LA"): img = img.convert("RGB")
+        output = io.BytesIO(); img.save(output, format="JPEG", quality=quality, optimize=True); output.seek(0)
         base = os.path.splitext(file.filename)[0]
-        return send_file(output, mimetype="image/jpeg", as_attachment=True,
-                         download_name=f"{base}_compressed.jpg")
-    except Exception as e:
-        return f"Error: {str(e)}", 500
+        return send_file(output, mimetype="image/jpeg", as_attachment=True, download_name=f"{base}_compressed.jpg")
+    except Exception as e: return f"Error: {str(e)}", 500
 
 @app.route("/tools/image-crop")
 def image_crop_tool():
@@ -234,34 +216,21 @@ def image_crop_tool():
 def image_crop_process():
     try:
         file = request.files.get("image")
-        if not file or file.filename == "":
-            return "Koi image select nahi ki", 400
-        x = int(request.form.get("x", 0))
-        y = int(request.form.get("y", 0))
-        width = int(request.form.get("width", 0))
-        height = int(request.form.get("height", 0))
-        if width <= 0 or height <= 0:
-            return "Sahi width/height daalo", 400
-        img = Image.open(file.stream)
-        img_w, img_h = img.size
-        x = max(0, min(x, img_w - 1))
-        y = max(0, min(y, img_h - 1))
-        width = min(width, img_w - x)
-        height = min(height, img_h - y)
+        if not file or file.filename == "": return "Koi image select nahi ki", 400
+        x = int(request.form.get("x", 0)); y = int(request.form.get("y", 0))
+        width = int(request.form.get("width", 0)); height = int(request.form.get("height", 0))
+        if width <= 0 or height <= 0: return "Sahi width/height daalo", 400
+        img = Image.open(file.stream); img_w, img_h = img.size
+        x = max(0, min(x, img_w - 1)); y = max(0, min(y, img_h - 1))
+        width = min(width, img_w - x); height = min(height, img_h - y)
         cropped = img.crop((x, y, x + width, y + height))
-        output = io.BytesIO()
-        fmt = img.format if img.format else "PNG"
-        if fmt not in ("JPEG", "PNG", "WEBP", "GIF", "BMP"): fmt = "PNG"
-        if fmt == "JPEG" and cropped.mode in ("RGBA", "P"):
-            cropped = cropped.convert("RGB")
-        cropped.save(output, format=fmt)
-        output.seek(0)
-        base = os.path.splitext(file.filename)[0]
-        ext = fmt.lower() if fmt != "JPEG" else "jpg"
-        return send_file(output, mimetype=f"image/{ext}", as_attachment=True,
-                         download_name=f"{base}_cropped.{ext}")
-    except Exception as e:
-        return f"Error: {str(e)}", 500
+        output = io.BytesIO(); fmt = img.format if img.format else "PNG"
+        if fmt not in ("JPEG","PNG","WEBP","GIF","BMP"): fmt = "PNG"
+        if fmt == "JPEG" and cropped.mode in ("RGBA","P"): cropped = cropped.convert("RGB")
+        cropped.save(output, format=fmt); output.seek(0)
+        base = os.path.splitext(file.filename)[0]; ext = fmt.lower() if fmt != "JPEG" else "jpg"
+        return send_file(output, mimetype=f"image/{ext}", as_attachment=True, download_name=f"{base}_cropped.{ext}")
+    except Exception as e: return f"Error: {str(e)}", 500
 
 @app.route("/tools/photo-to-pdf")
 def photo_to_pdf_tool():
@@ -273,23 +242,17 @@ def photo_to_pdf_process():
     try:
         files = request.files.getlist("images")
         files = [f for f in files if f and f.filename != ""]
-        if not files:
-            return "Koi image select nahi ki", 400
+        if not files: return "Koi image select nahi ki", 400
         images = []
         for f in files:
             img = Image.open(f.stream)
-            if img.mode != "RGB":
-                img = img.convert("RGB")
+            if img.mode != "RGB": img = img.convert("RGB")
             images.append(img)
-        first = images[0]
-        rest = images[1:]
+        first = images[0]; rest = images[1:]
         output = io.BytesIO()
-        first.save(output, format="PDF", save_all=True, append_images=rest)
-        output.seek(0)
-        return send_file(output, mimetype="application/pdf", as_attachment=True,
-                         download_name="gd-pulse-images.pdf")
-    except Exception as e:
-        return f"Error: {str(e)}", 500
+        first.save(output, format="PDF", save_all=True, append_images=rest); output.seek(0)
+        return send_file(output, mimetype="application/pdf", as_attachment=True, download_name="gd-pulse-images.pdf")
+    except Exception as e: return f"Error: {str(e)}", 500
 
 @app.route("/tools/pdf-merge")
 def pdf_merge_tool():
@@ -302,20 +265,14 @@ def pdf_merge_process():
         from pypdf import PdfWriter, PdfReader
         files = request.files.getlist("pdfs")
         files = [f for f in files if f and f.filename != ""]
-        if len(files) < 2:
-            return "Kam se kam 2 PDF files select karo", 400
+        if len(files) < 2: return "Kam se kam 2 PDF files select karo", 400
         writer = PdfWriter()
         for f in files:
             reader = PdfReader(f.stream)
-            for page in reader.pages:
-                writer.add_page(page)
-        output = io.BytesIO()
-        writer.write(output)
-        output.seek(0)
-        return send_file(output, mimetype="application/pdf", as_attachment=True,
-                         download_name="gd-pulse-merged.pdf")
-    except Exception as e:
-        return f"Error: {str(e)}", 500
+            for page in reader.pages: writer.add_page(page)
+        output = io.BytesIO(); writer.write(output); output.seek(0)
+        return send_file(output, mimetype="application/pdf", as_attachment=True, download_name="gd-pulse-merged.pdf")
+    except Exception as e: return f"Error: {str(e)}", 500
 
 @app.route("/tools/video-to-mp3")
 def video_to_mp3_tool():
@@ -326,20 +283,16 @@ def video_to_mp3_tool():
 def video_to_mp3_process():
     try:
         file = request.files.get("video")
-        if not file or file.filename == "":
-            return "Koi video select nahi ki", 400
-        input_path = "/tmp/input_video"
-        output_path = "/tmp/output_audio.mp3"
+        if not file or file.filename == "": return "Koi video select nahi ki", 400
+        input_path = "/tmp/input_video"; output_path = "/tmp/output_audio.mp3"
         file.save(input_path)
         from moviepy.editor import VideoFileClip
         clip = VideoFileClip(input_path)
         clip.audio.write_audiofile(output_path, codec="mp3", verbose=False, logger=None)
         clip.close()
         base = os.path.splitext(file.filename)[0]
-        return send_file(output_path, mimetype="audio/mpeg", as_attachment=True,
-                         download_name=f"{base}.mp3")
-    except Exception as e:
-        return f"Error: {str(e)}", 500
+        return send_file(output_path, mimetype="audio/mpeg", as_attachment=True, download_name=f"{base}.mp3")
+    except Exception as e: return f"Error: {str(e)}", 500
 
 @app.errorhandler(413)
 def too_large(e):
