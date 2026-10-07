@@ -8,135 +8,105 @@
 <link rel="stylesheet" href="/static/style.css">
 <style>
   .tab-bar {
-    display: flex;
-    gap: 8px;
-    margin: 30px 0;
-    flex-wrap: wrap;
-    border-bottom: 1px solid var(--border);
+    display: flex; gap: 8px; margin: 30px 0;
+    flex-wrap: wrap; border-bottom: 1px solid var(--border);
   }
   .tab-btn {
-    background: transparent;
-    border: none;
-    color: var(--text-dim);
-    padding: 12px 20px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s;
-    border-bottom: 3px solid transparent;
-    margin-bottom: -1px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
+    background: transparent; border: none; color: var(--text-dim);
+    padding: 12px 20px; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: all 0.3s;
+    border-bottom: 3px solid transparent; margin-bottom: -1px;
+    display: inline-flex; align-items: center; gap: 8px;
   }
   .tab-btn:hover { color: var(--primary); }
   .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
   .tab-btn svg { width: 18px; height: 18px; }
   .tab-content { display: none; }
   .tab-content.active { display: block; animation: fadeInUp 0.5s ease; }
-
   .section-label {
-    font-size: 13px;
-    font-weight: 800;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--primary);
-    margin: 30px 0 15px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    font-size: 13px; font-weight: 800; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--primary);
+    margin: 30px 0 15px; display: flex; align-items: center; gap: 10px;
   }
   .section-label::after {
-    content: "";
-    flex: 1;
-    height: 1px;
+    content: ""; flex: 1; height: 1px;
     background: linear-gradient(90deg, var(--primary), transparent);
   }
-
-  .tool-icon {
-    width: 26px;
-    height: 26px;
-    color: var(--primary);
-    margin-bottom: 12px;
-    transition: all 0.4s;
-  }
+  .tool-icon { width: 26px; height: 26px; color: var(--primary); margin-bottom: 12px; transition: all 0.4s; }
   .tool-card:hover .tool-icon { color: white; transform: translateY(-4px) scale(1.15); }
   .cat-icon svg { width: 26px; height: 26px; color: white; }
+
+  /* Management Table */
+  .mgmt-table {
+    width: 100%; background: var(--card);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    overflow: hidden; margin-bottom: 20px;
+  }
+  .mgmt-table table { width: 100%; border-collapse: collapse; }
+  .mgmt-table th, .mgmt-table td {
+    padding: 14px 18px; text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .mgmt-table th {
+    background: rgba(139, 92, 246, 0.08);
+    font-weight: 700; color: var(--text);
+    text-transform: uppercase; font-size: 11px; letter-spacing: 1px;
+  }
+  .mgmt-table tr:last-child td { border-bottom: none; }
+  .mgmt-table tr:hover td { background: rgba(139, 92, 246, 0.04); }
+  .badge-role {
+    display: inline-block; padding: 3px 12px; border-radius: 20px;
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .badge-role.owner  { background: rgba(236, 72, 153, 0.15); color: #ec4899; }
+  .badge-role.admin  { background: rgba(139, 92, 246, 0.15); color: var(--primary); }
+  .badge-role.staff  { background: rgba(34, 211, 238, 0.15); color: #22d3ee; }
+  .badge-role.user   { background: rgba(107, 114, 128, 0.15); color: #6b7280; }
+
+  .action-btn-sm {
+    padding: 6px 14px; border-radius: 20px;
+    font-size: 11px; font-weight: 700;
+    border: 1px solid var(--border); background: transparent;
+    color: var(--text-dim); cursor: pointer; transition: all 0.25s;
+    margin-right: 5px;
+  }
+  .action-btn-sm:hover { background: var(--primary); color: white; border-color: var(--primary); }
+  .action-btn-sm.danger:hover { background: var(--danger); border-color: var(--danger); }
 
   /* Modal */
   .modal-overlay {
     position: fixed; inset: 0;
-    background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(8px);
+    background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
     z-index: 9999; display: none;
-    justify-content: center; align-items: center;
-    padding: 20px;
+    justify-content: center; align-items: center; padding: 20px;
   }
   .modal-overlay.active { display: flex; }
   .modal-box {
-    background: var(--card);
-    border-radius: var(--radius-lg);
-    padding: 32px;
-    max-width: 900px; width: 100%;
+    background: var(--card); border-radius: var(--radius-lg);
+    padding: 32px; max-width: 900px; width: 100%;
     max-height: 90vh; overflow-y: auto;
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border); box-shadow: var(--shadow-lg);
     position: relative;
     animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
   .modal-close {
     position: absolute; top: 16px; right: 16px;
     background: var(--glass); border: 1px solid var(--border);
-    color: var(--text);
-    width: 36px; height: 36px; border-radius: 50%;
-    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    color: var(--text); width: 36px; height: 36px;
+    border-radius: 50%; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
     transition: all 0.25s;
   }
   .modal-close:hover { background: var(--danger); color: white; transform: rotate(90deg); }
   .modal-close svg { width: 18px; height: 18px; }
-  .modal-box h2 { margin-bottom: 8px; color: var(--text); font-size: 24px; font-weight: 800; }
-  .modal-box .modal-sub { color: var(--text-dim); font-size: 13px; margin-bottom: 24px; }
-  .prompt-step {
-    background: rgba(139, 92, 246, 0.05);
-    border: 1px solid var(--border);
-    border-left: 4px solid var(--primary);
-    border-radius: var(--radius-sm);
-    padding: 20px; margin-bottom: 18px;
-  }
-  .step-label {
-    display: inline-block; background: var(--primary); color: white;
-    padding: 4px 12px; border-radius: 20px;
-    font-size: 11px; font-weight: 700; letter-spacing: 1px;
-    text-transform: uppercase; margin-bottom: 10px;
-  }
-  .prompt-step h3 { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
-  .prompt-step pre {
-    background: var(--bg); color: var(--text);
-    padding: 14px; border-radius: 8px;
-    font-size: 12px; line-height: 1.6;
-    white-space: pre-wrap; word-break: break-word;
-    font-family: 'Consolas', 'Monaco', monospace;
-    max-height: 200px; overflow-y: auto;
-    border: 1px solid var(--border);
-  }
-  .copy-btn {
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    color: white; border: none;
-    padding: 8px 18px; border-radius: 20px;
-    font-size: 12px; font-weight: 700; cursor: pointer;
-    margin-top: 10px; transition: all 0.25s;
-    display: inline-flex; align-items: center; gap: 6px;
-  }
-  .copy-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(139,92,246,0.4); }
-  .copy-btn.copied { background: linear-gradient(135deg, var(--success), #059669); }
-  .copy-btn svg { width: 14px; height: 14px; }
+  .modal-box h2 { margin-bottom: 8px; font-size: 24px; font-weight: 800; }
 
   .empty-box {
     text-align: center; padding: 60px 20px;
     background: var(--card); border: 1px dashed var(--border);
     border-radius: var(--radius); color: var(--text-dim);
   }
-  .empty-box svg { width: 50px; height: 50px; color: var(--primary); opacity: 0.5; margin-bottom: 16px; }
 </style>
 </head>
 <body>
@@ -147,20 +117,16 @@
   <header>
     <a href="/" class="logo"><img src="/static/logo-horizontal.png" alt="GD Pulse"></a>
     <nav class="nav-links">
-      <a href="/prompts">Prompts</a>
       <a href="/tools">Tools</a>
+      <a href="/prompts">Prompts</a>
       <a href="/admin" class="active">Admin</a>
     </nav>
     <div class="header-right">
-      <button class="icon-btn" title="Notifications" onclick="alert('Notifications coming soon')">
-        <span data-icon="bell"></span>
-        <span class="badge">3</span>
-      </button>
       <button class="theme-toggle" onclick="toggleTheme(event)" title="Toggle theme"></button>
-      <div class="avatar" title="{{ name }}">{{ name[0]|upper }}</div>
-      <a href="/logout" class="btn btn-outline" style="display:inline-flex;align-items:center;gap:6px;">
-        <span data-icon="logout" style="width:16px;height:16px;display:inline-flex;"></span>
-      </a>
+      {% if role == 'owner' %}
+        <a href="/owner" class="btn btn-primary">Owner</a>
+      {% endif %}
+      <a href="/logout" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
     </div>
   </header>
 
@@ -169,32 +135,22 @@
 
       <div class="welcome reveal">
         <h1>Admin Panel, <span class="highlight">{{ name }}</span></h1>
-        <p>Aapki role: <b style="color:var(--primary);text-transform:uppercase;">{{ role }}</b></p>
+        <p>Role: <b style="color:var(--primary);text-transform:uppercase;">{{ role }}</b></p>
       </div>
 
       <div class="stats">
-        <div class="stat-card reveal">
-          <div class="value">14+</div>
-          <div class="label">Tools Live</div>
-        </div>
-        <div class="stat-card reveal">
-          <div class="value">15+</div>
-          <div class="label">Prompts</div>
-        </div>
-        <div class="stat-card reveal">
-          <div class="value">3</div>
-          <div class="label">Softwares</div>
-        </div>
-        <div class="stat-card reveal">
-          <div class="value">4</div>
-          <div class="label">Roles</div>
-        </div>
+        <div class="stat-card reveal"><div class="value">4</div><div class="label">Active Users</div></div>
+        <div class="stat-card reveal"><div class="value">15+</div><div class="label">Prompts</div></div>
+        <div class="stat-card reveal"><div class="value">14+</div><div class="label">Tools</div></div>
+        <div class="stat-card reveal"><div class="value">3</div><div class="label">Softwares</div></div>
       </div>
 
-      <!-- TABS -->
       <div class="tab-bar">
         <button class="tab-btn active" onclick="switchTab('overview', this)">
           <span data-icon="grid" style="width:18px;height:18px;display:inline-flex;"></span> Overview
+        </button>
+        <button class="tab-btn" onclick="switchTab('users', this)">
+          <span data-icon="users" style="width:18px;height:18px;display:inline-flex;"></span> Users
         </button>
         <button class="tab-btn" onclick="switchTab('prompts', this)">
           <span data-icon="prompts" style="width:18px;height:18px;display:inline-flex;"></span> Prompts
@@ -213,11 +169,9 @@
         </button>
       </div>
 
-      <!-- TAB: OVERVIEW -->
+      <!-- OVERVIEW -->
       <div class="tab-content active" id="tab-overview">
-        <div class="section-label">
-          <span data-icon="sparkle" style="width:16px;height:16px;display:inline-flex;"></span> Quick Access
-        </div>
+        <div class="section-label">Quick Access</div>
         <div class="grid grid-4">
           <a href="/prompts" class="tool-card reveal">
             <span class="tool-icon" data-icon="prompts"></span>
@@ -234,169 +188,177 @@
             <div class="title">Portfolio</div>
             <div class="desc">Public view</div>
           </a>
-          <div class="tool-card reveal" onclick="alert('Role management — coming soon')" style="opacity:0.6;">
+          <div class="tool-card reveal" onclick="switchTab('users', document.querySelectorAll('.tab-btn')[1])">
             <span class="tool-icon" data-icon="users"></span>
             <div class="title">User Management</div>
             <div class="desc">Roles & access</div>
           </div>
         </div>
+      </div>
 
-        {% if role == 'owner' %}
-        <div class="section-label" style="margin-top:50px;">
-          <span data-icon="sparkle" style="width:16px;height:16px;display:inline-flex;"></span> Owner Controls
+      <!-- USERS MANAGEMENT -->
+      <div class="tab-content" id="tab-users">
+        <div class="section-label">User Management</div>
+        <div class="info reveal" style="margin-bottom:20px;">
+          <b>Note:</b> Abhi users hardcoded hain. Role creation, new user add, edit, delete — <b>coming soon</b> (owner panel me).
+        </div>
+        <div class="mgmt-table reveal">
+          <table>
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Name</th>
+                <th>Role</th>
+                <th>Access</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><b>owner</b></td>
+                <td>Owner</td>
+                <td><span class="badge-role owner">Owner</span></td>
+                <td>Full + God Mode</td>
+                <td>
+                  <button class="action-btn-sm" onclick="alert('Coming soon')">Edit</button>
+                  <button class="action-btn-sm danger" onclick="alert('Cannot delete owner')">Delete</button>
+                </td>
+              </tr>
+              <tr>
+                <td><b>admin</b></td>
+                <td>Admin</td>
+                <td><span class="badge-role admin">Admin</span></td>
+                <td>Full Management</td>
+                <td>
+                  <button class="action-btn-sm" onclick="alert('Coming soon')">Edit</button>
+                  <button class="action-btn-sm danger" onclick="alert('Cannot delete admin')">Delete</button>
+                </td>
+              </tr>
+              <tr>
+                <td><b>staff</b></td>
+                <td>Staff</td>
+                <td><span class="badge-role staff">Staff</span></td>
+                <td>Tools + Prompts (read)</td>
+                <td>
+                  <button class="action-btn-sm" onclick="alert('Coming soon')">Edit</button>
+                  <button class="action-btn-sm danger" onclick="alert('Coming soon')">Delete</button>
+                </td>
+              </tr>
+              <tr>
+                <td><b>user</b></td>
+                <td>User</td>
+                <td><span class="badge-role user">User</span></td>
+                <td>Portfolio only</td>
+                <td>
+                  <button class="action-btn-sm" onclick="alert('Coming soon')">Edit</button>
+                  <button class="action-btn-sm danger" onclick="alert('Coming soon')">Delete</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <button class="btn btn-primary reveal" onclick="alert('Add User — coming soon')" style="display:inline-flex;align-items:center;gap:8px;">
+          <span data-icon="users" style="width:16px;height:16px;display:inline-flex;"></span> Add New User
+        </button>
+      </div>
+
+      <!-- PROMPTS -->
+      <div class="tab-content" id="tab-prompts">
+        <div class="section-label">Prompts Management</div>
+        <div class="info reveal" style="margin-bottom:20px;">
+          <b>Note:</b> Prompt <b>CRUD</b> (add/edit/delete) coming soon. Filhaal library dekho.
         </div>
         <div class="grid grid-3">
-          <div class="tool-card reveal" onclick="alert('Theme editor — coming soon')" style="opacity:0.6;">
-            <span class="tool-icon" data-icon="design"></span>
-            <div class="title">Theme Editor</div>
-            <div class="desc">Change colors, fonts from UI</div>
+          <div class="tool-card reveal" onclick="window.location.href='/prompts'">
+            <span class="tool-icon" data-icon="prompts"></span>
+            <div class="title">Open Library</div>
+            <div class="desc">View all prompts</div>
           </div>
-          <div class="tool-card reveal" onclick="alert('Role management — coming soon')" style="opacity:0.6;">
+          <div class="tool-card reveal" onclick="alert('Add Prompt — coming soon')" style="opacity:0.6;">
+            <span class="tool-icon" data-icon="sparkle"></span>
+            <div class="title">Add New Prompt</div>
+            <div class="desc">Create prompt (soon)</div>
+          </div>
+          <div class="tool-card reveal" onclick="alert('Manage Visibility — coming soon')" style="opacity:0.6;">
             <span class="tool-icon" data-icon="users"></span>
-            <div class="title">Role Management</div>
-            <div class="desc">Add/edit staff & users</div>
-          </div>
-          <div class="tool-card reveal" onclick="alert('Site settings — coming soon')" style="opacity:0.6;">
-            <span class="tool-icon" data-icon="software"></span>
-            <div class="title">Site Settings</div>
-            <div class="desc">Structure, pages, config</div>
+            <div class="title">Manage Visibility</div>
+            <div class="desc">Kisko dikhe (soon)</div>
           </div>
         </div>
-        {% endif %}
       </div>
 
-      <!-- TAB: PROMPTS -->
-      <div class="tab-content" id="tab-prompts">
-        <div class="section-label">
-          <span data-icon="prompts" style="width:16px;height:16px;display:inline-flex;"></span> Prompts Library
-        </div>
-        {% if role in ('owner', 'admin') %}
-        <div class="info reveal" style="margin-bottom:20px;">
-          <b>Note:</b> Prompt CRUD (add/edit/delete) abhi coming soon hai. Filhaal prompts library dekho.
-        </div>
-        {% endif %}
-        <a href="/prompts" class="btn btn-primary reveal" style="display:inline-flex;align-items:center;gap:8px;">
-          Open Prompts Library <span data-icon="arrowRight" style="width:16px;height:16px;display:inline-flex;"></span>
-        </a>
-      </div>
-
-      <!-- TAB: TOOLS -->
+      <!-- TOOLS -->
       <div class="tab-content" id="tab-tools">
-        <div class="section-label">
-          <span data-icon="tools" style="width:16px;height:16px;display:inline-flex;"></span> All Tools
+        <div class="section-label">Tools Management</div>
+        <div class="info reveal" style="margin-bottom:20px;">
+          <b>Note:</b> Tool enable/disable, kisko access — coming soon.
         </div>
         <div class="grid grid-4">
-          <a href="/tools/gst" class="tool-card reveal">
-            <span class="tool-icon" data-icon="gst"></span><div class="title">GST</div>
-          </a>
-          <a href="/tools/emi" class="tool-card reveal">
-            <span class="tool-icon" data-icon="emi"></span><div class="title">EMI</div>
-          </a>
-          <a href="/tools/age" class="tool-card reveal">
-            <span class="tool-icon" data-icon="age"></span><div class="title">Age</div>
-          </a>
-          <a href="/tools/number-to-words" class="tool-card reveal">
-            <span class="tool-icon" data-icon="number"></span><div class="title">Number→Words</div>
-          </a>
-          <a href="/tools/unit-converter" class="tool-card reveal">
-            <span class="tool-icon" data-icon="unit"></span><div class="title">Unit Converter</div>
-          </a>
-          <a href="/tools/text-tools" class="tool-card reveal">
-            <span class="tool-icon" data-icon="text"></span><div class="title">Text Tools</div>
-          </a>
-          <a href="/tools/qr-code" class="tool-card reveal">
-            <span class="tool-icon" data-icon="qr"></span><div class="title">QR Code</div>
-          </a>
-          <a href="/tools/image-resize" class="tool-card reveal">
-            <span class="tool-icon" data-icon="image"></span><div class="title">Image Resize</div>
-          </a>
-          <a href="/tools/image-compress" class="tool-card reveal">
-            <span class="tool-icon" data-icon="compress"></span><div class="title">Compress</div>
-          </a>
-          <a href="/tools/image-crop" class="tool-card reveal">
-            <span class="tool-icon" data-icon="crop"></span><div class="title">Crop</div>
-          </a>
-          <a href="/tools/photo-to-pdf" class="tool-card reveal">
-            <span class="tool-icon" data-icon="pdf"></span><div class="title">Photo→PDF</div>
-          </a>
-          <a href="/tools/pdf-merge" class="tool-card reveal">
-            <span class="tool-icon" data-icon="pdfMerge"></span><div class="title">PDF Merge</div>
-          </a>
-          <a href="/tools/video-to-mp3" class="tool-card reveal">
-            <span class="tool-icon" data-icon="audio"></span><div class="title">Video→MP3</div>
-          </a>
+          <div class="tool-card reveal"><span class="tool-icon" data-icon="gst"></span><div class="title">GST</div><div class="desc">Active</div></div>
+          <div class="tool-card reveal"><span class="tool-icon" data-icon="emi"></span><div class="title">EMI</div><div class="desc">Active</div></div>
+          <div class="tool-card reveal"><span class="tool-icon" data-icon="qr"></span><div class="title">QR Code</div><div class="desc">Active</div></div>
+          <div class="tool-card reveal"><span class="tool-icon" data-icon="image"></span><div class="title">Image Resize</div><div class="desc">Active</div></div>
+          <div class="tool-card reveal"><span class="tool-icon" data-icon="pdf"></span><div class="title">Photo→PDF</div><div class="desc">Active</div></div>
+          <div class="tool-card reveal"><span class="tool-icon" data-icon="pdfMerge"></span><div class="title">PDF Merge</div><div class="desc">Active</div></div>
+          <div class="tool-card reveal"><span class="tool-icon" data-icon="audio"></span><div class="title">Video→MP3</div><div class="desc">Active</div></div>
+          <div class="tool-card reveal" onclick="alert('Tool config — coming soon')" style="opacity:0.6;">
+            <span class="tool-icon" data-icon="tools"></span><div class="title">Configure</div><div class="desc">Soon</div>
+          </div>
         </div>
       </div>
 
-      <!-- TAB: SOFTWARE -->
+      <!-- SOFTWARE -->
       <div class="tab-content" id="tab-software">
-        <div class="section-label">
-          <span data-icon="software" style="width:16px;height:16px;display:inline-flex;"></span> GD Business — Software Projects
-        </div>
+        <div class="section-label">GD Business — Software Projects</div>
         <div class="grid grid-3">
           <div class="card reveal" onclick="alert('Retail Software — coming soon')">
             <span class="tool-icon" data-icon="retail"></span>
             <div class="title">Retail Store</div>
-            <div class="desc">Gofrugal style POS — Item, Purchase, Sale, Stock</div>
+            <div class="desc">Gofrugal style POS</div>
             <span class="soon">SOON</span>
           </div>
           <div class="card reveal" onclick="alert('Restaurant Software — coming soon')">
             <span class="tool-icon" data-icon="restaurant"></span>
             <div class="title">Restaurant POS</div>
-            <div class="desc">Ezee Optimum style — Table, Order, Kitchen, Billing</div>
+            <div class="desc">Ezee Optimum style</div>
             <span class="soon">SOON</span>
           </div>
           <div class="card reveal" onclick="alert('Sand Business — coming soon')">
             <span class="tool-icon" data-icon="sand"></span>
             <div class="title">Sand Business</div>
-            <div class="desc">Stock, Truck, Challan, Client Billing</div>
+            <div class="desc">Stock, Truck, Billing</div>
             <span class="soon">SOON</span>
           </div>
         </div>
       </div>
 
-      <!-- TAB: ASSETS -->
+      <!-- ASSETS -->
       <div class="tab-content" id="tab-assets">
-        <div class="section-label">
-          <span data-icon="assets" style="width:16px;height:16px;display:inline-flex;"></span> Assets Library
-        </div>
+        <div class="section-label">Assets Library</div>
         <div class="grid grid-4">
           <div class="tool-card reveal" onclick="alert('PNG Library — coming soon')">
-            <span class="tool-icon" data-icon="image"></span>
-            <div class="title">PNG Library</div>
-            <div class="desc">Transparent images</div>
+            <span class="tool-icon" data-icon="image"></span><div class="title">PNG Library</div>
           </div>
-          <div class="tool-card reveal" onclick="alert('Sound Effects — coming soon')">
-            <span class="tool-icon" data-icon="audio"></span>
-            <div class="title">Sound Effects</div>
-            <div class="desc">Audio library</div>
+          <div class="tool-card reveal" onclick="alert('Sound — coming soon')">
+            <span class="tool-icon" data-icon="audio"></span><div class="title">Sound Effects</div>
           </div>
           <div class="tool-card reveal" onclick="alert('Templates — coming soon')">
-            <span class="tool-icon" data-icon="assets"></span>
-            <div class="title">Templates</div>
-            <div class="desc">Design templates</div>
+            <span class="tool-icon" data-icon="assets"></span><div class="title">Templates</div>
           </div>
           <div class="tool-card reveal" onclick="alert('Fonts — coming soon')">
-            <span class="tool-icon" data-icon="text"></span>
-            <div class="title">Fonts</div>
-            <div class="desc">Typography library</div>
+            <span class="tool-icon" data-icon="text"></span><div class="title">Fonts</div>
           </div>
         </div>
       </div>
 
-      <!-- TAB: ANALYTICS -->
+      <!-- ANALYTICS -->
       <div class="tab-content" id="tab-analytics">
-        <div class="section-label">
-          <span data-icon="analytics" style="width:16px;height:16px;display:inline-flex;"></span> YouTube Analytics
-        </div>
+        <div class="section-label">YouTube Analytics</div>
         <div class="stats">
           <div class="stat-card reveal"><div class="value">--</div><div class="label">Subscribers</div></div>
-          <div class="stat-card reveal"><div class="value">--</div><div class="label">Total Views</div></div>
+          <div class="stat-card reveal"><div class="value">--</div><div class="label">Views</div></div>
           <div class="stat-card reveal"><div class="value">--</div><div class="label">Watch Hours</div></div>
           <div class="stat-card reveal"><div class="value">--</div><div class="label">Engagement</div></div>
-        </div>
-        <div class="info reveal" style="margin-top:20px;">
-          <b>Coming soon:</b> YouTube Data API connect karke live stats — last 3-5 videos ke views, likes, comments yahan dikhenge.
         </div>
       </div>
 
