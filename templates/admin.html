@@ -17,7 +17,7 @@
   }
   .tab-btn:hover { color: var(--primary); }
   .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
-  .tab-btn svg { width: 18px; height: 18px; }
+  .tab-btn [data-icon] { width: 18px; height: 18px; }
   .tab-content { display: none; }
   .tab-content.active { display: block; animation: fadeInUp 0.5s ease; }
   .section-label {
@@ -51,9 +51,11 @@
     display: inline-block; padding: 3px 12px; border-radius: 20px;
     font-size: 11px; font-weight: 700; text-transform: uppercase;
   }
-  .badge-role.owner { background: rgba(236, 72, 153, 0.15); color: #ec4899; }
-  .badge-role.admin { background: rgba(139, 92, 246, 0.15); color: var(--primary); }
-  .badge-role.staff { background: rgba(34, 211, 238, 0.15); color: #22d3ee; }
+  .badge-role.admin { background: rgba(236, 72, 153, 0.15); color: #ec4899; }
+  .badge-role.owner { background: rgba(139, 92, 246, 0.15); color: var(--primary); }
+  .badge-role.manager { background: rgba(34, 211, 238, 0.15); color: #22d3ee; }
+  .badge-role.hr { background: rgba(251, 191, 36, 0.15); color: #f59e0b; }
+  .badge-role.staff { background: rgba(16, 185, 129, 0.15); color: #10b981; }
   .badge-role.user  { background: rgba(107, 114, 128, 0.15); color: #6b7280; }
 
   .action-btn-sm {
@@ -62,22 +64,28 @@
     border: 1px solid var(--border); background: transparent;
     color: var(--text-dim); cursor: pointer; transition: all 0.25s;
     margin-right: 5px; text-decoration: none;
-    display: inline-block;
+    display: inline-flex; align-items: center; gap: 4px;
   }
   .action-btn-sm:hover { background: var(--primary); color: white; border-color: var(--primary); }
   .action-btn-sm.danger:hover { background: var(--danger); border-color: var(--danger); }
+  .action-btn-sm [data-icon] { width: 12px; height: 12px; }
+  .action-btn-sm svg { width: 12px; height: 12px; }
 
-  .form-grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 15px;
-    margin-bottom: 15px;
-  }
-  .form-grid.full { grid-template-columns: 1fr; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
 
-  .alert {
-    padding: 12px 18px; border-radius: 10px; margin-bottom: 20px; font-size: 14px;
-  }
+  .alert { padding: 12px 18px; border-radius: 10px; margin-bottom: 20px; font-size: 14px; }
   .alert.success { background: rgba(16, 185, 129, 0.1); color: #10b981; border-left: 3px solid #10b981; }
   .alert.error { background: rgba(239, 68, 68, 0.1); color: #ef4444; border-left: 3px solid #ef4444; }
+
+  .danger-btn {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white; border: none; padding: 10px 20px;
+    border-radius: 30px; font-size: 13px; font-weight: 700;
+    cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+    transition: all 0.25s;
+  }
+  .danger-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(239,68,68,0.4); }
+  .danger-btn [data-icon] { width: 16px; height: 16px; }
 </style>
 </head>
 <body>
@@ -95,7 +103,7 @@
     </nav>
     <div class="header-right">
       <button class="theme-toggle" onclick="toggleTheme(event)" title="Toggle theme"></button>
-      <a href="/logout" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
+      <a href="#" onclick="confirmLogout(event)" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
     </div>
   </header>
 
@@ -108,11 +116,19 @@
       </div>
 
       {% if request.args.get('success') == 'added' %}
-        <div class="alert success">✅ Successfully added!</div>
+        <div class="alert success">Successfully added!</div>
       {% elif request.args.get('success') == 'deleted' %}
-        <div class="alert success">✅ Successfully deleted!</div>
+        <div class="alert success">Successfully deleted!</div>
+      {% elif request.args.get('success') == 'updated' %}
+        <div class="alert success">Successfully updated!</div>
+      {% elif request.args.get('success') == 'all_deleted' %}
+        <div class="alert success">All DB prompts deleted!</div>
       {% elif request.args.get('error') == 'missing' %}
-        <div class="alert error">⚠️ Kuch fields missing hain</div>
+        <div class="alert error">Kuch fields missing hain</div>
+      {% elif request.args.get('error') == 'self' %}
+        <div class="alert error">Apne aap ko delete nahi kar sakte</div>
+      {% elif request.args.get('error') == 'protected' %}
+        <div class="alert error">Ye user protected hai</div>
       {% endif %}
 
       <div class="stats">
@@ -124,22 +140,22 @@
 
       <div class="tab-bar">
         <button class="tab-btn active" onclick="switchTab('overview', this)">
-          <span data-icon="grid" style="width:18px;height:18px;display:inline-flex;"></span> Overview
+          <span data-icon="grid"></span> Overview
         </button>
         <button class="tab-btn" onclick="switchTab('users', this)">
-          <span data-icon="users" style="width:18px;height:18px;display:inline-flex;"></span> Users
+          <span data-icon="users"></span> Users
         </button>
         <button class="tab-btn" onclick="switchTab('prompts', this)">
-          <span data-icon="prompts" style="width:18px;height:18px;display:inline-flex;"></span> Prompts
+          <span data-icon="prompts"></span> Prompts
         </button>
         <button class="tab-btn" onclick="switchTab('tools', this)">
-          <span data-icon="tools" style="width:18px;height:18px;display:inline-flex;"></span> Tools
+          <span data-icon="tools"></span> Tools
         </button>
         <button class="tab-btn" onclick="switchTab('software', this)">
-          <span data-icon="software" style="width:18px;height:18px;display:inline-flex;"></span> Software
+          <span data-icon="software"></span> Software
         </button>
         <button class="tab-btn" onclick="switchTab('analytics', this)">
-          <span data-icon="analytics" style="width:18px;height:18px;display:inline-flex;"></span> Analytics
+          <span data-icon="analytics"></span> Analytics
         </button>
       </div>
 
@@ -175,29 +191,23 @@
         <div class="section-label">User Management</div>
 
         <div class="box reveal" style="margin-bottom:25px;">
-          <h2 style="font-size:18px;margin-bottom:15px;">➕ Add New User</h2>
+          <h2 style="font-size:18px;margin-bottom:15px;"><span data-icon="plus" style="width:20px;height:20px;display:inline-flex;vertical-align:middle;color:var(--primary);"></span> Add New User</h2>
           <form method="POST" action="/admin/add-user">
             <div class="form-grid">
-              <div>
-                <label>Username</label>
-                <input type="text" name="username" placeholder="newuser" required>
-              </div>
-              <div>
-                <label>Password</label>
-                <input type="text" name="password" placeholder="password123" required>
-              </div>
+              <div><label>Username</label><input type="text" name="username" placeholder="newuser" required></div>
+              <div><label>Password</label><input type="text" name="password" placeholder="password123" required></div>
             </div>
             <div class="form-grid">
-              <div>
-                <label>Name</label>
-                <input type="text" name="name" placeholder="Full Name">
-              </div>
+              <div><label>Name</label><input type="text" name="name" placeholder="Full Name"></div>
               <div>
                 <label>Role</label>
                 <select name="role">
                   <option value="user">User</option>
                   <option value="staff">Staff</option>
-                  <option value="admin">Admin</option>
+                  <option value="hr">HR</option>
+                  <option value="manager">Manager</option>
+                  <option value="owner">Owner</option>
+                  {% if role == 'admin' %}<option value="admin">Admin</option>{% endif %}
                 </select>
               </div>
             </div>
@@ -217,8 +227,8 @@
                 <td>{{ udata.name }}</td>
                 <td><span class="badge-role {{ udata.role }}">{{ udata.role }}</span></td>
                 <td>
-                  {% if uname != 'owner' and udata.role != 'owner' %}
-                  <a href="/admin/delete-user/{{ uname }}" class="action-btn-sm danger" onclick="return confirm('Delete {{ uname }}?')">Delete</a>
+                  {% if uname != 'admin' and uname != user %}
+                  <a href="#" onclick="confirmDeleteUser('{{ uname }}');return false;" class="action-btn-sm danger"><span data-icon="trash"></span> Delete</a>
                   {% else %}
                   <span style="font-size:11px;color:var(--text-mute);">Protected</span>
                   {% endif %}
@@ -234,14 +244,20 @@
       <div class="tab-content" id="tab-prompts">
         <div class="section-label">Prompts Management</div>
 
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+          <div class="info" style="margin:0;flex:1;">
+            <b>Note:</b> DB prompts hain (JSON me store). Edit/Delete karo ya sab delete karo.
+          </div>
+          {% if all_prompts %}
+          <button onclick="confirmDeleteAll()" class="danger-btn"><span data-icon="trash"></span> Delete All Prompts</button>
+          {% endif %}
+        </div>
+
         <div class="box reveal" style="margin-bottom:25px;">
-          <h2 style="font-size:18px;margin-bottom:15px;">➕ Add New Prompt</h2>
+          <h2 style="font-size:18px;margin-bottom:15px;"><span data-icon="plus" style="width:20px;height:20px;display:inline-flex;vertical-align:middle;color:var(--primary);"></span> Add New Prompt</h2>
           <form method="POST" action="/admin/add-prompt">
             <div class="form-grid">
-              <div>
-                <label>Key (unique)</label>
-                <input type="text" name="key" placeholder="my-prompt" required>
-              </div>
+              <div><label>Key (unique)</label><input type="text" name="key" placeholder="my-prompt" required></div>
               <div>
                 <label>Category</label>
                 <select name="cat">
@@ -252,14 +268,8 @@
               </div>
             </div>
             <div class="form-grid">
-              <div>
-                <label>Title</label>
-                <input type="text" name="title" placeholder="My Prompt Title" required>
-              </div>
-              <div>
-                <label>Subtitle</label>
-                <input type="text" name="sub" placeholder="Short description">
-              </div>
+              <div><label>Title</label><input type="text" name="title" placeholder="My Prompt Title" required></div>
+              <div><label>Subtitle</label><input type="text" name="sub" placeholder="Short description"></div>
             </div>
             <label>Prompt Text</label>
             <textarea name="text" placeholder="Full prompt here..." style="min-height:150px;" required></textarea>
@@ -277,9 +287,10 @@
               <tr>
                 <td><b>{{ key }}</b></td>
                 <td>{{ pdata.title }}</td>
-                <td><span class="badge-role admin">{{ pdata.cat }}</span></td>
+                <td><span class="badge-role owner">{{ pdata.cat }}</span></td>
                 <td>
-                  <a href="/admin/delete-prompt/{{ key }}" class="action-btn-sm danger" onclick="return confirm('Delete {{ key }}?')">Delete</a>
+                  <a href="/admin/edit-prompt/{{ key }}" class="action-btn-sm"><span data-icon="edit"></span> Edit</a>
+                  <a href="#" onclick="confirmDeletePrompt('{{ key }}');return false;" class="action-btn-sm danger"><span data-icon="trash"></span> Delete</a>
                 </td>
               </tr>
               {% endfor %}
@@ -291,14 +302,14 @@
         </div>
 
         <div class="info reveal" style="margin-top:20px;">
-          💡 <b>Note:</b> Ye DB prompts hain (JSON file me store). Base 15 prompts <a href="/prompts" style="color:var(--primary);">Prompts Library</a> me hamesha rahenge (code me hardcoded).
+          <b>Note:</b> Base 15 prompts hamesha rahenge (code me hardcoded). Sirf DB prompts delete honge.
         </div>
       </div>
 
       <!-- TOOLS -->
       <div class="tab-content" id="tab-tools">
         <div class="section-label">Tools</div>
-        <a href="/tools" class="btn btn-primary">Open Tools Dashboard →</a>
+        <a href="/tools" class="btn btn-primary">Open Tools Dashboard</a>
       </div>
 
       <!-- SOFTWARE -->
@@ -340,6 +351,19 @@
     </div>
   </main>
 
+  <!-- Confirm Dialog -->
+  <div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-box">
+      <div class="warn-icon"><span data-icon="warning"></span></div>
+      <h3 id="confirmTitle">Are you sure?</h3>
+      <p id="confirmMessage">This action cannot be undone.</p>
+      <div class="confirm-actions">
+        <button class="btn-cancel" onclick="closeConfirm()">Cancel</button>
+        <button class="btn-confirm" id="confirmYes">Yes</button>
+      </div>
+    </div>
+  </div>
+
   <footer><p>© 2025 GD Pulse — Admin Panel</p></footer>
 
   <script src="/static/icons.js"></script>
@@ -352,6 +376,45 @@
       document.getElementById("tab-" + tab).classList.add("active");
       if (window.renderIcons) window.renderIcons();
     }
+
+    let pendingAction = null;
+    function showConfirm(title, message, btnText, callback) {
+      document.getElementById("confirmTitle").innerText = title;
+      document.getElementById("confirmMessage").innerText = message;
+      document.getElementById("confirmYes").innerText = btnText;
+      pendingAction = callback;
+      document.getElementById("confirmOverlay").classList.add("active");
+      if (window.renderIcons) window.renderIcons();
+    }
+    function closeConfirm() {
+      document.getElementById("confirmOverlay").classList.remove("active");
+      pendingAction = null;
+    }
+    document.getElementById("confirmYes").addEventListener("click", () => {
+      if (pendingAction) { const action = pendingAction; closeConfirm(); action(); }
+    });
+    function confirmDeleteUser(uname) {
+      showConfirm("Delete User?", `"${uname}" ko delete karna hai? Ye undo nahi ho sakta.`, "Yes, Delete", () => {
+        window.location.href = `/admin/delete-user/${uname}`;
+      });
+    }
+    function confirmDeletePrompt(key) {
+      showConfirm("Delete Prompt?", `"${key}" ko permanently delete karna hai?`, "Yes, Delete", () => {
+        window.location.href = `/admin/delete-prompt/${key}`;
+      });
+    }
+    function confirmDeleteAll() {
+      showConfirm("Delete ALL DB Prompts?", "Saare DB prompts delete ho jayenge. Ye undo nahi ho sakta. Base 15 prompts safe rahenge.", "Yes, Delete All", () => {
+        window.location.href = "/admin/delete-all-prompts";
+      });
+    }
+    function confirmLogout(e) {
+      if (e) e.preventDefault();
+      showConfirm("Logout?", "Kya tum sach me logout karna chahte ho?", "Yes, Logout", () => {
+        window.location.href = "/logout";
+      });
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
       if (window.renderIcons) window.renderIcons();
       const urlParams = new URLSearchParams(window.location.search);
