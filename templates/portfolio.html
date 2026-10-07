@@ -9,6 +9,10 @@
 </head>
 <body>
 
+  <!-- Parallax orbs -->
+  <div class="parallax-orb" style="top: 10%; left: 5%;"></div>
+  <div class="parallax-orb" style="bottom: 10%; right: 5%;"></div>
+
   <!-- HEADER -->
   <header>
     <a href="/" class="logo">
@@ -23,6 +27,7 @@
       <a href="#contact">Contact</a>
     </nav>
     <div class="header-right">
+      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
       {% if user %}
         <a href="/tools" class="btn btn-white">Dashboard</a>
         <a href="/logout" class="avatar" title="{{ user }}">{{ user[0]|upper }}</a>
@@ -60,44 +65,53 @@
 
   <!-- ABOUT -->
   <section class="section" id="about">
-    <div class="section-header">
+    <div class="section-header reveal">
       <span class="section-tag">About Us</span>
       <h2 class="section-title">Designing with <span class="highlight">Empathy</span><br>Building with <span class="highlight">Purpose</span></h2>
     </div>
     <div class="grid grid-3">
-      <div class="stat-card"><div class="value">5+</div><div class="label">Years Experience</div></div>
-      <div class="stat-card"><div class="value">50+</div><div class="label">Projects Completed</div></div>
-      <div class="stat-card"><div class="value">15+</div><div class="label">Happy Clients</div></div>
+      <div class="stat-card reveal">
+        <div class="value">5+</div>
+        <div class="label">Years Experience</div>
+      </div>
+      <div class="stat-card reveal">
+        <div class="value">50+</div>
+        <div class="label">Projects Completed</div>
+      </div>
+      <div class="stat-card reveal">
+        <div class="value">15+</div>
+        <div class="label">Happy Clients</div>
+      </div>
     </div>
   </section>
 
   <!-- SERVICES -->
   <section class="section" id="services">
-    <div class="section-header">
+    <div class="section-header reveal">
       <span class="section-tag">What We Do</span>
       <h2 class="section-title">Services We <span class="highlight">Offer</span></h2>
       <p class="section-subtitle">From concept to execution — we handle every aspect of your digital presence.</p>
     </div>
     <div class="grid grid-4">
-      <div class="card">
+      <div class="card reveal">
         <div class="icon">🎨</div>
         <div class="title">Design</div>
         <div class="desc">Logo, brand identity, social media creatives, packaging, and visual systems.</div>
         <span class="tag">Design</span>
       </div>
-      <div class="card">
+      <div class="card reveal">
         <div class="icon">🎬</div>
         <div class="title">Content</div>
         <div class="desc">Video editing, reels, cinematic edits, AI concepts, and motion graphics.</div>
         <span class="tag">Content</span>
       </div>
-      <div class="card">
+      <div class="card reveal">
         <div class="icon">📈</div>
         <div class="title">Marketing</div>
         <div class="desc">Strategy, research, content calendars, campaigns, and ad creative strategy.</div>
         <span class="tag">Marketing</span>
       </div>
-      <div class="card">
+      <div class="card reveal">
         <div class="icon">🌐</div>
         <div class="title">Web & Digital</div>
         <div class="desc">Landing pages, UI/UX, websites, redesigns, and performance improvements.</div>
@@ -108,13 +122,13 @@
 
   <!-- WORK / PORTFOLIO -->
   <section class="section" id="work">
-    <div class="section-header">
+    <div class="section-header reveal">
       <span class="section-tag">Portfolio</span>
       <h2 class="section-title">Selected <span class="highlight">Work</span></h2>
       <p class="section-subtitle">A curated collection across design, content, marketing and digital.</p>
     </div>
 
-    <div class="tabs">
+    <div class="tabs reveal">
       <div class="tab active">All</div>
       <div class="tab">🎨 Design</div>
       <div class="tab">🎬 Content</div>
@@ -123,37 +137,37 @@
     </div>
 
     <div class="grid grid-3">
-      <div class="card">
+      <div class="card reveal">
         <div class="icon">🚗</div>
         <div class="title">BMW Cinematic Concept</div>
         <div class="desc">Premium automotive visual concept with AI-generated scenes and cinematic editing.</div>
         <span class="tag">Self-Initiated · Content</span>
       </div>
-      <div class="card">
+      <div class="card reveal">
         <div class="icon">🍽️</div>
         <div class="title">Restaurant Brand Identity</div>
         <div class="desc">Complete brand package — logo, colour palette, menu design, packaging concepts.</div>
         <span class="tag">Concept Project · Design</span>
       </div>
-      <div class="card">
+      <div class="card reveal">
         <div class="icon">📊</div>
         <div class="title">30-Day Instagram Growth</div>
         <div class="desc">Audience research → content pillars → hooks → calendar → CTA → measurement.</div>
         <span class="tag">Strategy · Marketing</span>
       </div>
-      <div class="card">
+      <div class="card reveal">
         <div class="icon">💻</div>
         <div class="title">Landing Page Concept</div>
         <div class="desc">Figma design → desktop + mobile → UX structure → CTA optimisation.</div>
         <span class="tag">Practice · Web</span>
       </div>
-      <div class="card">
+      <div class="card reveal">
         <div class="icon">🎥</div>
         <div class="title">Creator Reel Edit</div>
         <div class="desc">Short-form editing with hooks, pacing, transitions, and sound design.</div>
         <span class="tag">Creator Collab · Content</span>
       </div>
-      <div class="card">
+      <div class="card reveal">
         <div class="icon">✍️</div>
         <div class="title">Typography Experiment</div>
         <div class="desc">Exploring type hierarchy, contrast, and modern layout systems.</div>
@@ -164,37 +178,37 @@
 
   <!-- PROCESS -->
   <section class="section" id="process">
-    <div class="section-header">
+    <div class="section-header reveal">
       <span class="section-tag">Our Process</span>
       <h2 class="section-title">How We <span class="highlight">Work</span></h2>
     </div>
     <div class="grid grid-3">
-      <div class="card">
+      <div class="card reveal">
         <div class="icon">🔍</div>
         <div class="title">01 · Discover</div>
         <div class="desc">Understanding goals, audience, and project scope.</div>
       </div>
-      <div class="card">
+      <div class="card reveal">
         <div class="icon">🎯</div>
         <div class="title">02 · Define</div>
         <div class="desc">Research, strategy, and defining the problem.</div>
       </div>
-      <div class="card">
+      <div class="card reveal">
         <div class="icon">💡</div>
         <div class="title">03 · Ideate</div>
         <div class="desc">Brainstorming creative directions and concepts.</div>
       </div>
-      <div class="card">
+      <div class="card reveal">
         <div class="icon">🎨</div>
         <div class="title">04 · Design</div>
         <div class="desc">Crafting visuals, content, and design systems.</div>
       </div>
-      <div class="card">
+      <div class="card reveal">
         <div class="icon">🧪</div>
         <div class="title">05 · Test & Iterate</div>
         <div class="desc">Refining based on feedback and performance.</div>
       </div>
-      <div class="card">
+      <div class="card reveal">
         <div class="icon">🚀</div>
         <div class="title">06 · Deliver</div>
         <div class="desc">Final handoff with documentation and support.</div>
@@ -204,13 +218,13 @@
 
   <!-- CONTACT -->
   <section class="section" id="contact">
-    <div class="section-header">
+    <div class="section-header reveal">
       <span class="section-tag">Get In Touch</span>
       <h2 class="section-title">Have a project in <span class="highlight">mind?</span></h2>
       <p class="section-subtitle">Let's create something amazing together.</p>
     </div>
     <div class="grid grid-2">
-      <div>
+      <div class="reveal-left">
         <div class="card">
           <div class="icon">📧</div>
           <div class="title">Email</div>
@@ -229,7 +243,7 @@
           <div class="desc">India</div>
         </div>
       </div>
-      <div class="box">
+      <div class="box reveal-right">
         <h2 style="font-size: 20px; margin-bottom: 20px;">Send us a message</h2>
         <form onsubmit="event.preventDefault(); alert('Message sent! (demo)');">
           <label>Your Name</label>
@@ -249,17 +263,14 @@
     <p>© 2025 GD Pulse — Creative Digital Studio. All rights reserved.</p>
   </footer>
 
-  <!-- Smooth scroll + tab highlight -->
+  <script src="/static/animations.js"></script>
   <script>
-    // Smooth scroll for nav links
     document.querySelectorAll('.nav-links a').forEach(link => {
-      link.addEventListener('click', (e) => {
+      link.addEventListener('click', () => {
         document.querySelectorAll('.nav-links a').forEach(l => l.classList.remove('active'));
         link.classList.add('active');
       });
     });
-
-    // Tabs visual
     document.querySelectorAll('.tab').forEach(tab => {
       tab.addEventListener('click', () => {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
