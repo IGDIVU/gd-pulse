@@ -20,11 +20,11 @@ def current_user(): return session.get("user")
 def current_role(): return session.get("role")
 def current_name(): return session.get("name", session.get("user"))
 
-def require_login():  return current_role() in ("owner", "admin", "staff", "user")
-def require_staff():  return current_role() in ("owner", "admin")   # Sirf admin+owner tools use kare
-def require_prompts(): return current_role() in ("owner", "admin", "staff")  # Staff bhi prompts dekh sake
-def require_admin():  return current_role() in ("owner", "admin")
-def require_owner():  return current_role() == "owner"
+def require_login():    return current_role() in ("owner", "admin", "staff", "user")
+def require_staff():    return current_role() in ("owner", "admin", "staff")
+def require_prompts():  return current_role() in ("owner", "admin", "staff")
+def require_admin():    return current_role() in ("owner", "admin")
+def require_owner():    return current_role() == "owner"
 
 # ---------- Auto-Inject ----------
 @app.after_request
@@ -65,7 +65,7 @@ def login():
             elif role == "admin":
                 return redirect(url_for("admin"))
             elif role == "staff":
-                return redirect(url_for("prompts"))
+                return redirect(url_for("tools"))
             else:
                 return redirect(url_for("portfolio"))
         else:
@@ -88,7 +88,7 @@ def prompts():
     return render_template("prompts.html", user=current_user(), role=current_role(), name=current_name())
 
 # ============================================
-# TOOLS (Sirf Owner + Admin)
+# TOOLS (Owner + Admin + Staff)
 # ============================================
 
 @app.route("/tools")
@@ -118,7 +118,7 @@ def owner():
     return render_template("owner.html", user=current_user(), role=current_role(), name=current_name())
 
 # ============================================
-# TOOLS (Owner + Admin only)
+# TOOLS (Owner + Admin + Staff)
 # ============================================
 
 @app.route("/tools/gst")
