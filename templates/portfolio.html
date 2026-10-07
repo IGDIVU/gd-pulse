@@ -26,8 +26,24 @@
       <a href="#process">Process</a>
       <a href="#contact">Contact</a>
     </nav>
-    <div class="header-right">
-      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+        <div class="header-right">
+      <button class="theme-toggle" onclick="toggleTheme(event)" title="Toggle theme"></button>
+      {% if role in ('owner', 'admin', 'staff') %}
+        <a href="/tools" class="btn btn-outline">Tools</a>
+        <a href="/prompts" class="btn btn-outline">Prompts</a>
+      {% endif %}
+      {% if role in ('owner', 'admin') %}
+        <a href="/admin" class="btn btn-outline">Admin</a>
+      {% endif %}
+      {% if role == 'owner' %}
+        <a href="/owner" class="btn btn-primary">Owner</a>
+      {% endif %}
+      {% if user %}
+        <a href="/logout" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
+      {% else %}
+        <a href="/login" class="btn btn-primary">Login →</a>
+      {% endif %}
+    </div>
       {% if user %}
         <a href="/tools" class="btn btn-white">Dashboard</a>
         <a href="/logout" class="avatar" title="{{ user }}">{{ user[0]|upper }}</a>
