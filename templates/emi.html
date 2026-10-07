@@ -4,87 +4,51 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EMI Calculator — GD Pulse</title>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
-  body { background: #f4f6f9; color: #222; }
-  header {
-    background: #1e2a38; color: white; padding: 15px 30px;
-    display: flex; justify-content: space-between; align-items: center;
-  }
-  header h1 { font-size: 20px; }
-  .btn {
-    background: #00b894; color: white; padding: 8px 20px;
-    border: none; border-radius: 6px; cursor: pointer;
-    font-size: 14px; text-decoration: none;
-  }
-  .btn:hover { background: #019875; }
-  .btn-outline { background: transparent; border: 1px solid #00b894; color: #00b894; }
-  main { padding: 30px; max-width: 650px; margin: 0 auto; }
-  .box {
-    background: white; padding: 30px; border-radius: 12px;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
-  }
-  h2 { color: #1e2a38; margin-bottom: 20px; font-size: 22px; }
-  label { display: block; font-size: 14px; color: #555; margin-bottom: 6px; }
-  input, select {
-    width: 100%; padding: 12px; margin-bottom: 18px;
-    border: 1px solid #ccc; border-radius: 6px; font-size: 15px;
-  }
-  input:focus, select:focus { outline: none; border-color: #00b894; }
-  .calc-btn {
-    width: 100%; padding: 14px; background: #00b894; color: white;
-    border: none; border-radius: 6px; font-size: 16px; cursor: pointer;
-    font-weight: bold;
-  }
-  .calc-btn:hover { background: #019875; }
-  .result {
-    margin-top: 25px; padding: 20px; background: #f0fdf9;
-    border-left: 4px solid #00b894; border-radius: 8px;
-  }
-  .result-row {
-    display: flex; justify-content: space-between; padding: 8px 0;
-    border-bottom: 1px dashed #cde9e0; font-size: 15px;
-  }
-  .result-row:last-child { border-bottom: none; font-weight: bold; font-size: 17px; color: #019875; }
-  .result-row span:last-child { font-weight: bold; }
-  .back { display: inline-block; margin-top: 20px; color: #1e2a38; text-decoration: none; font-size: 14px; }
-</style>
+<link rel="icon" type="image/png" href="/static/favicon.png">
+<link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 
   <header>
-    <h1>💰 EMI Calculator</h1>
-    <a href="/" class="btn btn-outline" style="color:white; border-color:white;">← Dashboard</a>
+    <a href="/" class="logo"><img src="/static/logo-horizontal.png" alt="GD Pulse"></a>
+    <nav class="nav-links"><a href="/tools">Tools</a></nav>
+    <div class="header-right">
+      <a href="/tools" class="btn btn-outline">← Back</a>
+    </div>
   </header>
 
   <main>
-    <div class="box">
-      <h2>Loan EMI Calculate Karo</h2>
+    <div class="container" style="max-width: 650px;">
+      <div class="box">
+        <h2>💰 Loan EMI Calculate Karo</h2>
 
-      <label>Loan Amount (₹)</label>
-      <input type="number" id="principal" placeholder="Jaise: 500000" min="0">
+        <label>Loan Amount (₹)</label>
+        <input type="number" id="principal" placeholder="Jaise: 500000" min="0">
 
-      <label>Interest Rate (% per year)</label>
-      <input type="number" id="rate" placeholder="Jaise: 8.5" min="0" step="0.01">
+        <label>Interest Rate (% per year)</label>
+        <input type="number" id="rate" placeholder="Jaise: 8.5" min="0" step="0.01">
 
-      <label>Loan Tenure</label>
-      <input type="number" id="tenure" placeholder="Jaise: 5" min="1">
-      <select id="tenureType">
-        <option value="months">Months</option>
-        <option value="years" selected>Years</option>
-      </select>
+        <label>Loan Tenure</label>
+        <input type="number" id="tenure" placeholder="Jaise: 5" min="1">
+        <select id="tenureType">
+          <option value="months">Months</option>
+          <option value="years" selected>Years</option>
+        </select>
 
-      <button class="calc-btn" onclick="calculateEMI()">Calculate EMI</button>
+        <button class="calc-btn" onclick="calculateEMI()">Calculate EMI</button>
 
-      <div id="result" class="result" style="display:none;">
-        <div class="result-row"><span>Monthly EMI</span><span id="r-emi">₹0</span></div>
-        <div class="result-row"><span>Total Interest</span><span id="r-interest">₹0</span></div>
-        <div class="result-row"><span>Total Payment</span><span id="r-total">₹0</span></div>
+        <div id="result" class="result" style="display:none;">
+          <div class="result-row"><span>Monthly EMI</span><span id="r-emi">₹0</span></div>
+          <div class="result-row"><span>Total Interest</span><span id="r-interest">₹0</span></div>
+          <div class="result-row"><span>Total Payment</span><span id="r-total">₹0</span></div>
+        </div>
+
+        <a href="/tools" class="back">← Back to Tools</a>
       </div>
-
-      <a href="/" class="back">← Back to Dashboard</a>
     </div>
   </main>
+
+  <footer><p>© 2025 GD Pulse</p></footer>
 
   <script>
     function calculateEMI() {
@@ -93,23 +57,15 @@
       let tenure = parseFloat(document.getElementById("tenure").value);
       const tenureType = document.getElementById("tenureType").value;
 
-      if (isNaN(principal) || principal <= 0 ||
-          isNaN(annualRate) || annualRate < 0 ||
-          isNaN(tenure) || tenure <= 0) {
-        alert("Sahi values daalo");
-        return;
+      if (isNaN(principal) || principal <= 0 || isNaN(annualRate) || annualRate < 0 || isNaN(tenure) || tenure <= 0) {
+        alert("Sahi values daalo"); return;
       }
 
-      // Convert tenure to months
       let months = tenureType === "years" ? tenure * 12 : tenure;
-
-      // Monthly interest rate
       const monthlyRate = annualRate / 12 / 100;
-
       let emi, totalPayment, totalInterest;
 
       if (monthlyRate === 0) {
-        // No interest case
         emi = principal / months;
         totalPayment = principal;
         totalInterest = 0;
