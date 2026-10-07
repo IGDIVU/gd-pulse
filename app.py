@@ -1,19 +1,12 @@
-from flask import Flask, render_template, request, redirect, url_for, session, send_file
+from flask import Flask, render_template, request, redirect, url_for, session, send_file, jsonify
 import os
 import io
 from PIL import Image
+import database
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "gd_pulse_secret_key_2025")
 app.config["MAX_CONTENT_LENGTH"] = 25 * 1024 * 1024
-
-# ---------- Users (4 Roles) ----------
-USERS = {
-    "owner": {"password": "gdowner123", "role": "owner",  "name": "Owner"},
-    "admin": {"password": "gdadmin123", "role": "admin",  "name": "Admin"},
-    "staff": {"password": "gdstaff123", "role": "staff",  "name": "Staff"},
-    "user":  {"password": "gduser123",  "role": "user",   "name": "User"},
-}
 
 # ---------- Helpers ----------
 def current_user(): return session.get("user")
@@ -55,11 +48,12 @@ def login():
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "").strip()
-        if username in USERS and USERS[username]["password"] == password:
+        user = database.get_user(username)
+        if user and user["password"] == password:
             session["user"] = username
-            session["role"] = USERS[username]["role"]
-            session["name"] = USERS[username]["name"]
-            role = USERS[username]["role"]
+            session["role"] = user["role"]
+            session["name"] = user["name"]
+            role = user["role"]
             if role == "owner":
                 return redirect(url_for("owner"))
             elif role == "admin":
@@ -78,17 +72,18 @@ def logout():
     return redirect(url_for("portfolio"))
 
 # ============================================
-# PROMPTS (Owner + Admin + Staff)
+# PROMPTS
 # ============================================
 
 @app.route("/prompts")
 def prompts():
     if not require_prompts():
         return redirect(url_for("login"))
-    return render_template("prompts.html", user=current_user(), role=current_role(), name=current_name())
+    all_prompts = database.load_prompts()
+    return render_template("prompts.html", user=current_user(), role=current_role(), name=current_name(), db_prompts=all_prompts)
 
 # ============================================
-# TOOLS (Owner + Admin + Staff)
+# TOOLS
 # ============================================
 
 @app.route("/tools")
@@ -98,27 +93,110 @@ def tools():
     return render_template("tools.html", user=current_user(), role=current_role(), name=current_name())
 
 # ============================================
-# ADMIN PANEL (Owner + Admin)
+# ADMIN PANEL
 # ============================================
 
 @app.route("/admin")
 def admin():
     if not require_admin():
         return redirect(url_for("login"))
-    return render_template("admin.html", user=current_user(), role=current_role(), name=current_name())
+    users = database.load_users()
+    prompts = database.load_prompts()
+    return render_template("admin.html", user=current_user(), role=current_role(), name=current_name(), all_users=users, all_prompts=prompts)
+
+# Admin: Add User
+@app.route("/admin/add-user", methods=["POST"])
+def admin_add_user():
+    if not require_admin(): return redirect(url_for("login"))
+    username = request.form.get("username", "").strip()
+    password = request.form.get("password", "").strip()
+    role = request.form.get("role", "user").strip()
+    name = request.form.get("name", "").strip() or username
+    if not username or not password:
+        return redirect(url_for("admin") + "?tab=users&error=missing")
+    if role not in ("admin", "staff", "user"):
+        role = "user"
+    database.add_user(username, password, role, name)
+    return redirect(url_for("admin") + "?tab=users&success=added")
+
+# Admin: Delete User
+@app.route("/admin/delete-user/<username>")
+def admin_delete_user(username):
+    if not require_admin(): return redirect(url_for("login"))
+    database.delete_user(username)
+    return redirect(url_for("admin") + "?tab=users&success=deleted")
+
+# Admin: Add Prompt
+@app.route("/admin/add-prompt", methods=["POST"])
+def admin_add_prompt():
+    if not require_admin(): return redirect(url_for("login"))
+    key = request.form.get("key", "").strip().lower().replace(" ", "-")
+    title = request.form.get("title", "").strip()
+    sub = request.form.get("sub", "").strip()
+    cat = request.form.get("cat", "single").strip()
+    text = request.form.get("text", "").strip()
+    if not key or not title or not text:
+        return redirect(url_for("admin") + "?tab=prompts&error=missing")
+    database.add_prompt(key, {
+        "title": title,
+        "sub": sub,
+        "cat": cat,
+        "steps": [{"label": "Prompt", "name": title, "text": text}]
+    })
+    return redirect(url_for("admin") + "?tab=prompts&success=added")
+
+# Admin: Delete Prompt
+@app.route("/admin/delete-prompt/<key>")
+def admin_delete_prompt(key):
+    if not require_admin(): return redirect(url_for("login"))
+    database.delete_prompt(key)
+    return redirect(url_for("admin") + "?tab=prompts&success=deleted")
 
 # ============================================
-# OWNER PANEL (God Mode)
+# OWNER PANEL
 # ============================================
 
 @app.route("/owner")
 def owner():
     if not require_owner():
         return redirect(url_for("login"))
-    return render_template("owner.html", user=current_user(), role=current_role(), name=current_name())
+    users = database.load_users()
+    return render_template("owner.html", user=current_user(), role=current_role(), name=current_name(), all_users=users)
+
+# Owner: Add User (any role)
+@app.route("/owner/add-user", methods=["POST"])
+def owner_add_user():
+    if not require_owner(): return redirect(url_for("login"))
+    username = request.form.get("username", "").strip()
+    password = request.form.get("password", "").strip()
+    role = request.form.get("role", "user").strip()
+    name = request.form.get("name", "").strip() or username
+    if not username or not password:
+        return redirect(url_for("owner") + "?tab=roles&error=missing")
+    if role not in ("owner", "admin", "staff", "user"):
+        role = "user"
+    database.add_user(username, password, role, name)
+    return redirect(url_for("owner") + "?tab=roles&success=added")
+
+# Owner: Delete User
+@app.route("/owner/delete-user/<username>")
+def owner_delete_user(username):
+    if not require_owner(): return redirect(url_for("login"))
+    database.delete_user(username)
+    return redirect(url_for("owner") + "?tab=roles&success=deleted")
+
+# Owner: Update User Role
+@app.route("/owner/update-role", methods=["POST"])
+def owner_update_role():
+    if not require_owner(): return redirect(url_for("login"))
+    username = request.form.get("username", "").strip()
+    role = request.form.get("role", "").strip()
+    if username and role in ("owner", "admin", "staff", "user"):
+        database.update_user(username, role=role)
+    return redirect(url_for("owner") + "?tab=roles&success=updated")
 
 # ============================================
-# TOOLS (Owner + Admin + Staff)
+# TOOLS
 # ============================================
 
 @app.route("/tools/gst")
