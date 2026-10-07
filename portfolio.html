@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GD Pulse — Creative Digital Studio</title>
+<link rel="icon" type="image/png" href="/static/favicon.png">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <a href="/" class="logo">
+      <img src="/static/logo-horizontal.png" alt="GD Pulse">
+    </a>
+    <nav class="nav-links">
+      <a href="#home" class="active">Home</a>
+      <a href="#about">About</a>
+      <a href="#services">Services</a>
+      <a href="#work">Work</a>
+      <a href="#process">Process</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <div class="header-right">
+      {% if user %}
+        <a href="/tools" class="btn btn-white">Dashboard</a>
+        <a href="/logout" class="avatar" title="{{ user }}">{{ user[0]|upper }}</a>
+      {% else %}
+        <a href="/login" class="btn btn-primary">Login →</a>
+      {% endif %}
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero" id="home">
+    <div class="hero-text">
+      <span class="tagline">HELLO, WE ARE GD PULSE</span>
+      <h1>Creative <span class="highlight">Digital Studio</span></h1>
+      <h2>Design · Content · Marketing · Web</h2>
+      <p>We craft meaningful digital experiences — from brand identity to cinematic content, from marketing strategy to modern websites. Built with purpose, delivered with precision.</p>
+      <div class="hero-actions">
+        <a href="#work" class="btn">View Our Work →</a>
+        <a href="#contact" class="btn btn-outline">Let's Talk</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="orb"></div>
+      <img src="/static/logo-circular.png" alt="GD Pulse Logo">
+      <div class="float-card card-1">
+        <div class="value">5+</div>
+        <div class="label">Years of Craft</div>
+      </div>
+      <div class="float-card card-2">
+        <div class="value">50+</div>
+        <div class="label">Projects Done</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="section" id="about">
+    <div class="section-header">
+      <span class="section-tag">About Us</span>
+      <h2 class="section-title">Designing with <span class="highlight">Empathy</span><br>Building with <span class="highlight">Purpose</span></h2>
+    </div>
+    <div class="grid grid-3">
+      <div class="stat-card"><div class="value">5+</div><div class="label">Years Experience</div></div>
+      <div class="stat-card"><div class="value">50+</div><div class="label">Projects Completed</div></div>
+      <div class="stat-card"><div class="value">15+</div><div class="label">Happy Clients</div></div>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section class="section" id="services">
+    <div class="section-header">
+      <span class="section-tag">What We Do</span>
+      <h2 class="section-title">Services We <span class="highlight">Offer</span></h2>
+      <p class="section-subtitle">From concept to execution — we handle every aspect of your digital presence.</p>
+    </div>
+    <div class="grid grid-4">
+      <div class="card">
+        <div class="icon">🎨</div>
+        <div class="title">Design</div>
+        <div class="desc">Logo, brand identity, social media creatives, packaging, and visual systems.</div>
+        <span class="tag">Design</span>
+      </div>
+      <div class="card">
+        <div class="icon">🎬</div>
+        <div class="title">Content</div>
+        <div class="desc">Video editing, reels, cinematic edits, AI concepts, and motion graphics.</div>
+        <span class="tag">Content</span>
+      </div>
+      <div class="card">
+        <div class="icon">📈</div>
+        <div class="title">Marketing</div>
+        <div class="desc">Strategy, research, content calendars, campaigns, and ad creative strategy.</div>
+        <span class="tag">Marketing</span>
+      </div>
+      <div class="card">
+        <div class="icon">🌐</div>
+        <div class="title">Web & Digital</div>
+        <div class="desc">Landing pages, UI/UX, websites, redesigns, and performance improvements.</div>
+        <span class="tag">Web</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- WORK / PORTFOLIO -->
+  <section class="section" id="work">
+    <div class="section-header">
+      <span class="section-tag">Portfolio</span>
+      <h2 class="section-title">Selected <span class="highlight">Work</span></h2>
+      <p class="section-subtitle">A curated collection across design, content, marketing and digital.</p>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active">All</div>
+      <div class="tab">🎨 Design</div>
+      <div class="tab">🎬 Content</div>
+      <div class="tab">📈 Marketing</div>
+      <div class="tab">🌐 Web</div>
+    </div>
+
+    <div class="grid grid-3">
+      <div class="card">
+        <div class="icon">🚗</div>
+        <div class="title">BMW Cinematic Concept</div>
+        <div class="desc">Premium automotive visual concept with AI-generated scenes and cinematic editing.</div>
+        <span class="tag">Self-Initiated · Content</span>
+      </div>
+      <div class="card">
+        <div class="icon">🍽️</div>
+        <div class="title">Restaurant Brand Identity</div>
+        <div class="desc">Complete brand package — logo, colour palette, menu design, packaging concepts.</div>
+        <span class="tag">Concept Project · Design</span>
+      </div>
+      <div class="card">
+        <div class="icon">📊</div>
+        <div class="title">30-Day Instagram Growth</div>
+        <div class="desc">Audience research → content pillars → hooks → calendar → CTA → measurement.</div>
+        <span class="tag">Strategy · Marketing</span>
+      </div>
+      <div class="card">
+        <div class="icon">💻</div>
+        <div class="title">Landing Page Concept</div>
+        <div class="desc">Figma design → desktop + mobile → UX structure → CTA optimisation.</div>
+        <span class="tag">Practice · Web</span>
+      </div>
+      <div class="card">
+        <div class="icon">🎥</div>
+        <div class="title">Creator Reel Edit</div>
+        <div class="desc">Short-form editing with hooks, pacing, transitions, and sound design.</div>
+        <span class="tag">Creator Collab · Content</span>
+      </div>
+      <div class="card">
+        <div class="icon">✍️</div>
+        <div class="title">Typography Experiment</div>
+        <div class="desc">Exploring type hierarchy, contrast, and modern layout systems.</div>
+        <span class="tag">Experiment · Design</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROCESS -->
+  <section class="section" id="process">
+    <div class="section-header">
+      <span class="section-tag">Our Process</span>
+      <h2 class="section-title">How We <span class="highlight">Work</span></h2>
+    </div>
+    <div class="grid grid-3">
+      <div class="card">
+        <div class="icon">🔍</div>
+        <div class="title">01 · Discover</div>
+        <div class="desc">Understanding goals, audience, and project scope.</div>
+      </div>
+      <div class="card">
+        <div class="icon">🎯</div>
+        <div class="title">02 · Define</div>
+        <div class="desc">Research, strategy, and defining the problem.</div>
+      </div>
+      <div class="card">
+        <div class="icon">💡</div>
+        <div class="title">03 · Ideate</div>
+        <div class="desc">Brainstorming creative directions and concepts.</div>
+      </div>
+      <div class="card">
+        <div class="icon">🎨</div>
+        <div class="title">04 · Design</div>
+        <div class="desc">Crafting visuals, content, and design systems.</div>
+      </div>
+      <div class="card">
+        <div class="icon">🧪</div>
+        <div class="title">05 · Test & Iterate</div>
+        <div class="desc">Refining based on feedback and performance.</div>
+      </div>
+      <div class="card">
+        <div class="icon">🚀</div>
+        <div class="title">06 · Deliver</div>
+        <div class="desc">Final handoff with documentation and support.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="section" id="contact">
+    <div class="section-header">
+      <span class="section-tag">Get In Touch</span>
+      <h2 class="section-title">Have a project in <span class="highlight">mind?</span></h2>
+      <p class="section-subtitle">Let's create something amazing together.</p>
+    </div>
+    <div class="grid grid-2">
+      <div>
+        <div class="card">
+          <div class="icon">📧</div>
+          <div class="title">Email</div>
+          <div class="desc">hello@gdpulse.com</div>
+        </div>
+        <br>
+        <div class="card">
+          <div class="icon">📱</div>
+          <div class="title">Phone</div>
+          <div class="desc">+91 98765 43210</div>
+        </div>
+        <br>
+        <div class="card">
+          <div class="icon">📍</div>
+          <div class="title">Location</div>
+          <div class="desc">India</div>
+        </div>
+      </div>
+      <div class="box">
+        <h2 style="font-size: 20px; margin-bottom: 20px;">Send us a message</h2>
+        <form onsubmit="event.preventDefault(); alert('Message sent! (demo)');">
+          <label>Your Name</label>
+          <input type="text" placeholder="Your name" required>
+          <label>Your Email</label>
+          <input type="email" placeholder="you@example.com" required>
+          <label>Project Details</label>
+          <textarea placeholder="Tell us about your project..." style="min-height: 100px;" required></textarea>
+          <button type="submit" class="calc-btn">Send Message →</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2025 GD Pulse — Creative Digital Studio. All rights reserved.</p>
+  </footer>
+
+  <!-- Smooth scroll + tab highlight -->
+  <script>
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-links a').forEach(link => {
+      link.addEventListener('click', (e) => {
+        document.querySelectorAll('.nav-links a').forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+      });
+    });
+
+    // Tabs visual
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+      });
+    });
+  </script>
+
+</body>
+</html>
