@@ -17,7 +17,7 @@
   }
   .tab-btn:hover { color: var(--primary); }
   .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
-  .tab-btn svg { width: 18px; height: 18px; }
+  .tab-btn [data-icon] { width: 18px; height: 18px; }
   .tab-content { display: none; }
   .tab-content.active { display: block; animation: fadeInUp 0.5s ease; }
   .section-label {
@@ -26,14 +26,35 @@
     margin: 30px 0 15px; display: flex; align-items: center; gap: 10px;
   }
   .section-label::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, var(--primary), transparent); }
+  .section-label [data-icon] { width: 16px; height: 16px; }
   .prompt-search { max-width: 400px; margin-bottom: 20px; position: relative; }
   .prompt-search input { padding-left: 42px; margin-bottom: 0; }
   .prompt-search .search-icon {
     position: absolute; left: 14px; top: 50%;
-    transform: translateY(-50%); width: 16px; height: 16px; color: var(--text-dim);
+    transform: translateY(-50%); width: 16px; height: 16px;
+    color: var(--text-dim); pointer-events: none;
   }
-  .tool-icon { width: 26px; height: 26px; color: var(--primary); margin-bottom: 12px; transition: all 0.4s; }
-  .tool-card:hover .tool-icon { color: white; transform: translateY(-4px) scale(1.15); }
+  .prompt-search .search-icon svg { width: 16px; height: 16px; }
+
+  .card-actions {
+    display: flex; gap: 6px; margin-top: 12px;
+    justify-content: center;
+    position: relative; z-index: 2;
+  }
+  .card-action {
+    padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700;
+    border: 1px solid var(--border); background: transparent;
+    color: var(--text-dim); cursor: pointer; transition: all 0.25s;
+    text-decoration: none; display: inline-flex; align-items: center; gap: 4px;
+  }
+  .card-action:hover { background: var(--primary); color: white; border-color: var(--primary); }
+  .card-action.edit:hover { background: #22d3ee; border-color: #22d3ee; }
+  .card-action.delete:hover { background: #ef4444; border-color: #ef4444; }
+  .card-action [data-icon] { width: 12px; height: 12px; }
+  .card-action svg { width: 12px; height: 12px; }
+  .card:hover .card-action { background: rgba(255,255,255,0.2); color: white; border-color: rgba(255,255,255,0.3); }
+  .card:hover .card-action:hover { background: white; color: var(--primary); }
+
   .modal-overlay {
     position: fixed; inset: 0;
     background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
@@ -58,6 +79,7 @@
     transition: all 0.25s;
   }
   .modal-close:hover { background: var(--danger); color: white; transform: rotate(90deg); }
+  .modal-close [data-icon] { width: 18px; height: 18px; }
   .modal-close svg { width: 18px; height: 18px; }
   .modal-box h2 { margin-bottom: 8px; color: var(--text); font-size: 24px; font-weight: 800; }
   .modal-box .modal-sub { color: var(--text-dim); font-size: 13px; margin-bottom: 24px; }
@@ -92,6 +114,7 @@
   }
   .copy-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(139,92,246,0.4); }
   .copy-btn.copied { background: linear-gradient(135deg, var(--success), #059669); }
+  .copy-btn [data-icon] { width: 14px; height: 14px; }
   .copy-btn svg { width: 14px; height: 14px; }
 </style>
 </head>
@@ -105,16 +128,12 @@
     <nav class="nav-links">
       <a href="/prompts" class="active">Prompts</a>
       <a href="/tools">Tools</a>
-      {% if role in ('owner', 'admin') %}
-        <a href="/admin">Admin</a>
-      {% endif %}
-      {% if role == 'owner' %}
-        <a href="/owner">Owner</a>
-      {% endif %}
+      {% if role in ('admin', 'owner') %}<a href="/admin">Admin</a>{% endif %}
+      {% if role == 'owner' %}<a href="/owner">Owner</a>{% endif %}
     </nav>
     <div class="header-right">
       <button class="theme-toggle" onclick="toggleTheme(event)" title="Toggle theme"></button>
-      <a href="/logout" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
+      <a href="#" onclick="confirmLogout(event)" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
     </div>
   </header>
 
@@ -128,16 +147,16 @@
 
       <div class="tab-bar">
         <button class="tab-btn active" onclick="switchTab('all', this)">
-          <span data-icon="grid" style="width:18px;height:18px;display:inline-flex;"></span> All
+          <span data-icon="grid"></span> All
         </button>
         <button class="tab-btn" onclick="switchTab('single', this)">
-          <span data-icon="image" style="width:18px;height:18px;display:inline-flex;"></span> Single (Image)
+          <span data-icon="image"></span> Single
         </button>
         <button class="tab-btn" onclick="switchTab('multi', this)">
-          <span data-icon="video" style="width:18px;height:18px;display:inline-flex;"></span> Workflows (Video)
+          <span data-icon="video"></span> Workflows
         </button>
         <button class="tab-btn" onclick="switchTab('system', this)">
-          <span data-icon="sparkle" style="width:18px;height:18px;display:inline-flex;"></span> System (AI)
+          <span data-icon="sparkle"></span> System
         </button>
       </div>
 
@@ -147,11 +166,11 @@
       </div>
 
       <div class="tab-content active" id="tab-all">
-        <div class="section-label"><span data-icon="image" style="width:16px;height:16px;display:inline-flex;"></span> Single Prompts (Image)</div>
+        <div class="section-label"><span data-icon="image"></span> Single Prompts</div>
         <div class="grid grid-3" id="singleGrid"></div>
-        <div class="section-label"><span data-icon="video" style="width:16px;height:16px;display:inline-flex;"></span> Multi-Step Workflows (Video)</div>
+        <div class="section-label"><span data-icon="video"></span> Multi-Step Workflows</div>
         <div class="grid grid-2" id="multiGrid"></div>
-        <div class="section-label"><span data-icon="sparkle" style="width:16px;height:16px;display:inline-flex;"></span> System Prompts (AI Agents)</div>
+        <div class="section-label"><span data-icon="sparkle"></span> System Prompts</div>
         <div class="grid grid-2" id="systemGrid"></div>
       </div>
 
@@ -169,6 +188,19 @@
     </div>
   </div>
 
+  <!-- Confirm Dialog -->
+  <div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-box">
+      <div class="warn-icon"><span data-icon="warning"></span></div>
+      <h3 id="confirmTitle">Are you sure?</h3>
+      <p id="confirmMessage">This action cannot be undone.</p>
+      <div class="confirm-actions">
+        <button class="btn-cancel" onclick="closeConfirm()">Cancel</button>
+        <button class="btn-confirm" id="confirmYes">Yes</button>
+      </div>
+    </div>
+  </div>
+
   <footer><p>© 2025 GD Pulse — Prompts Library</p></footer>
 
   <script src="/static/icons.js"></script>
@@ -179,7 +211,7 @@
       insta: { title: "Instagram Post", sub: "Social media creative generation", cat: "single", steps: [{ label: "Prompt", name: "Instagram Post", text: `Create a scroll-stopping Instagram post for [BRAND NAME].\nProduct/Service: [PRODUCT]\nTarget audience: [AUDIENCE]\nTone: [modern/bold/minimal/luxury]\nColor palette: [COLORS]\nRequirements:\n- Eye-catching visual hierarchy\n- Bold headline with clear value proposition\n- Includes brand logo placement area\n- Optimized for 1080×1080 and 1080×1350\n- Modern gradient or solid background\n- High contrast for mobile viewing\nOutput: Premium social media creative.` }] },
       product: { title: "Product Photography", sub: "E-commerce product shot", cat: "single", steps: [{ label: "Prompt", name: "Product Photography", text: `Professional product photography of [PRODUCT].\nStyle: Commercial, high-end, e-commerce ready.\nBackground: [Clean white / Gradient / Lifestyle scene]\nLighting: Soft studio lighting with subtle shadows.\nAngle: [45-degree hero / Top-down flat lay / Front-facing]\nDetails:\n- Sharp focus on product\n- Rich, true-to-life colors\n- Subtle reflections\n- Minimal props\n- 4K resolution\nOutput: Studio-quality product image.` }] },
       food: { title: "Food Photography", sub: "Restaurant dish photography", cat: "single", steps: [{ label: "Prompt", name: "Food Photography", text: `Mouth-watering food photography of [DISH NAME].\nStyle: Editorial, restaurant menu quality.\nAngle: [45-degree / Top-down / Close-up macro]\nLighting: Warm natural lighting, appetizing highlights.\nSetting: [Rustic wooden table / Modern minimal / Dark moody]\nDetails:\n- Steam or freshness visible\n- Garnish and plating detail\n- Shallow depth of field\n- Rich, saturated colors\n- Background softly blurred\nOutput: Magazine-quality food image.` }] },
-      thumb: { title: "YouTube Thumbnail", sub: "High-CTR thumbnail design", cat: "single", steps: [{ label: "Prompt", name: "YouTube Thumbnail", text: `Design a high-CTR YouTube thumbnail for: "[VIDEO TITLE]"\nTopic: [TOPIC]\nStyle: Bold, clickable, attention-grabbing.\nRequirements:\n- Big expressive face on right side\n- Bold 3-4 word text on left\n- Bright vibrant colors (yellow, red, blue)\n- 1280×720 resolution\n- Readable at small size\n- Arrow or circle highlighting key element\nOutput: High-CTR thumbnail.` }] },
+      thumb: { title: "YouTube Thumbnail", sub: "High-CTR thumbnail design", cat: "single", steps: [{ label: "Prompt", name: "YouTube Thumbnail", text: `Design a high-CTR YouTube thumbnail for: "[VIDEO TITLE]"\nTopic: [TOPIC]\nStyle: Bold, clickable, attention-grabbing.\nRequirements:\n- Big expressive face on right side\n- Bold 3-4 word text on left\n- Bright vibrant colors\n- 1280×720 resolution\n- Readable at small size\n- Arrow or circle highlighting key element\nOutput: High-CTR thumbnail.` }] },
       poster: { title: "Poster Design", sub: "Event poster generation", cat: "single", steps: [{ label: "Prompt", name: "Poster Design", text: `Create a stunning poster for [EVENT NAME].\nEvent type: [Concert / Sale / Workshop / Launch]\nDate & venue: [DATE], [VENUE]\nStyle: [Modern / Retro / Minimal / Bold]\nColor scheme: [COLORS]\nRequirements:\n- Strong focal point\n- Clear hierarchy: Event → Date → Venue → Details\n- Eye-catching from distance\n- Print-ready A3 or A2\n- Sponsor/logo area at bottom\nOutput: Print-quality poster.` }] },
       packaging: { title: "Packaging Design", sub: "Product packaging concept", cat: "single", steps: [{ label: "Prompt", name: "Packaging Design", text: `Design premium packaging for [PRODUCT].\nCategory: [Food / Cosmetic / Beverage / Electronics]\nStyle: [Minimal / Luxury / Playful / Eco-friendly]\nColor palette: [COLORS]\nRequirements:\n- Strong shelf presence\n- Clear brand logo placement\n- Product name prominent\n- Key information visible\n- Front, back, side view\n- Mockup on realistic background\nOutput: 3D mockup of packaging.` }] },
       cinematic30: { title: "30-Sec Cinematic Video", sub: "7 clips × 4 sec · Pre + Master + Agent", cat: "multi", steps: [
@@ -198,11 +230,15 @@
         { label: "Step 1 — Pre-Production", name: "Ad Concept", text: `Create a 24-second product ad for [PRODUCT].\nTarget: [AUDIENCE]\nUSP: [UNIQUE SELLING POINT]\n\n4-CLIP BREAKDOWN (6 sec each):\n- Clip 1: Problem / Relatable moment\n- Clip 2: Product introduction (hero reveal)\n- Clip 3: Key benefit in action\n- Clip 4: CTA + Logo + Tagline\n\nTone: [Professional / Playful / Luxury / Minimal]` },
         { label: "Step 2 — Master Prompt", name: "Style Reference", text: `MASTER STYLE:\n\nLook: Clean, modern, premium\nBackground: [Studio white / Gradient / Lifestyle]\nLighting: Soft studio, subtle shadows\nColor: Brand-aligned palette\nCamera: Macro to wide, smooth transitions\nMusic: [Energetic / Calm / Cinematic]\n\nCONSISTENCY: Same product appearance, same lighting.` },
         { label: "Step 3 — Agent Prompt", name: "Clip Generation (4×)", text: `AGENT PROMPT (4 clips):\n\nClip 1: Relatable scenario showing problem\nClip 2: Product hero reveal with drama\nClip 3: Product in use, showing benefit\nClip 4: Product + brand logo + tagline + CTA\n\nEach clip 6 sec, brand-aligned color grade.` }] },
-      videoEditor: { title: "Video Editor AI", sub: "AI agent for editing guidance", cat: "system", steps: [{ label: "System Prompt", name: "Video Editor Instructions", text: `You are an expert video editor with 10+ years of experience in cinematic editing, social media content, and commercial videos.\n\nYour role:\n- Suggest editing techniques (cut timing, transitions, pacing)\n- Recommend music/audio sync points\n- Advise on color grading (LUTs, color correction)\n- Propose text overlays and motion graphics\n- Give feedback on rough cuts\n- Suggest hook optimization for social media\n\nStyle guidelines:\n- Modern, punchy, trend-aware\n- Data-informed (retention curves)\n- Reference specific timestamps\n- Always suggest 2-3 alternative approaches` }] },
-      scriptWriter: { title: "Script Writer AI", sub: "AI agent for video scripts", cat: "system", steps: [{ label: "System Prompt", name: "Script Writer Instructions", text: `You are a professional script writer specialized in short-form and long-form video content.\n\nYour expertise:\n- YouTube long-form (10-20 min)\n- Instagram Reels / YouTube Shorts\n- Commercial scripts\n- Documentary narration\n- Voiceover scripts\n\nYou write with:\n- Strong hooks (first 3 seconds)\n- Clear structure (Hook → Context → Value → CTA)\n- Conversational tone matching brand voice\n- Visual cues for editor\n- Timing notes\n\nOutput format:\n[0:00-0:03] HOOK: "..."\n[0:03-0:10] CONTEXT: "..."\n[0:10-0:25] VALUE: "..."\n[0:25-0:30] CTA: "..."` }] },
-      strategist: { title: "Content Strategist AI", sub: "AI agent for social media strategy", cat: "system", steps: [{ label: "System Prompt", name: "Content Strategist Instructions", text: `You are a senior social media strategist who has grown multiple brands on Instagram, YouTube, and LinkedIn.\n\nYour expertise:\n- Audience research and persona building\n- Content pillar development\n- Content calendar planning (30/60/90 days)\n- Hook testing and A/B strategies\n- Algorithm optimization\n- Competitor analysis\n- Analytics interpretation\n\nWhen asked, provide:\n1. Target audience profile\n2. Content pillars (3-5 themes)\n3. Posting cadence\n4. Hook variations for testing\n5. Performance metrics to track\n6. 30-day content calendar skeleton` }] },
-      brandDesigner: { title: "Brand Designer AI", sub: "AI agent for brand systems", cat: "system", steps: [{ label: "System Prompt", name: "Brand Designer Instructions", text: `You are a senior brand designer who has built brand identities for startups to Fortune 500 companies.\n\nYour expertise:\n- Brand naming and positioning\n- Logo design direction\n- Color palette development\n- Typography pairing\n- Visual language systems\n- Brand guidelines documentation\n- Packaging and collateral\n\nWhen asked, deliver:\n1. Brand essence (3 words)\n2. Logo direction (2-3 concepts)\n3. Color palette (with hex codes)\n4. Typography (heading + body)\n5. Visual style rules\n6. Voice & tone guidelines\n7. Do's and don'ts` }] },
+      videoEditor: { title: "Video Editor AI", sub: "AI agent for editing guidance", cat: "system", steps: [{ label: "System Prompt", name: "Video Editor Instructions", text: `You are an expert video editor with 10+ years of experience.\n\nYour role:\n- Suggest editing techniques\n- Recommend music/audio sync points\n- Advise on color grading\n- Propose text overlays and motion graphics\n- Give feedback on rough cuts\n- Suggest hook optimization\n\nStyle: Modern, punchy, trend-aware` }] },
+      scriptWriter: { title: "Script Writer AI", sub: "AI agent for video scripts", cat: "system", steps: [{ label: "System Prompt", name: "Script Writer Instructions", text: `You are a professional script writer specialized in video content.\n\nExpertise:\n- YouTube long-form\n- Instagram Reels / Shorts\n- Commercial scripts\n- Documentary narration\n\nStructure:\n[0:00-0:03] HOOK: "..."\n[0:03-0:10] CONTEXT: "..."\n[0:10-0:25] VALUE: "..."\n[0:25-0:30] CTA: "..."` }] },
+      strategist: { title: "Content Strategist AI", sub: "AI agent for social media strategy", cat: "system", steps: [{ label: "System Prompt", name: "Content Strategist Instructions", text: `You are a senior social media strategist.\n\nExpertise:\n- Audience research\n- Content pillars\n- Content calendar planning\n- Hook testing\n- Algorithm optimization\n- Analytics interpretation` }] },
+      brandDesigner: { title: "Brand Designer AI", sub: "AI agent for brand systems", cat: "system", steps: [{ label: "System Prompt", name: "Brand Designer Instructions", text: `You are a senior brand designer.\n\nExpertise:\n- Brand naming and positioning\n- Logo design direction\n- Color palette development\n- Typography pairing\n- Visual language systems\n- Brand guidelines` }] },
     };
+
+    const DB_PROMPTS = {{ db_prompts|tojson }};
+    const ALL_PROMPTS = Object.assign({}, PROMPTS, DB_PROMPTS);
+    const CAN_EDIT = {{ 'true' if can_edit else 'false' }};
 
     const PROMPT_ICONS = {
       logo: "design", insta: "content", product: "image", food: "restaurant",
@@ -211,22 +247,32 @@
       videoEditor: "video", scriptWriter: "text", strategist: "analytics", brandDesigner: "design"
     };
 
-    function makeCard(key, data, tagText) {
+    function makeCard(key, data, tagText, isDb) {
       const icon = PROMPT_ICONS[key] || "sparkle";
+      let actionsHtml = "";
+      if (CAN_EDIT && isDb) {
+        actionsHtml = `
+          <div class="card-actions" onclick="event.stopPropagation()">
+            <a href="/admin/edit-prompt/${key}" class="card-action edit"><span data-icon="edit"></span> Edit</a>
+            <a href="#" onclick="confirmDelete('${key}');return false;" class="card-action delete"><span data-icon="trash"></span> Delete</a>
+          </div>`;
+      }
       return `<div class="card reveal" onclick="openPrompt('${key}')" data-search="${data.title.toLowerCase()} ${data.sub.toLowerCase()}">
         <span class="tool-icon" data-icon="${icon}"></span>
         <div class="title">${data.title}</div>
         <div class="desc">${data.sub}</div>
-        <span class="tag">${tagText}</span>
+        <span class="tag">${isDb ? "DB" : tagText}</span>
+        ${actionsHtml}
       </div>`;
     }
 
     function renderAll() {
       const single = [], multi = [], system = [];
-      Object.entries(PROMPTS).forEach(([key, data]) => {
-        if (data.cat === "single") single.push(makeCard(key, data, "Copy →"));
-        else if (data.cat === "multi") multi.push(makeCard(key, data, "Workflow →"));
-        else system.push(makeCard(key, data, "Copy →"));
+      Object.entries(ALL_PROMPTS).forEach(([key, data]) => {
+        const isDb = DB_PROMPTS.hasOwnProperty(key);
+        if (data.cat === "single") single.push(makeCard(key, data, "Copy", isDb));
+        else if (data.cat === "multi") multi.push(makeCard(key, data, "Workflow", isDb));
+        else system.push(makeCard(key, data, "Copy", isDb));
       });
       document.getElementById("singleGrid").innerHTML = single.join("");
       document.getElementById("multiGrid").innerHTML = multi.join("");
@@ -246,7 +292,7 @@
     }
 
     function openPrompt(key) {
-      const data = PROMPTS[key];
+      const data = ALL_PROMPTS[key];
       if (!data) return;
       let html = `<h2>${data.title}</h2><p class="modal-sub">${data.sub}</p>`;
       data.steps.forEach((step, i) => {
@@ -288,6 +334,35 @@
       document.querySelectorAll("[data-search]").forEach(card => {
         const text = card.getAttribute("data-search");
         card.style.display = (query === "" || text.includes(query)) ? "" : "none";
+      });
+    }
+
+    // ============ CONFIRM ============
+    let pendingAction = null;
+    function showConfirm(title, message, btnText, callback) {
+      document.getElementById("confirmTitle").innerText = title;
+      document.getElementById("confirmMessage").innerText = message;
+      document.getElementById("confirmYes").innerText = btnText;
+      pendingAction = callback;
+      document.getElementById("confirmOverlay").classList.add("active");
+      if (window.renderIcons) window.renderIcons();
+    }
+    function closeConfirm() {
+      document.getElementById("confirmOverlay").classList.remove("active");
+      pendingAction = null;
+    }
+    document.getElementById("confirmYes").addEventListener("click", () => {
+      if (pendingAction) { const action = pendingAction; closeConfirm(); action(); }
+    });
+    function confirmDelete(key) {
+      showConfirm("Delete Prompt?", `"${key}" ko permanently delete karna hai?`, "Yes, Delete", () => {
+        window.location.href = `/admin/delete-prompt/${key}`;
+      });
+    }
+    function confirmLogout(e) {
+      if (e) e.preventDefault();
+      showConfirm("Logout?", "Kya tum sach me logout karna chahte ho?", "Yes, Logout", () => {
+        window.location.href = "/logout";
       });
     }
 
