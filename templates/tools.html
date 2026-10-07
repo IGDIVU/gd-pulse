@@ -69,9 +69,15 @@
         <input type="text" placeholder="Search tools..." id="searchInput">
         <span class="search-icon">🔍</span>
       </div>
-      <button class="theme-toggle" onclick="toggleTheme(event)" title="Toggle theme">🌙</button>
-      <div class="avatar" title="{{ user }}">{{ user[0]|upper }}</div>
-      <a href="/logout" class="btn btn-outline">Logout</a>
+            <button class="theme-toggle" onclick="toggleTheme(event)" title="Toggle theme"></button>
+      <a href="/prompts" class="btn btn-outline">Prompts</a>
+      {% if role in ('owner', 'admin') %}
+        <a href="/admin" class="btn btn-outline">Admin</a>
+      {% endif %}
+      {% if role == 'owner' %}
+        <a href="/owner" class="btn btn-primary">Owner</a>
+      {% endif %}
+      <a href="/logout" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
     </div>
   </header>
 
