@@ -1,6 +1,6 @@
 /* ============================================
-   GD PULSE — ANIMATIONS
-   With MAGIC theme transition (dramatic!)
+   GD PULSE — FULL MAGIC THEME TRANSITION
+   Screen shake + Confetti + Sound + Stagger
    ============================================ */
 
 // ===== SCROLL PROGRESS BAR =====
@@ -17,7 +17,7 @@
   });
 })();
 
-// ===== THEME TOGGLE with MAGIC =====
+// ===== THEME TOGGLE with FULL MAGIC =====
 (function initTheme() {
   const savedTheme = localStorage.getItem('gd-theme') || 'light';
   document.documentElement.setAttribute('data-theme', savedTheme);
@@ -32,7 +32,6 @@ function toggleTheme(e) {
   const current = document.documentElement.getAttribute('data-theme') || 'light';
   const next = current === 'light' ? 'dark' : 'light';
 
-  // Get click position
   let x = window.innerWidth - 60;
   let y = 60;
   if (e && e.clientX) {
@@ -40,36 +39,102 @@ function toggleTheme(e) {
     y = e.clientY;
   }
 
-  // Spin the button
+  // 1. Play sound
+  playMagicSound(current);
+
+  // 2. Spin the toggle button
   const btn = e ? e.target.closest('.theme-toggle') : null;
   if (btn) {
     btn.classList.add('spinning');
     setTimeout(() => btn.classList.remove('spinning'), 900);
   }
 
-  // 1. Circle expand from click
+  // 3. Screen shake
+  triggerScreenShake();
+
+  // 4. Circle expand
   createCircleExpand(x, y, current);
 
-  // 2. Particles burst
+  // 5. Ripple rings (3 concentric)
+  createRippleRings(x, y, current);
+
+  // 6. Star burst
+  createStarBurst(x, y, current);
+
+  // 7. Confetti burst
+  createConfetti(x, y);
+
+  // 8. Particles
   createParticles(x, y, current);
 
-  // 3. Flash overlay
+  // 9. Flash
   createFlash();
 
-  // 4. Change theme in the middle (after 350ms)
+  // 10. Change theme after 400ms
   setTimeout(() => {
     document.documentElement.setAttribute('data-theme', next);
     localStorage.setItem('gd-theme', next);
     updateThemeIcon(next);
+    triggerStaggerColors();
   }, 400);
 
-  setTimeout(() => { isSwitching = false; }, 1400);
+  setTimeout(() => { isSwitching = false; }, 1600);
 }
 
-// Circle that expands from click point
+// ---- SOUND (Web Audio API — no files needed) ----
+function playMagicSound(currentTheme) {
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+
+    // Whoosh sound (rising frequency)
+    const whoosh = ctx.createOscillator();
+    const whooshGain = ctx.createGain();
+    whoosh.type = 'sine';
+    whoosh.frequency.setValueAtTime(200, ctx.currentTime);
+    whoosh.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.4);
+    whooshGain.gain.setValueAtTime(0, ctx.currentTime);
+    whooshGain.gain.linearRampToValueAtTime(0.15, ctx.currentTime + 0.1);
+    whooshGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+    whoosh.connect(whooshGain);
+    whooshGain.connect(ctx.destination);
+    whoosh.start(ctx.currentTime);
+    whoosh.stop(ctx.currentTime + 0.5);
+
+    // Sparkle (high freq random notes)
+    setTimeout(() => {
+      const notes = [880, 1108, 1318, 1567, 1760];
+      notes.forEach((freq, i) => {
+        const sparkle = ctx.createOscillator();
+        const sGain = ctx.createGain();
+        sparkle.type = 'triangle';
+        sparkle.frequency.setValueAtTime(freq, ctx.currentTime);
+        sGain.gain.setValueAtTime(0, ctx.currentTime);
+        sGain.gain.linearRampToValueAtTime(0.08, ctx.currentTime + 0.02);
+        sGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+        sparkle.connect(sGain);
+        sGain.connect(ctx.destination);
+        sparkle.start(ctx.currentTime + i * 0.06);
+        sparkle.stop(ctx.currentTime + i * 0.06 + 0.3);
+      });
+    }, 250);
+
+  } catch (err) {
+    console.log('Sound not supported:', err);
+  }
+}
+
+// ---- SCREEN SHAKE ----
+function triggerScreenShake() {
+  document.body.style.animation = 'screenShake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97)';
+  setTimeout(() => { document.body.style.animation = ''; }, 500);
+}
+
+// ---- CIRCLE EXPAND ----
 function createCircleExpand(x, y, currentTheme) {
-  const circle = document.createElement('div');
   const color = currentTheme === 'light' ? '#8b5cf6' : '#0f0a1f';
+  const circle = document.createElement('div');
   circle.style.cssText = `
     position: fixed;
     left: ${x}px;
@@ -87,45 +152,110 @@ function createCircleExpand(x, y, currentTheme) {
     animation: circleExpand 1.1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   `;
   document.body.appendChild(circle);
-
-  // Add keyframes once
-  if (!document.getElementById('magic-keyframes')) {
-    const style = document.createElement('style');
-    style.id = 'magic-keyframes';
-    style.textContent = `
-      @keyframes circleExpand {
-        0% { transform: scale(0); opacity: 0.9; }
-        60% { transform: scale(30); opacity: 0.7; }
-        100% { transform: scale(80); opacity: 0; }
-      }
-      @keyframes particleFly {
-        0% {
-          transform: translate(0, 0) scale(1);
-          opacity: 1;
-        }
-        100% {
-          transform: translate(var(--px), var(--py)) scale(0);
-          opacity: 0;
-        }
-      }
-      @keyframes flashPulse {
-        0% { opacity: 0; }
-        30% { opacity: 0.4; }
-        100% { opacity: 0; }
-      }
-      @keyframes elementPulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.015); }
-        100% { transform: scale(1); }
-      }
-    `;
-    document.head.appendChild(style);
-  }
-
   setTimeout(() => circle.remove(), 1200);
 }
 
-// Particles that fly out from click
+// ---- RIPPLE RINGS ----
+function createRippleRings(x, y, currentTheme) {
+  const color = currentTheme === 'light' ? '#8b5cf6' : '#a78bfa';
+  for (let i = 0; i < 3; i++) {
+    setTimeout(() => {
+      const ring = document.createElement('div');
+      ring.style.cssText = `
+        position: fixed;
+        left: ${x}px;
+        top: ${y}px;
+        width: 20px;
+        height: 20px;
+        margin-left: -10px;
+        margin-top: -10px;
+        border-radius: 50%;
+        border: 3px solid ${color};
+        pointer-events: none;
+        z-index: 99992;
+        transform: scale(0);
+        box-shadow: 0 0 30px ${color};
+        animation: ringExpand 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      `;
+      document.body.appendChild(ring);
+      setTimeout(() => ring.remove(), 1100);
+    }, i * 150);
+  }
+}
+
+// ---- STAR BURST ----
+function createStarBurst(x, y, currentTheme) {
+  const colors = currentTheme === 'light'
+    ? ['#8b5cf6', '#ec4899', '#22d3ee', '#fbbf24']
+    : ['#a78bfa', '#22d3ee', '#ec4899', '#fbbf24'];
+
+  const count = 8;
+  for (let i = 0; i < count; i++) {
+    const angle = (Math.PI * 2 * i) / count;
+    const distance = 150 + Math.random() * 100;
+    const px = Math.cos(angle) * distance;
+    const py = Math.sin(angle) * distance;
+    const color = colors[i % colors.length];
+
+    const star = document.createElement('div');
+    star.innerText = '✦';
+    star.style.cssText = `
+      position: fixed;
+      left: ${x}px;
+      top: ${y}px;
+      font-size: 28px;
+      color: ${color};
+      text-shadow: 0 0 20px ${color}, 0 0 40px ${color};
+      pointer-events: none;
+      z-index: 99993;
+      --px: ${px}px;
+      --py: ${py}px;
+      animation: starFly 1.2s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+    `;
+    document.body.appendChild(star);
+    setTimeout(() => star.remove(), 1300);
+  }
+}
+
+// ---- CONFETTI ----
+function createConfetti(x, y) {
+  const colors = ['#8b5cf6', '#a78bfa', '#ec4899', '#22d3ee', '#fbbf24', '#10b981', '#f472b6'];
+  const count = 100;
+
+  for (let i = 0; i < count; i++) {
+    const piece = document.createElement('div');
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    const size = 6 + Math.random() * 10;
+    const angle = Math.random() * Math.PI * 2;
+    const velocity = 100 + Math.random() * 400;
+    const px = Math.cos(angle) * velocity;
+    const py = Math.sin(angle) * velocity - 200;
+    const rotation = Math.random() * 720 - 360;
+    const duration = 1.5 + Math.random() * 1.5;
+    const shape = Math.random() > 0.5 ? '50%' : '2px';
+
+    piece.style.cssText = `
+      position: fixed;
+      left: ${x}px;
+      top: ${y}px;
+      width: ${size}px;
+      height: ${size}px;
+      background: ${color};
+      border-radius: ${shape};
+      pointer-events: none;
+      z-index: 99994;
+      --px: ${px}px;
+      --py: ${py + 600}px;
+      --rot: ${rotation}deg;
+      animation: confettiFall ${duration}s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+      box-shadow: 0 0 ${size / 2}px ${color};
+    `;
+    document.body.appendChild(piece);
+    setTimeout(() => piece.remove(), duration * 1000 + 100);
+  }
+}
+
+// ---- PARTICLES ----
 function createParticles(x, y, currentTheme) {
   const colors = currentTheme === 'light'
     ? ['#8b5cf6', '#a78bfa', '#ec4899', '#c4b5fd']
@@ -163,7 +293,7 @@ function createParticles(x, y, currentTheme) {
   }
 }
 
-// Flash overlay
+// ---- FLASH ----
 function createFlash() {
   const flash = document.createElement('div');
   flash.style.cssText = `
@@ -178,6 +308,73 @@ function createFlash() {
   document.body.appendChild(flash);
   setTimeout(() => flash.remove(), 1000);
 }
+
+// ---- STAGGER COLOR CHANGE ----
+function triggerStaggerColors() {
+  const elements = document.querySelectorAll(
+    'header, .card, .tool-card, .stat-card, .box, .welcome, .container, footer, .tab, .btn, .avatar, .search-box input, .nav-links a'
+  );
+  elements.forEach((el, i) => {
+    el.style.transition = `background-color 0.5s ease ${i * 0.03}s, color 0.5s ease ${i * 0.03}s, border-color 0.5s ease ${i * 0.03}s, box-shadow 0.5s ease ${i * 0.03}s`;
+    setTimeout(() => {
+      el.style.transition = '';
+    }, 1500 + i * 30);
+  });
+}
+
+// ---- KEYFRAMES (inject once) ----
+(function injectMagicKeyframes() {
+  if (document.getElementById('magic-keyframes')) return;
+  const style = document.createElement('style');
+  style.id = 'magic-keyframes';
+  style.textContent = `
+    @keyframes circleExpand {
+      0% { transform: scale(0); opacity: 0.9; }
+      60% { transform: scale(30); opacity: 0.7; }
+      100% { transform: scale(80); opacity: 0; }
+    }
+    @keyframes ringExpand {
+      0% { transform: scale(0); opacity: 1; }
+      100% { transform: scale(15); opacity: 0; }
+    }
+    @keyframes particleFly {
+      0% { transform: translate(0, 0) scale(1); opacity: 1; }
+      100% { transform: translate(var(--px), var(--py)) scale(0); opacity: 0; }
+    }
+    @keyframes starFly {
+      0% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 1; }
+      100% { transform: translate(var(--px), var(--py)) scale(0.5) rotate(360deg); opacity: 0; }
+    }
+    @keyframes confettiFall {
+      0% {
+        transform: translate(0, 0) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(var(--px), var(--py)) rotate(var(--rot));
+        opacity: 0;
+      }
+    }
+    @keyframes flashPulse {
+      0% { opacity: 0; }
+      30% { opacity: 0.4; }
+      100% { opacity: 0; }
+    }
+    @keyframes screenShake {
+      0%, 100% { transform: translate(0, 0); }
+      10% { transform: translate(-5px, -3px); }
+      20% { transform: translate(4px, 2px); }
+      30% { transform: translate(-3px, 3px); }
+      40% { transform: translate(3px, -2px); }
+      50% { transform: translate(-4px, 1px); }
+      60% { transform: translate(2px, 3px); }
+      70% { transform: translate(-2px, -2px); }
+      80% { transform: translate(3px, 1px); }
+      90% { transform: translate(-1px, -1px); }
+    }
+  `;
+  document.head.appendChild(style);
+})();
 
 function updateThemeIcon(theme) {
   document.querySelectorAll('.theme-toggle').forEach(btn => {
@@ -203,7 +400,6 @@ function updateThemeIcon(theme) {
     document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale, .stagger')
       .forEach(el => observer.observe(el));
   }
-
   document.addEventListener('DOMContentLoaded', observeAll);
   setTimeout(observeAll, 500);
 })();
@@ -239,13 +435,12 @@ function animateCount(el, target, duration = 2000) {
       }
     });
   }, { threshold: 0.5 });
-
   document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.stat-card .value').forEach(el => observer.observe(el));
   });
 })();
 
-// ===== PARALLAX ORB =====
+// ===== PARALLAX =====
 (function initParallax() {
   const orbs = document.querySelectorAll('.parallax-orb');
   if (!orbs.length) return;
@@ -295,7 +490,7 @@ function animateCount(el, target, duration = 2000) {
   document.head.appendChild(style);
 })();
 
-// ===== MAGNETIC BUTTONS =====
+// ===== MAGNETIC =====
 (function initMagnetic() {
   if (window.innerWidth < 900) return;
   document.querySelectorAll('.btn, .icon-btn, .theme-toggle, .avatar').forEach(btn => {
@@ -311,7 +506,7 @@ function animateCount(el, target, duration = 2000) {
   });
 })();
 
-// ===== CARD 3D TILT =====
+// ===== CARD TILT =====
 (function initTilt() {
   if (window.innerWidth < 900) return;
   document.querySelectorAll('.card, .tool-card, .stat-card').forEach(card => {
