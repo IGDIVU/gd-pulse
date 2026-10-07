@@ -13,9 +13,7 @@
   <div class="parallax-orb" style="bottom: 10%; right: 5%;"></div>
 
   <header>
-    <a href="/" class="logo">
-      <img src="/static/logo-horizontal.png" alt="GD Pulse">
-    </a>
+    <a href="/" class="logo"><img src="/static/logo-horizontal.png" alt="GD Pulse"></a>
     <nav class="nav-links">
       <a href="#home" class="active">Home</a>
       <a href="#about">About</a>
@@ -26,22 +24,22 @@
     </nav>
     <div class="header-right">
       <button class="theme-toggle" onclick="toggleTheme(event)" title="Toggle theme"></button>
-      {% if role in ('owner', 'admin', 'staff') %}
+      {% if role in ('admin', 'owner', 'manager', 'hr', 'staff') %}
         <a href="/tools" class="btn btn-outline">Tools</a>
       {% endif %}
-      {% if role in ('owner', 'admin', 'staff') %}
+      {% if role in ('admin', 'owner', 'manager', 'staff') %}
         <a href="/prompts" class="btn btn-outline">Prompts</a>
       {% endif %}
-      {% if role in ('owner', 'admin') %}
+      {% if role in ('admin', 'owner') %}
         <a href="/admin" class="btn btn-outline">Admin</a>
       {% endif %}
       {% if role == 'owner' %}
         <a href="/owner" class="btn btn-primary">Owner</a>
       {% endif %}
       {% if user %}
-        <a href="/logout" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
+        <a href="#" onclick="confirmLogout(event)" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
       {% else %}
-        <a href="/login" class="btn btn-primary">Login →</a>
+        <a href="/login" class="btn btn-primary">Login</a>
       {% endif %}
     </div>
   </header>
@@ -53,7 +51,7 @@
       <h2>Design · Content · Marketing · Web</h2>
       <p>We craft meaningful digital experiences — from brand identity to cinematic content, from marketing strategy to modern websites.</p>
       <div class="hero-actions">
-        <a href="#work" class="btn">View Our Work →</a>
+        <a href="#work" class="btn">View Our Work</a>
         <a href="#contact" class="btn btn-outline">Let's Talk</a>
       </div>
     </div>
@@ -90,25 +88,25 @@
     </div>
     <div class="grid grid-4">
       <div class="card reveal">
-        <div class="icon">🎨</div>
+        <span class="tool-icon" data-icon="design" style="width:32px;height:32px;"></span>
         <div class="title">Design</div>
         <div class="desc">Logo, brand identity, social media creatives, packaging.</div>
         <span class="tag">Design</span>
       </div>
       <div class="card reveal">
-        <div class="icon">🎬</div>
+        <span class="tool-icon" data-icon="content" style="width:32px;height:32px;"></span>
         <div class="title">Content</div>
         <div class="desc">Video editing, reels, cinematic edits, AI concepts.</div>
         <span class="tag">Content</span>
       </div>
       <div class="card reveal">
-        <div class="icon">📈</div>
+        <span class="tool-icon" data-icon="marketing" style="width:32px;height:32px;"></span>
         <div class="title">Marketing</div>
         <div class="desc">Strategy, research, content calendars, campaigns.</div>
         <span class="tag">Marketing</span>
       </div>
       <div class="card reveal">
-        <div class="icon">🌐</div>
+        <span class="tool-icon" data-icon="web" style="width:32px;height:32px;"></span>
         <div class="title">Web & Digital</div>
         <div class="desc">Landing pages, UI/UX, websites, redesigns.</div>
         <span class="tag">Web</span>
@@ -130,37 +128,31 @@
     </div>
     <div class="grid grid-3">
       <div class="card reveal">
-        <div class="icon">🚗</div>
         <div class="title">BMW Cinematic Concept</div>
         <div class="desc">Premium automotive visual concept with AI-generated scenes.</div>
         <span class="tag">Self-Initiated · Content</span>
       </div>
       <div class="card reveal">
-        <div class="icon">🍽️</div>
         <div class="title">Restaurant Brand Identity</div>
         <div class="desc">Complete brand package — logo, colour palette, menu design.</div>
         <span class="tag">Concept Project · Design</span>
       </div>
       <div class="card reveal">
-        <div class="icon">📊</div>
         <div class="title">30-Day Instagram Growth</div>
         <div class="desc">Audience research → content pillars → hooks → calendar.</div>
         <span class="tag">Strategy · Marketing</span>
       </div>
       <div class="card reveal">
-        <div class="icon">💻</div>
         <div class="title">Landing Page Concept</div>
         <div class="desc">Figma design → desktop + mobile → UX structure.</div>
         <span class="tag">Practice · Web</span>
       </div>
       <div class="card reveal">
-        <div class="icon">🎥</div>
         <div class="title">Creator Reel Edit</div>
         <div class="desc">Short-form editing with hooks, pacing, transitions.</div>
         <span class="tag">Creator Collab · Content</span>
       </div>
       <div class="card reveal">
-        <div class="icon">✍️</div>
         <div class="title">Typography Experiment</div>
         <div class="desc">Exploring type hierarchy, contrast, and layout systems.</div>
         <span class="tag">Experiment · Design</span>
@@ -174,12 +166,12 @@
       <h2 class="section-title">How We <span class="highlight">Work</span></h2>
     </div>
     <div class="grid grid-3">
-      <div class="card reveal"><div class="icon">🔍</div><div class="title">01 · Discover</div><div class="desc">Understanding goals, audience, and project scope.</div></div>
-      <div class="card reveal"><div class="icon">🎯</div><div class="title">02 · Define</div><div class="desc">Research, strategy, and defining the problem.</div></div>
-      <div class="card reveal"><div class="icon">💡</div><div class="title">03 · Ideate</div><div class="desc">Brainstorming creative directions and concepts.</div></div>
-      <div class="card reveal"><div class="icon">🎨</div><div class="title">04 · Design</div><div class="desc">Crafting visuals, content, and design systems.</div></div>
-      <div class="card reveal"><div class="icon">🧪</div><div class="title">05 · Test & Iterate</div><div class="desc">Refining based on feedback and performance.</div></div>
-      <div class="card reveal"><div class="icon">🚀</div><div class="title">06 · Deliver</div><div class="desc">Final handoff with documentation and support.</div></div>
+      <div class="card reveal"><div class="title">01 · Discover</div><div class="desc">Understanding goals, audience, and project scope.</div></div>
+      <div class="card reveal"><div class="title">02 · Define</div><div class="desc">Research, strategy, and defining the problem.</div></div>
+      <div class="card reveal"><div class="title">03 · Ideate</div><div class="desc">Brainstorming creative directions and concepts.</div></div>
+      <div class="card reveal"><div class="title">04 · Design</div><div class="desc">Crafting visuals, content, and design systems.</div></div>
+      <div class="card reveal"><div class="title">05 · Test & Iterate</div><div class="desc">Refining based on feedback and performance.</div></div>
+      <div class="card reveal"><div class="title">06 · Deliver</div><div class="desc">Final handoff with documentation and support.</div></div>
     </div>
   </section>
 
@@ -190,11 +182,11 @@
     </div>
     <div class="grid grid-2">
       <div class="reveal-left">
-        <div class="card"><div class="icon">📧</div><div class="title">Email</div><div class="desc">hello@gdpulse.com</div></div>
+        <div class="card"><span class="tool-icon" data-icon="mail"></span><div class="title">Email</div><div class="desc">hello@gdpulse.com</div></div>
         <br>
-        <div class="card"><div class="icon">📱</div><div class="title">Phone</div><div class="desc">+91 98765 43210</div></div>
+        <div class="card"><span class="tool-icon" data-icon="phone"></span><div class="title">Phone</div><div class="desc">+91 98765 43210</div></div>
         <br>
-        <div class="card"><div class="icon">📍</div><div class="title">Location</div><div class="desc">India</div></div>
+        <div class="card"><span class="tool-icon" data-icon="pin"></span><div class="title">Location</div><div class="desc">India</div></div>
       </div>
       <div class="box reveal-right">
         <h2 style="font-size: 20px; margin-bottom: 20px;">Send us a message</h2>
@@ -205,15 +197,26 @@
           <input type="email" placeholder="you@example.com" required>
           <label>Project Details</label>
           <textarea placeholder="Tell us about your project..." style="min-height: 100px;" required></textarea>
-          <button type="submit" class="calc-btn">Send Message →</button>
+          <button type="submit" class="calc-btn">Send Message</button>
         </form>
       </div>
     </div>
   </section>
 
-  <footer>
-    <p>© 2025 GD Pulse — Creative Digital Studio. All rights reserved.</p>
-  </footer>
+  <footer><p>© 2025 GD Pulse — Creative Digital Studio. All rights reserved.</p></footer>
+
+  <!-- Confirm Dialog -->
+  <div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-box">
+      <div class="warn-icon"><span data-icon="warning"></span></div>
+      <h3 id="confirmTitle">Are you sure?</h3>
+      <p id="confirmMessage">This action cannot be undone.</p>
+      <div class="confirm-actions">
+        <button class="btn-cancel" onclick="closeConfirm()">Cancel</button>
+        <button class="btn-confirm" id="confirmYes">Yes</button>
+      </div>
+    </div>
+  </div>
 
   <script src="/static/icons.js"></script>
   <script>
@@ -229,6 +232,29 @@
         tab.classList.add('active');
       });
     });
+    let pendingAction = null;
+    function showConfirm(title, message, btnText, callback) {
+      document.getElementById("confirmTitle").innerText = title;
+      document.getElementById("confirmMessage").innerText = message;
+      document.getElementById("confirmYes").innerText = btnText;
+      pendingAction = callback;
+      document.getElementById("confirmOverlay").classList.add("active");
+      if (window.renderIcons) window.renderIcons();
+    }
+    function closeConfirm() {
+      document.getElementById("confirmOverlay").classList.remove("active");
+      pendingAction = null;
+    }
+    document.getElementById("confirmYes").addEventListener("click", () => {
+      if (pendingAction) { const action = pendingAction; closeConfirm(); action(); }
+    });
+    function confirmLogout(e) {
+      if (e) e.preventDefault();
+      showConfirm("Logout?", "Kya tum sach me logout karna chahte ho?", "Yes, Logout", () => {
+        window.location.href = "/logout";
+      });
+    }
+    document.addEventListener("DOMContentLoaded", () => { if (window.renderIcons) window.renderIcons(); });
   </script>
 
 </body>
