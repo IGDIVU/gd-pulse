@@ -120,10 +120,38 @@ def text_tools():
     if not require_staff(): return redirect(url_for("login"))
     return render_template("text-tools.html")
 
-@app.route("/tools/qr-code")
-def qr_code_tool():
-    if not require_staff(): return redirect(url_for("login"))
-    return render_template("qr-code.html")
+@app.route("/tools/qr-code/process", methods=["POST"])
+def qr_code_process():
+    try:
+        import qrcode
+        text = request.form.get("text", "").strip()
+        size = int(request.form.get("size", 300))
+        if not text:
+            return "Kuch text daalo", 400
+        if size < 100 or size > 1000:
+            size = 300
+
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_H,
+            box_size=10,
+            border=2,
+        )
+        qr.add_data(text)
+        qr.make(fit=True)
+        img = qr.make_image(fill_color="#1a1a1a", back_color="white").convert("RGB")
+
+        # Resize to requested size
+        img = img.resize((size, size), Image.LANCZOS)
+
+        output = io.BytesIO()
+        img.save(output, format="PNG")
+        output.seek(0)
+
+        return send_file(output, mimetype="image/png", as_attachment=True,
+                         download_name="gd-pulse-qr.png")
+    except Exception as e:
+        return f"Error: {str(e)}", 500
 
 @app.route("/tools/image-resize")
 def image_resize_tool():
