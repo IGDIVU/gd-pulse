@@ -7,10 +7,7 @@
 <link rel="icon" type="image/png" href="/static/favicon.png">
 <link rel="stylesheet" href="/static/style.css">
 <style>
-  .tab-bar {
-    display: flex; gap: 8px; margin: 30px 0;
-    flex-wrap: wrap; border-bottom: 1px solid var(--border);
-  }
+  .tab-bar { display: flex; gap: 8px; margin: 30px 0; flex-wrap: wrap; border-bottom: 1px solid var(--border); }
   .tab-btn {
     background: transparent; border: none; color: var(--text-dim);
     padding: 12px 20px; font-size: 14px; font-weight: 600;
@@ -28,15 +25,10 @@
     text-transform: uppercase; color: var(--primary);
     margin: 30px 0 15px; display: flex; align-items: center; gap: 10px;
   }
-  .section-label::after {
-    content: ""; flex: 1; height: 1px;
-    background: linear-gradient(90deg, var(--primary), transparent);
-  }
+  .section-label::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, var(--primary), transparent); }
   .tool-icon { width: 26px; height: 26px; color: var(--primary); margin-bottom: 12px; transition: all 0.4s; }
   .tool-card:hover .tool-icon { color: white; transform: translateY(-4px) scale(1.15); }
-  .cat-icon svg { width: 26px; height: 26px; color: white; }
 
-  /* Management Table */
   .mgmt-table {
     width: 100%; background: var(--card);
     border: 1px solid var(--border); border-radius: var(--radius);
@@ -45,8 +37,7 @@
   .mgmt-table table { width: 100%; border-collapse: collapse; }
   .mgmt-table th, .mgmt-table td {
     padding: 14px 18px; text-align: left;
-    border-bottom: 1px solid var(--border);
-    font-size: 14px;
+    border-bottom: 1px solid var(--border); font-size: 14px;
   }
   .mgmt-table th {
     background: rgba(139, 92, 246, 0.08);
@@ -55,58 +46,38 @@
   }
   .mgmt-table tr:last-child td { border-bottom: none; }
   .mgmt-table tr:hover td { background: rgba(139, 92, 246, 0.04); }
+
   .badge-role {
     display: inline-block; padding: 3px 12px; border-radius: 20px;
-    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
   }
-  .badge-role.owner  { background: rgba(236, 72, 153, 0.15); color: #ec4899; }
-  .badge-role.admin  { background: rgba(139, 92, 246, 0.15); color: var(--primary); }
-  .badge-role.staff  { background: rgba(34, 211, 238, 0.15); color: #22d3ee; }
-  .badge-role.user   { background: rgba(107, 114, 128, 0.15); color: #6b7280; }
+  .badge-role.owner { background: rgba(236, 72, 153, 0.15); color: #ec4899; }
+  .badge-role.admin { background: rgba(139, 92, 246, 0.15); color: var(--primary); }
+  .badge-role.staff { background: rgba(34, 211, 238, 0.15); color: #22d3ee; }
+  .badge-role.user  { background: rgba(107, 114, 128, 0.15); color: #6b7280; }
 
   .action-btn-sm {
     padding: 6px 14px; border-radius: 20px;
     font-size: 11px; font-weight: 700;
     border: 1px solid var(--border); background: transparent;
     color: var(--text-dim); cursor: pointer; transition: all 0.25s;
-    margin-right: 5px;
+    margin-right: 5px; text-decoration: none;
+    display: inline-block;
   }
   .action-btn-sm:hover { background: var(--primary); color: white; border-color: var(--primary); }
   .action-btn-sm.danger:hover { background: var(--danger); border-color: var(--danger); }
 
-  /* Modal */
-  .modal-overlay {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
-    z-index: 9999; display: none;
-    justify-content: center; align-items: center; padding: 20px;
+  .form-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 15px;
+    margin-bottom: 15px;
   }
-  .modal-overlay.active { display: flex; }
-  .modal-box {
-    background: var(--card); border-radius: var(--radius-lg);
-    padding: 32px; max-width: 900px; width: 100%;
-    max-height: 90vh; overflow-y: auto;
-    border: 1px solid var(--border); box-shadow: var(--shadow-lg);
-    position: relative;
-    animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  }
-  .modal-close {
-    position: absolute; top: 16px; right: 16px;
-    background: var(--glass); border: 1px solid var(--border);
-    color: var(--text); width: 36px; height: 36px;
-    border-radius: 50%; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.25s;
-  }
-  .modal-close:hover { background: var(--danger); color: white; transform: rotate(90deg); }
-  .modal-close svg { width: 18px; height: 18px; }
-  .modal-box h2 { margin-bottom: 8px; font-size: 24px; font-weight: 800; }
+  .form-grid.full { grid-template-columns: 1fr; }
 
-  .empty-box {
-    text-align: center; padding: 60px 20px;
-    background: var(--card); border: 1px dashed var(--border);
-    border-radius: var(--radius); color: var(--text-dim);
+  .alert {
+    padding: 12px 18px; border-radius: 10px; margin-bottom: 20px; font-size: 14px;
   }
+  .alert.success { background: rgba(16, 185, 129, 0.1); color: #10b981; border-left: 3px solid #10b981; }
+  .alert.error { background: rgba(239, 68, 68, 0.1); color: #ef4444; border-left: 3px solid #ef4444; }
 </style>
 </head>
 <body>
@@ -120,12 +91,10 @@
       <a href="/tools">Tools</a>
       <a href="/prompts">Prompts</a>
       <a href="/admin" class="active">Admin</a>
+      {% if role == 'owner' %}<a href="/owner">Owner</a>{% endif %}
     </nav>
     <div class="header-right">
       <button class="theme-toggle" onclick="toggleTheme(event)" title="Toggle theme"></button>
-      {% if role == 'owner' %}
-        <a href="/owner" class="btn btn-primary">Owner</a>
-      {% endif %}
       <a href="/logout" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
     </div>
   </header>
@@ -138,9 +107,17 @@
         <p>Role: <b style="color:var(--primary);text-transform:uppercase;">{{ role }}</b></p>
       </div>
 
+      {% if request.args.get('success') == 'added' %}
+        <div class="alert success">✅ Successfully added!</div>
+      {% elif request.args.get('success') == 'deleted' %}
+        <div class="alert success">✅ Successfully deleted!</div>
+      {% elif request.args.get('error') == 'missing' %}
+        <div class="alert error">⚠️ Kuch fields missing hain</div>
+      {% endif %}
+
       <div class="stats">
-        <div class="stat-card reveal"><div class="value">4</div><div class="label">Active Users</div></div>
-        <div class="stat-card reveal"><div class="value">15+</div><div class="label">Prompts</div></div>
+        <div class="stat-card reveal"><div class="value">{{ all_users|length }}</div><div class="label">Users</div></div>
+        <div class="stat-card reveal"><div class="value">{{ all_prompts|length }}</div><div class="label">DB Prompts</div></div>
         <div class="stat-card reveal"><div class="value">14+</div><div class="label">Tools</div></div>
         <div class="stat-card reveal"><div class="value">3</div><div class="label">Softwares</div></div>
       </div>
@@ -161,9 +138,6 @@
         <button class="tab-btn" onclick="switchTab('software', this)">
           <span data-icon="software" style="width:18px;height:18px;display:inline-flex;"></span> Software
         </button>
-        <button class="tab-btn" onclick="switchTab('assets', this)">
-          <span data-icon="assets" style="width:18px;height:18px;display:inline-flex;"></span> Assets
-        </button>
         <button class="tab-btn" onclick="switchTab('analytics', this)">
           <span data-icon="analytics" style="width:18px;height:18px;display:inline-flex;"></span> Analytics
         </button>
@@ -176,7 +150,7 @@
           <a href="/prompts" class="tool-card reveal">
             <span class="tool-icon" data-icon="prompts"></span>
             <div class="title">Prompts Library</div>
-            <div class="desc">15+ ready prompts</div>
+            <div class="desc">View all prompts</div>
           </a>
           <a href="/tools" class="tool-card reveal">
             <span class="tool-icon" data-icon="tools"></span>
@@ -191,120 +165,140 @@
           <div class="tool-card reveal" onclick="switchTab('users', document.querySelectorAll('.tab-btn')[1])">
             <span class="tool-icon" data-icon="users"></span>
             <div class="title">User Management</div>
-            <div class="desc">Roles & access</div>
+            <div class="desc">Add/remove users</div>
           </div>
         </div>
       </div>
 
-      <!-- USERS MANAGEMENT -->
+      <!-- USERS -->
       <div class="tab-content" id="tab-users">
         <div class="section-label">User Management</div>
-        <div class="info reveal" style="margin-bottom:20px;">
-          <b>Note:</b> Abhi users hardcoded hain. Role creation, new user add, edit, delete — <b>coming soon</b> (owner panel me).
+
+        <div class="box reveal" style="margin-bottom:25px;">
+          <h2 style="font-size:18px;margin-bottom:15px;">➕ Add New User</h2>
+          <form method="POST" action="/admin/add-user">
+            <div class="form-grid">
+              <div>
+                <label>Username</label>
+                <input type="text" name="username" placeholder="newuser" required>
+              </div>
+              <div>
+                <label>Password</label>
+                <input type="text" name="password" placeholder="password123" required>
+              </div>
+            </div>
+            <div class="form-grid">
+              <div>
+                <label>Name</label>
+                <input type="text" name="name" placeholder="Full Name">
+              </div>
+              <div>
+                <label>Role</label>
+                <select name="role">
+                  <option value="user">User</option>
+                  <option value="staff">Staff</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit" class="calc-btn">Add User</button>
+          </form>
         </div>
+
         <div class="mgmt-table reveal">
           <table>
             <thead>
-              <tr>
-                <th>Username</th>
-                <th>Name</th>
-                <th>Role</th>
-                <th>Access</th>
-                <th>Actions</th>
-              </tr>
+              <tr><th>Username</th><th>Name</th><th>Role</th><th>Actions</th></tr>
             </thead>
             <tbody>
+              {% for uname, udata in all_users.items() %}
               <tr>
-                <td><b>owner</b></td>
-                <td>Owner</td>
-                <td><span class="badge-role owner">Owner</span></td>
-                <td>Full + God Mode</td>
+                <td><b>{{ uname }}</b></td>
+                <td>{{ udata.name }}</td>
+                <td><span class="badge-role {{ udata.role }}">{{ udata.role }}</span></td>
                 <td>
-                  <button class="action-btn-sm" onclick="alert('Coming soon')">Edit</button>
-                  <button class="action-btn-sm danger" onclick="alert('Cannot delete owner')">Delete</button>
+                  {% if uname != 'owner' and udata.role != 'owner' %}
+                  <a href="/admin/delete-user/{{ uname }}" class="action-btn-sm danger" onclick="return confirm('Delete {{ uname }}?')">Delete</a>
+                  {% else %}
+                  <span style="font-size:11px;color:var(--text-mute);">Protected</span>
+                  {% endif %}
                 </td>
               </tr>
-              <tr>
-                <td><b>admin</b></td>
-                <td>Admin</td>
-                <td><span class="badge-role admin">Admin</span></td>
-                <td>Full Management</td>
-                <td>
-                  <button class="action-btn-sm" onclick="alert('Coming soon')">Edit</button>
-                  <button class="action-btn-sm danger" onclick="alert('Cannot delete admin')">Delete</button>
-                </td>
-              </tr>
-              <tr>
-                <td><b>staff</b></td>
-                <td>Staff</td>
-                <td><span class="badge-role staff">Staff</span></td>
-                <td>Tools + Prompts (read)</td>
-                <td>
-                  <button class="action-btn-sm" onclick="alert('Coming soon')">Edit</button>
-                  <button class="action-btn-sm danger" onclick="alert('Coming soon')">Delete</button>
-                </td>
-              </tr>
-              <tr>
-                <td><b>user</b></td>
-                <td>User</td>
-                <td><span class="badge-role user">User</span></td>
-                <td>Portfolio only</td>
-                <td>
-                  <button class="action-btn-sm" onclick="alert('Coming soon')">Edit</button>
-                  <button class="action-btn-sm danger" onclick="alert('Coming soon')">Delete</button>
-                </td>
-              </tr>
+              {% endfor %}
             </tbody>
           </table>
         </div>
-        <button class="btn btn-primary reveal" onclick="alert('Add User — coming soon')" style="display:inline-flex;align-items:center;gap:8px;">
-          <span data-icon="users" style="width:16px;height:16px;display:inline-flex;"></span> Add New User
-        </button>
       </div>
 
       <!-- PROMPTS -->
       <div class="tab-content" id="tab-prompts">
         <div class="section-label">Prompts Management</div>
-        <div class="info reveal" style="margin-bottom:20px;">
-          <b>Note:</b> Prompt <b>CRUD</b> (add/edit/delete) coming soon. Filhaal library dekho.
+
+        <div class="box reveal" style="margin-bottom:25px;">
+          <h2 style="font-size:18px;margin-bottom:15px;">➕ Add New Prompt</h2>
+          <form method="POST" action="/admin/add-prompt">
+            <div class="form-grid">
+              <div>
+                <label>Key (unique)</label>
+                <input type="text" name="key" placeholder="my-prompt" required>
+              </div>
+              <div>
+                <label>Category</label>
+                <select name="cat">
+                  <option value="single">Single (Image)</option>
+                  <option value="multi">Multi-Step (Video)</option>
+                  <option value="system">System (AI)</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-grid">
+              <div>
+                <label>Title</label>
+                <input type="text" name="title" placeholder="My Prompt Title" required>
+              </div>
+              <div>
+                <label>Subtitle</label>
+                <input type="text" name="sub" placeholder="Short description">
+              </div>
+            </div>
+            <label>Prompt Text</label>
+            <textarea name="text" placeholder="Full prompt here..." style="min-height:150px;" required></textarea>
+            <button type="submit" class="calc-btn">Add Prompt</button>
+          </form>
         </div>
-        <div class="grid grid-3">
-          <div class="tool-card reveal" onclick="window.location.href='/prompts'">
-            <span class="tool-icon" data-icon="prompts"></span>
-            <div class="title">Open Library</div>
-            <div class="desc">View all prompts</div>
-          </div>
-          <div class="tool-card reveal" onclick="alert('Add Prompt — coming soon')" style="opacity:0.6;">
-            <span class="tool-icon" data-icon="sparkle"></span>
-            <div class="title">Add New Prompt</div>
-            <div class="desc">Create prompt (soon)</div>
-          </div>
-          <div class="tool-card reveal" onclick="alert('Manage Visibility — coming soon')" style="opacity:0.6;">
-            <span class="tool-icon" data-icon="users"></span>
-            <div class="title">Manage Visibility</div>
-            <div class="desc">Kisko dikhe (soon)</div>
-          </div>
+
+        <div class="mgmt-table reveal">
+          <table>
+            <thead>
+              <tr><th>Key</th><th>Title</th><th>Category</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              {% for key, pdata in all_prompts.items() %}
+              <tr>
+                <td><b>{{ key }}</b></td>
+                <td>{{ pdata.title }}</td>
+                <td><span class="badge-role admin">{{ pdata.cat }}</span></td>
+                <td>
+                  <a href="/admin/delete-prompt/{{ key }}" class="action-btn-sm danger" onclick="return confirm('Delete {{ key }}?')">Delete</a>
+                </td>
+              </tr>
+              {% endfor %}
+              {% if not all_prompts %}
+              <tr><td colspan="4" style="text-align:center;color:var(--text-dim);padding:30px;">Koi DB prompt nahi. Upar se add karo.</td></tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="info reveal" style="margin-top:20px;">
+          💡 <b>Note:</b> Ye DB prompts hain (JSON file me store). Base 15 prompts <a href="/prompts" style="color:var(--primary);">Prompts Library</a> me hamesha rahenge (code me hardcoded).
         </div>
       </div>
 
       <!-- TOOLS -->
       <div class="tab-content" id="tab-tools">
-        <div class="section-label">Tools Management</div>
-        <div class="info reveal" style="margin-bottom:20px;">
-          <b>Note:</b> Tool enable/disable, kisko access — coming soon.
-        </div>
-        <div class="grid grid-4">
-          <div class="tool-card reveal"><span class="tool-icon" data-icon="gst"></span><div class="title">GST</div><div class="desc">Active</div></div>
-          <div class="tool-card reveal"><span class="tool-icon" data-icon="emi"></span><div class="title">EMI</div><div class="desc">Active</div></div>
-          <div class="tool-card reveal"><span class="tool-icon" data-icon="qr"></span><div class="title">QR Code</div><div class="desc">Active</div></div>
-          <div class="tool-card reveal"><span class="tool-icon" data-icon="image"></span><div class="title">Image Resize</div><div class="desc">Active</div></div>
-          <div class="tool-card reveal"><span class="tool-icon" data-icon="pdf"></span><div class="title">Photo→PDF</div><div class="desc">Active</div></div>
-          <div class="tool-card reveal"><span class="tool-icon" data-icon="pdfMerge"></span><div class="title">PDF Merge</div><div class="desc">Active</div></div>
-          <div class="tool-card reveal"><span class="tool-icon" data-icon="audio"></span><div class="title">Video→MP3</div><div class="desc">Active</div></div>
-          <div class="tool-card reveal" onclick="alert('Tool config — coming soon')" style="opacity:0.6;">
-            <span class="tool-icon" data-icon="tools"></span><div class="title">Configure</div><div class="desc">Soon</div>
-          </div>
-        </div>
+        <div class="section-label">Tools</div>
+        <a href="/tools" class="btn btn-primary">Open Tools Dashboard →</a>
       </div>
 
       <!-- SOFTWARE -->
@@ -328,25 +322,6 @@
             <div class="title">Sand Business</div>
             <div class="desc">Stock, Truck, Billing</div>
             <span class="soon">SOON</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- ASSETS -->
-      <div class="tab-content" id="tab-assets">
-        <div class="section-label">Assets Library</div>
-        <div class="grid grid-4">
-          <div class="tool-card reveal" onclick="alert('PNG Library — coming soon')">
-            <span class="tool-icon" data-icon="image"></span><div class="title">PNG Library</div>
-          </div>
-          <div class="tool-card reveal" onclick="alert('Sound — coming soon')">
-            <span class="tool-icon" data-icon="audio"></span><div class="title">Sound Effects</div>
-          </div>
-          <div class="tool-card reveal" onclick="alert('Templates — coming soon')">
-            <span class="tool-icon" data-icon="assets"></span><div class="title">Templates</div>
-          </div>
-          <div class="tool-card reveal" onclick="alert('Fonts — coming soon')">
-            <span class="tool-icon" data-icon="text"></span><div class="title">Fonts</div>
           </div>
         </div>
       </div>
@@ -379,6 +354,12 @@
     }
     document.addEventListener("DOMContentLoaded", () => {
       if (window.renderIcons) window.renderIcons();
+      const urlParams = new URLSearchParams(window.location.search);
+      const tab = urlParams.get('tab');
+      if (tab) {
+        const btn = document.querySelector(`.tab-btn[onclick*="${tab}"]`);
+        if (btn) switchTab(tab, btn);
+      }
     });
   </script>
 
