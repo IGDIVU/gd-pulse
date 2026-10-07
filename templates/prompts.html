@@ -7,10 +7,7 @@
 <link rel="icon" type="image/png" href="/static/favicon.png">
 <link rel="stylesheet" href="/static/style.css">
 <style>
-  .tab-bar {
-    display: flex; gap: 8px; margin: 30px 0 30px;
-    flex-wrap: wrap; border-bottom: 1px solid var(--border);
-  }
+  .tab-bar { display: flex; gap: 8px; margin: 30px 0; flex-wrap: wrap; border-bottom: 1px solid var(--border); }
   .tab-btn {
     background: transparent; border: none; color: var(--text-dim);
     padding: 12px 20px; font-size: 14px; font-weight: 600;
@@ -23,33 +20,20 @@
   .tab-btn svg { width: 18px; height: 18px; }
   .tab-content { display: none; }
   .tab-content.active { display: block; animation: fadeInUp 0.5s ease; }
-
   .section-label {
     font-size: 13px; font-weight: 800; letter-spacing: 2px;
     text-transform: uppercase; color: var(--primary);
     margin: 30px 0 15px; display: flex; align-items: center; gap: 10px;
   }
-  .section-label::after {
-    content: ""; flex: 1; height: 1px;
-    background: linear-gradient(90deg, var(--primary), transparent);
-  }
-
-  .prompt-search {
-    max-width: 400px; margin-bottom: 20px; position: relative;
-  }
+  .section-label::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, var(--primary), transparent); }
+  .prompt-search { max-width: 400px; margin-bottom: 20px; position: relative; }
   .prompt-search input { padding-left: 42px; margin-bottom: 0; }
   .prompt-search .search-icon {
     position: absolute; left: 14px; top: 50%;
-    transform: translateY(-50%); width: 16px; height: 16px;
-    color: var(--text-dim);
+    transform: translateY(-50%); width: 16px; height: 16px; color: var(--text-dim);
   }
-
-  .tool-icon {
-    width: 26px; height: 26px; color: var(--primary);
-    margin-bottom: 12px; transition: all 0.4s;
-  }
+  .tool-icon { width: 26px; height: 26px; color: var(--primary); margin-bottom: 12px; transition: all 0.4s; }
   .tool-card:hover .tool-icon { color: white; transform: translateY(-4px) scale(1.15); }
-
   .modal-overlay {
     position: fixed; inset: 0;
     background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
@@ -120,9 +104,7 @@
     <a href="/" class="logo"><img src="/static/logo-horizontal.png" alt="GD Pulse"></a>
     <nav class="nav-links">
       <a href="/prompts" class="active">Prompts</a>
-      {% if role in ('owner', 'admin') %}
-        <a href="/tools">Tools</a>
-      {% endif %}
+      <a href="/tools">Tools</a>
       {% if role in ('owner', 'admin') %}
         <a href="/admin">Admin</a>
       {% endif %}
@@ -200,33 +182,25 @@
       thumb: { title: "YouTube Thumbnail", sub: "High-CTR thumbnail design", cat: "single", steps: [{ label: "Prompt", name: "YouTube Thumbnail", text: `Design a high-CTR YouTube thumbnail for: "[VIDEO TITLE]"\nTopic: [TOPIC]\nStyle: Bold, clickable, attention-grabbing.\nRequirements:\n- Big expressive face on right side\n- Bold 3-4 word text on left\n- Bright vibrant colors (yellow, red, blue)\n- 1280×720 resolution\n- Readable at small size\n- Arrow or circle highlighting key element\nOutput: High-CTR thumbnail.` }] },
       poster: { title: "Poster Design", sub: "Event poster generation", cat: "single", steps: [{ label: "Prompt", name: "Poster Design", text: `Create a stunning poster for [EVENT NAME].\nEvent type: [Concert / Sale / Workshop / Launch]\nDate & venue: [DATE], [VENUE]\nStyle: [Modern / Retro / Minimal / Bold]\nColor scheme: [COLORS]\nRequirements:\n- Strong focal point\n- Clear hierarchy: Event → Date → Venue → Details\n- Eye-catching from distance\n- Print-ready A3 or A2\n- Sponsor/logo area at bottom\nOutput: Print-quality poster.` }] },
       packaging: { title: "Packaging Design", sub: "Product packaging concept", cat: "single", steps: [{ label: "Prompt", name: "Packaging Design", text: `Design premium packaging for [PRODUCT].\nCategory: [Food / Cosmetic / Beverage / Electronics]\nStyle: [Minimal / Luxury / Playful / Eco-friendly]\nColor palette: [COLORS]\nRequirements:\n- Strong shelf presence\n- Clear brand logo placement\n- Product name prominent\n- Key information visible\n- Front, back, side view\n- Mockup on realistic background\nOutput: 3D mockup of packaging.` }] },
-
       cinematic30: { title: "30-Sec Cinematic Video", sub: "7 clips × 4 sec · Pre + Master + Agent", cat: "multi", steps: [
-        { label: "Step 1 — Pre-Production", name: "Concept & Script", text: `You are a cinematic video director. For a 30-second cinematic video about [SUBJECT], generate:\n\n1. CONCEPT: One-line high-level concept\n2. MOOD: Overall tone and emotion\n3. SCRIPT/STORYBOARD: 7 clips of 4 seconds each:\n   - Clip 1: Opening hook\n   - Clip 2: Introduction of subject\n   - Clip 3: Detail shot\n   - Clip 4: Action / movement\n   - Clip 5: Drama / climax build\n   - Clip 6: Peak moment\n   - Clip 7: Resolution / branding\n4. SHOT LIST: For each clip — camera angle, movement, key visuals\n5. MUSIC MOOD: Genre, tempo\n\nOutput as structured text ready for AI video generator.` },
-        { label: "Step 2 — Master Prompt", name: "Style & Consistency Reference", text: `MASTER STYLE PROMPT (use for all 7 clips):\n\nVisual Style: Cinematic, [FILM LOOK]\nAspect Ratio: 16:9\nFrame Rate: 24fps\nColor Grading: [MOOD]\nLighting: [Natural / Studio / Golden hour]\nCamera: [Lens type]\nSubject: [MAIN CHARACTER/OBJECT]\nEnvironment: [SETTING]\nParticle effects: [dust, sparks, fog]\n\nCONSISTENCY RULES:\n- Same subject in every clip\n- Same color grade and lighting\n- Same world/environment\n- Consistent camera language` },
-        { label: "Step 3 — Agent Prompt", name: "Clip Generation (7×)", text: `AGENT PROMPT TEMPLATE:\n\nGenerate Clip [CLIP #] of 7 (4 seconds):\nShot description: [DETAILED SCENE]\nCamera: [angle + movement]\nSubject action: [specific motion]\nBackground: [environment details]\nLighting: [from master]\nStyle: [from master]\n\nTECHNICAL:\n- Motion: [smooth / dynamic / dramatic]\n- Focus: [sharp / rack focus]\n- Transition: [cut / match cut / fade]\n\nRepeat for all 7 clips.` }] },
-
+        { label: "Step 1 — Pre-Production", name: "Concept & Script", text: `You are a cinematic video director. For a 30-second cinematic video about [SUBJECT], generate:\n\n1. CONCEPT: One-line high-level concept\n2. MOOD: Overall tone and emotion\n3. SCRIPT/STORYBOARD: 7 clips of 4 seconds each:\n   - Clip 1: Opening hook\n   - Clip 2: Introduction of subject\n   - Clip 3: Detail shot\n   - Clip 4: Action / movement\n   - Clip 5: Drama / climax build\n   - Clip 6: Peak moment\n   - Clip 7: Resolution / branding\n4. SHOT LIST: Camera angle, movement, key visuals\n5. MUSIC MOOD: Genre, tempo\n\nOutput as structured text.` },
+        { label: "Step 2 — Master Prompt", name: "Style Reference", text: `MASTER STYLE PROMPT (all 7 clips):\n\nVisual Style: Cinematic, [FILM LOOK]\nAspect Ratio: 16:9\nFrame Rate: 24fps\nColor Grading: [MOOD]\nLighting: [Natural / Studio / Golden hour]\nCamera: [Lens type]\nSubject: [MAIN CHARACTER/OBJECT]\nEnvironment: [SETTING]\nParticle effects: [dust, sparks, fog]\n\nCONSISTENCY RULES:\n- Same subject in every clip\n- Same color grade and lighting\n- Same world/environment\n- Consistent camera language` },
+        { label: "Step 3 — Agent Prompt", name: "Clip Generation (7×)", text: `AGENT PROMPT TEMPLATE:\n\nGenerate Clip [CLIP #] of 7 (4 seconds):\nShot description: [DETAILED SCENE]\nCamera: [angle + movement]\nSubject action: [specific motion]\nBackground: [environment]\nLighting: [from master]\nStyle: [from master]\n\nTECHNICAL:\n- Motion: [smooth / dynamic / dramatic]\n- Focus: [sharp / rack focus]\n- Transition: [cut / match cut / fade]\n\nRepeat for all 7 clips.` }] },
       reel15: { title: "15-Sec Reel", sub: "4 clips × 4 sec · Pre + Master + Agent", cat: "multi", steps: [
-        { label: "Step 1 — Pre-Production", name: "Concept & Hook", text: `Create a 15-second Instagram Reel about [TOPIC/PRODUCT].\n\n1. HOOK (first 2 sec): Grab attention\n2. CORE MESSAGE: Value in one line\n3. 4-CLIP BREAKDOWN (4 sec each):\n   - Clip 1: Hook (pattern interrupt)\n   - Clip 2: Problem / Interest\n   - Clip 3: Solution / Reveal\n   - Clip 4: CTA / Result\n4. TRENDING ELEMENTS: Audio, transitions, text overlays\n5. CAPTION: With 5 hashtags` },
+        { label: "Step 1 — Pre-Production", name: "Concept & Hook", text: `Create a 15-second Instagram Reel about [TOPIC/PRODUCT].\n\n1. HOOK (first 2 sec)\n2. CORE MESSAGE: Value in one line\n3. 4-CLIP BREAKDOWN (4 sec each):\n   - Clip 1: Hook (pattern interrupt)\n   - Clip 2: Problem / Interest\n   - Clip 3: Solution / Reveal\n   - Clip 4: CTA / Result\n4. TRENDING ELEMENTS: Audio, transitions, text overlays\n5. CAPTION: With 5 hashtags` },
         { label: "Step 2 — Master Prompt", name: "Style Reference", text: `MASTER STYLE (all 4 clips):\n\nAspect Ratio: 9:16\nDuration: 4 sec per clip, 15 sec total\nStyle: [Trendy / Minimal / Bold / Aesthetic]\nColor palette: [Vibrant / Pastel / Dark]\nPacing: Fast, energetic, scroll-stopping\nText overlays: Bold, large, animated\nMusic sync: On beat cuts\nLighting: [Natural / Studio]\n\nCONSISTENCY: Same person/product/setting across all clips.` },
         { label: "Step 3 — Agent Prompt", name: "Clip Generation (4×)", text: `AGENT PROMPT (4 clips):\n\nClip 1 (Hook): [Pattern interrupt] + bold text\nClip 2 (Build): [Context/problem] + text\nClip 3 (Reveal): [Solution/product] + text\nClip 4 (CTA): [Action prompt] + text + brand\n\nFor each clip include:\n- Visual description\n- Text overlay content\n- Motion / transition\n- Beat sync point` }] },
-
       restaurant: { title: "Restaurant Promo Video", sub: "5 clips × 6 sec · Pre + Master + Agent", cat: "multi", steps: [
         { label: "Step 1 — Pre-Production", name: "Concept & Menu Focus", text: `Create a 30-second restaurant promotional video for [RESTAURANT NAME].\nCuisine: [TYPE]\nSignature dishes: [DISHES]\n\n5-CLIP BREAKDOWN (6 sec each):\n- Clip 1: Ambiance reveal\n- Clip 2: Chef action\n- Clip 3: Signature dish hero shot\n- Clip 4: Customer enjoyment\n- Clip 5: Logo + tagline + CTA\n\nEmotions: Warmth, appetite, quality, hospitality.` },
         { label: "Step 2 — Master Prompt", name: "Style Reference", text: `MASTER STYLE:\n\nLook: Warm, appetizing, inviting\nLighting: Golden hour / warm tungsten\nColor grade: Rich oranges, warm browns, fresh greens\nCamera: Smooth dolly, macro food shots\nMusic: [Upbeat acoustic / Jazz / Modern fusion]\nPacing: Gentle, savored moments\n\nCONSISTENCY: Same restaurant, same ambience across all clips.` },
         { label: "Step 3 — Agent Prompt", name: "Clip Generation (5×)", text: `AGENT PROMPT (5 clips):\n\nClip 1: Wide shot of restaurant ambience, candle-lit\nClip 2: Chef plating / flames, hands in action\nClip 3: Hero shot of signature dish, steam rising\nClip 4: Happy customers, laughter, food on table\nClip 5: Restaurant name + tagline + phone + address\n\nEach clip: 6 sec, cinematic warm grade, smooth motion.` }] },
-
       productAd: { title: "Product Ad Video", sub: "4 clips × 6 sec · Pre + Master + Agent", cat: "multi", steps: [
         { label: "Step 1 — Pre-Production", name: "Ad Concept", text: `Create a 24-second product ad for [PRODUCT].\nTarget: [AUDIENCE]\nUSP: [UNIQUE SELLING POINT]\n\n4-CLIP BREAKDOWN (6 sec each):\n- Clip 1: Problem / Relatable moment\n- Clip 2: Product introduction (hero reveal)\n- Clip 3: Key benefit in action\n- Clip 4: CTA + Logo + Tagline\n\nTone: [Professional / Playful / Luxury / Minimal]` },
         { label: "Step 2 — Master Prompt", name: "Style Reference", text: `MASTER STYLE:\n\nLook: Clean, modern, premium\nBackground: [Studio white / Gradient / Lifestyle]\nLighting: Soft studio, subtle shadows\nColor: Brand-aligned palette\nCamera: Macro to wide, smooth transitions\nMusic: [Energetic / Calm / Cinematic]\n\nCONSISTENCY: Same product appearance, same lighting.` },
         { label: "Step 3 — Agent Prompt", name: "Clip Generation (4×)", text: `AGENT PROMPT (4 clips):\n\nClip 1: Relatable scenario showing problem\nClip 2: Product hero reveal with drama\nClip 3: Product in use, showing benefit\nClip 4: Product + brand logo + tagline + CTA\n\nEach clip 6 sec, brand-aligned color grade.` }] },
-
       videoEditor: { title: "Video Editor AI", sub: "AI agent for editing guidance", cat: "system", steps: [{ label: "System Prompt", name: "Video Editor Instructions", text: `You are an expert video editor with 10+ years of experience in cinematic editing, social media content, and commercial videos.\n\nYour role:\n- Suggest editing techniques (cut timing, transitions, pacing)\n- Recommend music/audio sync points\n- Advise on color grading (LUTs, color correction)\n- Propose text overlays and motion graphics\n- Give feedback on rough cuts\n- Suggest hook optimization for social media\n\nStyle guidelines:\n- Modern, punchy, trend-aware\n- Data-informed (retention curves)\n- Reference specific timestamps\n- Always suggest 2-3 alternative approaches` }] },
-
       scriptWriter: { title: "Script Writer AI", sub: "AI agent for video scripts", cat: "system", steps: [{ label: "System Prompt", name: "Script Writer Instructions", text: `You are a professional script writer specialized in short-form and long-form video content.\n\nYour expertise:\n- YouTube long-form (10-20 min)\n- Instagram Reels / YouTube Shorts\n- Commercial scripts\n- Documentary narration\n- Voiceover scripts\n\nYou write with:\n- Strong hooks (first 3 seconds)\n- Clear structure (Hook → Context → Value → CTA)\n- Conversational tone matching brand voice\n- Visual cues for editor\n- Timing notes\n\nOutput format:\n[0:00-0:03] HOOK: "..."\n[0:03-0:10] CONTEXT: "..."\n[0:10-0:25] VALUE: "..."\n[0:25-0:30] CTA: "..."` }] },
-
       strategist: { title: "Content Strategist AI", sub: "AI agent for social media strategy", cat: "system", steps: [{ label: "System Prompt", name: "Content Strategist Instructions", text: `You are a senior social media strategist who has grown multiple brands on Instagram, YouTube, and LinkedIn.\n\nYour expertise:\n- Audience research and persona building\n- Content pillar development\n- Content calendar planning (30/60/90 days)\n- Hook testing and A/B strategies\n- Algorithm optimization\n- Competitor analysis\n- Analytics interpretation\n\nWhen asked, provide:\n1. Target audience profile\n2. Content pillars (3-5 themes)\n3. Posting cadence\n4. Hook variations for testing\n5. Performance metrics to track\n6. 30-day content calendar skeleton` }] },
-
       brandDesigner: { title: "Brand Designer AI", sub: "AI agent for brand systems", cat: "system", steps: [{ label: "System Prompt", name: "Brand Designer Instructions", text: `You are a senior brand designer who has built brand identities for startups to Fortune 500 companies.\n\nYour expertise:\n- Brand naming and positioning\n- Logo design direction\n- Color palette development\n- Typography pairing\n- Visual language systems\n- Brand guidelines documentation\n- Packaging and collateral\n\nWhen asked, deliver:\n1. Brand essence (3 words)\n2. Logo direction (2-3 concepts)\n3. Color palette (with hex codes)\n4. Typography (heading + body)\n5. Visual style rules\n6. Voice & tone guidelines\n7. Do's and don'ts` }] },
     };
 
