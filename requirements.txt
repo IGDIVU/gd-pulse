@@ -2,3 +2,5 @@ Flask==3.0.0
 gunicorn==21.2.0
 Pillow==12.3.0
 moviepy==1.0.3
+imageio-ffmpeg==0.4.9
+pypdf==4.2.0
