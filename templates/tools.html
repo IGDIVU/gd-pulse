@@ -8,48 +8,37 @@
 <link rel="stylesheet" href="/static/style.css">
 <style>
   .category-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 40px 0 20px;
-    padding: 16px 24px;
+    display: flex; align-items: center; gap: 12px;
+    margin: 40px 0 20px; padding: 16px 24px;
     border-radius: var(--radius);
     background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(196, 181, 253, 0.12));
     border: 1px solid var(--border);
   }
   .category-header .cat-icon {
-    font-size: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 50px;
-    height: 50px;
+    font-size: 28px; display: flex; align-items: center; justify-content: center;
+    width: 50px; height: 50px;
     background: linear-gradient(135deg, var(--primary), var(--primary-light));
-    border-radius: 12px;
-    color: white;
+    border-radius: 12px; color: white;
     box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3);
   }
   .category-header .cat-info h2 {
-    font-size: 20px;
-    font-weight: 800;
-    color: var(--text);
-    margin: 0 0 4px;
-    letter-spacing: -0.5px;
+    font-size: 20px; font-weight: 800; color: var(--text);
+    margin: 0 0 4px; letter-spacing: -0.5px;
   }
   .category-header .cat-info p {
-    font-size: 13px;
-    color: var(--text-dim);
-    margin: 0;
+    font-size: 13px; color: var(--text-dim); margin: 0;
   }
   .category-header .cat-count {
-    margin-left: auto;
-    background: var(--primary);
-    color: white;
-    padding: 6px 16px;
-    border-radius: 30px;
-    font-size: 13px;
-    font-weight: 700;
+    margin-left: auto; background: var(--primary); color: white;
+    padding: 6px 16px; border-radius: 30px;
+    font-size: 13px; font-weight: 700;
   }
+  .tool-icon {
+    width: 26px; height: 26px; color: var(--primary);
+    margin-bottom: 12px; transition: all 0.4s;
+  }
+  .tool-card:hover .tool-icon { color: white; transform: translateY(-4px) scale(1.15); }
+  .cat-icon svg { width: 26px; height: 26px; color: white; }
 </style>
 </head>
 <body>
@@ -58,25 +47,21 @@
   <div class="parallax-orb" style="bottom: 10%; right: 5%;"></div>
 
   <header>
-    <a href="/" class="logo">
-      <img src="/static/logo-horizontal.png" alt="GD Pulse">
-    </a>
+    <a href="/" class="logo"><img src="/static/logo-horizontal.png" alt="GD Pulse"></a>
     <nav class="nav-links">
       <a href="/tools" class="active">Tools</a>
+      <a href="/prompts">Prompts</a>
+      <a href="/admin">Admin</a>
+      {% if role == 'owner' %}
+        <a href="/owner">Owner</a>
+      {% endif %}
     </nav>
     <div class="header-right">
       <div class="search-box">
         <input type="text" placeholder="Search tools..." id="searchInput">
-        <span class="search-icon">🔍</span>
+        <span class="search-icon" data-icon="search"></span>
       </div>
-            <button class="theme-toggle" onclick="toggleTheme(event)" title="Toggle theme"></button>
-      <a href="/prompts" class="btn btn-outline">Prompts</a>
-      {% if role in ('owner', 'admin') %}
-        <a href="/admin" class="btn btn-outline">Admin</a>
-      {% endif %}
-      {% if role == 'owner' %}
-        <a href="/owner" class="btn btn-primary">Owner</a>
-      {% endif %}
+      <button class="theme-toggle" onclick="toggleTheme(event)" title="Toggle theme"></button>
       <a href="/logout" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
     </div>
   </header>
@@ -85,105 +70,43 @@
     <div class="container">
 
       <div class="welcome reveal">
-        <h1>Welcome, <span class="highlight">{{ user }}</span> 👋</h1>
+        <h1>Welcome, <span class="highlight">{{ name }}</span></h1>
         <p>Aapke saare tools — 3 categories me organized.</p>
       </div>
 
       <div class="stats">
-        <div class="stat-card reveal">
-          <div class="value">14+</div>
-          <div class="label">Total Tools</div>
-        </div>
-        <div class="stat-card reveal">
-          <div class="value">{{ role }}</div>
-          <div class="label">Your Role</div>
-        </div>
-        <div class="stat-card reveal">
-          <div class="value">3</div>
-          <div class="label">Categories</div>
-        </div>
-        <div class="stat-card reveal">
-          <div class="value">24/7</div>
-          <div class="label">Available</div>
-        </div>
+        <div class="stat-card reveal"><div class="value">14+</div><div class="label">Total Tools</div></div>
+        <div class="stat-card reveal"><div class="value">{{ role }}</div><div class="label">Your Role</div></div>
+        <div class="stat-card reveal"><div class="value">3</div><div class="label">Categories</div></div>
+        <div class="stat-card reveal"><div class="value">24/7</div><div class="label">Available</div></div>
       </div>
 
-      <!-- ========== CATEGORY 1: OFFICE TOOLS ========== -->
       <div class="category-header reveal">
-        <div class="cat-icon">💼</div>
+        <div class="cat-icon" data-icon="tools"></div>
         <div class="cat-info">
           <h2>GD Workspace</h2>
           <p>Office tools — GST, PDF, Image, Calculator, Text</p>
         </div>
-        <div class="cat-count">10 Tools</div>
+        <div class="cat-count">12 Tools</div>
       </div>
 
       <div class="grid grid-4">
-        <a href="/tools/gst" class="tool-card reveal">
-          <div class="icon">🧮</div>
-          <div class="title">GST Calculator</div>
-          <div class="desc">Quick GST calculation</div>
-        </a>
-        <a href="/tools/emi" class="tool-card reveal">
-          <div class="icon">💰</div>
-          <div class="title">EMI Calculator</div>
-          <div class="desc">Loan EMI & interest</div>
-        </a>
-        <a href="/tools/age" class="tool-card reveal">
-          <div class="icon">📅</div>
-          <div class="title">Age Calculator</div>
-          <div class="desc">Calculate exact age</div>
-        </a>
-        <a href="/tools/number-to-words" class="tool-card reveal">
-          <div class="icon">🔢</div>
-          <div class="title">Number to Words</div>
-          <div class="desc">Convert numbers to text</div>
-        </a>
-        <a href="/tools/unit-converter" class="tool-card reveal">
-          <div class="icon">📏</div>
-          <div class="title">Unit Converter</div>
-          <div class="desc">Length, weight, temp</div>
-        </a>
-        <a href="/tools/text-tools" class="tool-card reveal">
-          <div class="icon">🔤</div>
-          <div class="title">Text Tools</div>
-          <div class="desc">Word count, case change</div>
-        </a>
-        <a href="/tools/qr-code" class="tool-card reveal">
-          <div class="icon">📱</div>
-          <div class="title">QR Code Generator</div>
-          <div class="desc">Text/URL to QR</div>
-        </a>
-        <a href="/tools/image-resize" class="tool-card reveal">
-          <div class="icon">🖼️</div>
-          <div class="title">Image Resize</div>
-          <div class="desc">Resize any image</div>
-        </a>
-        <a href="/tools/image-compress" class="tool-card reveal">
-          <div class="icon">🎨</div>
-          <div class="title">Image Compressor</div>
-          <div class="desc">Reduce image size</div>
-        </a>
-        <a href="/tools/image-crop" class="tool-card reveal">
-          <div class="icon">✂️</div>
-          <div class="title">Image Cropper</div>
-          <div class="desc">Crop images online</div>
-        </a>
-        <a href="/tools/photo-to-pdf" class="tool-card reveal">
-          <div class="icon">📄</div>
-          <div class="title">Photo to PDF</div>
-          <div class="desc">Convert images to PDF</div>
-        </a>
-        <a href="/tools/pdf-merge" class="tool-card reveal">
-          <div class="icon">📚</div>
-          <div class="title">PDF Merge</div>
-          <div class="desc">Merge multiple PDFs</div>
-        </a>
+        <a href="/tools/gst" class="tool-card reveal"><span class="tool-icon" data-icon="gst"></span><div class="title">GST Calculator</div><div class="desc">Quick GST</div></a>
+        <a href="/tools/emi" class="tool-card reveal"><span class="tool-icon" data-icon="emi"></span><div class="title">EMI Calculator</div><div class="desc">Loan EMI</div></a>
+        <a href="/tools/age" class="tool-card reveal"><span class="tool-icon" data-icon="age"></span><div class="title">Age Calculator</div><div class="desc">Exact age</div></a>
+        <a href="/tools/number-to-words" class="tool-card reveal"><span class="tool-icon" data-icon="number"></span><div class="title">Number to Words</div><div class="desc">Text conversion</div></a>
+        <a href="/tools/unit-converter" class="tool-card reveal"><span class="tool-icon" data-icon="unit"></span><div class="title">Unit Converter</div><div class="desc">Length, weight</div></a>
+        <a href="/tools/text-tools" class="tool-card reveal"><span class="tool-icon" data-icon="text"></span><div class="title">Text Tools</div><div class="desc">Word count, case</div></a>
+        <a href="/tools/qr-code" class="tool-card reveal"><span class="tool-icon" data-icon="qr"></span><div class="title">QR Code</div><div class="desc">Generate QR</div></a>
+        <a href="/tools/image-resize" class="tool-card reveal"><span class="tool-icon" data-icon="image"></span><div class="title">Image Resize</div><div class="desc">Resize images</div></a>
+        <a href="/tools/image-compress" class="tool-card reveal"><span class="tool-icon" data-icon="compress"></span><div class="title">Image Compressor</div><div class="desc">Reduce size</div></a>
+        <a href="/tools/image-crop" class="tool-card reveal"><span class="tool-icon" data-icon="crop"></span><div class="title">Image Cropper</div><div class="desc">Crop images</div></a>
+        <a href="/tools/photo-to-pdf" class="tool-card reveal"><span class="tool-icon" data-icon="pdf"></span><div class="title">Photo to PDF</div><div class="desc">Images → PDF</div></a>
+        <a href="/tools/pdf-merge" class="tool-card reveal"><span class="tool-icon" data-icon="pdfMerge"></span><div class="title">PDF Merge</div><div class="desc">Merge PDFs</div></a>
       </div>
 
-      <!-- ========== CATEGORY 2: MEDIA TOOLS ========== -->
       <div class="category-header reveal">
-        <div class="cat-icon">🎬</div>
+        <div class="cat-icon" data-icon="video"></div>
         <div class="cat-info">
           <h2>GD Studio</h2>
           <p>Media tools — Video, Audio, Downloader (coming soon)</p>
@@ -192,31 +115,20 @@
       </div>
 
       <div class="grid grid-4">
-        <a href="/tools/video-to-mp3" class="tool-card reveal">
-          <div class="icon">🎵</div>
-          <div class="title">Video to MP3</div>
-          <div class="desc">Extract audio from video</div>
-        </a>
+        <a href="/tools/video-to-mp3" class="tool-card reveal"><span class="tool-icon" data-icon="audio"></span><div class="title">Video to MP3</div><div class="desc">Extract audio</div></a>
         <div class="tool-card reveal" onclick="alert('Video Converter — coming soon! 🚧')" style="opacity: 0.6;">
-          <div class="icon">🎞️</div>
-          <div class="title">Video Converter</div>
-          <div class="desc">MP4, AVI, MOV — coming soon</div>
+          <span class="tool-icon" data-icon="video"></span><div class="title">Video Converter</div><div class="desc">MP4, AVI, MOV</div>
         </div>
         <div class="tool-card reveal" onclick="alert('YouTube Downloader — coming soon! 🚧')" style="opacity: 0.6;">
-          <div class="icon">📥</div>
-          <div class="title">YouTube Downloader</div>
-          <div class="desc">MP3/MP4 — coming soon</div>
+          <span class="tool-icon" data-icon="download"></span><div class="title">YouTube Downloader</div><div class="desc">MP3/MP4</div>
         </div>
         <div class="tool-card reveal" onclick="alert('Instagram Downloader — coming soon! 🚧')" style="opacity: 0.6;">
-          <div class="icon">📸</div>
-          <div class="title">Instagram Downloader</div>
-          <div class="desc">Reels, Posts — coming soon</div>
+          <span class="tool-icon" data-icon="download"></span><div class="title">Instagram Downloader</div><div class="desc">Reels, Posts</div>
         </div>
       </div>
 
-      <!-- ========== CATEGORY 3: BUSINESS SOFTWARE ========== -->
       <div class="category-header reveal">
-        <div class="cat-icon">🏢</div>
+        <div class="cat-icon" data-icon="software"></div>
         <div class="cat-info">
           <h2>GD Business</h2>
           <p>Business software — Retail, Restaurant, Sand (coming soon)</p>
@@ -226,32 +138,28 @@
 
       <div class="grid grid-4">
         <div class="tool-card reveal" onclick="alert('Retail Store — coming soon! 🚧')" style="opacity: 0.6;">
-          <div class="icon">🏪</div>
-          <div class="title">Retail Store</div>
-          <div class="desc">Gofrugal style POS</div>
+          <span class="tool-icon" data-icon="retail"></span><div class="title">Retail Store</div><div class="desc">Gofrugal style POS</div>
         </div>
         <div class="tool-card reveal" onclick="alert('Restaurant POS — coming soon! 🚧')" style="opacity: 0.6;">
-          <div class="icon">🍽️</div>
-          <div class="title">Restaurant POS</div>
-          <div class="desc">Ezee Optimum style</div>
+          <span class="tool-icon" data-icon="restaurant"></span><div class="title">Restaurant POS</div><div class="desc">Ezee Optimum style</div>
         </div>
         <div class="tool-card reveal" onclick="alert('Sand Business — coming soon! 🚧')" style="opacity: 0.6;">
-          <div class="icon">🚛</div>
-          <div class="title">Sand Business</div>
-          <div class="desc">Stock, Truck, Billing</div>
+          <span class="tool-icon" data-icon="sand"></span><div class="title">Sand Business</div><div class="desc">Stock, Truck, Billing</div>
         </div>
       </div>
 
     </div>
   </main>
 
-  <footer>
-    <p>© 2025 GD Pulse — Creative Digital Studio</p>
-  </footer>
+  <footer><p>© 2025 GD Pulse — Creative Digital Studio</p></footer>
 
+  <script src="/static/icons.js"></script>
   <script>
     document.getElementById("searchInput").addEventListener("keypress", (e) => {
       if (e.key === "Enter") alert("Search feature jald aa raha hai! 🔍");
+    });
+    document.addEventListener("DOMContentLoaded", () => {
+      if (window.renderIcons) window.renderIcons();
     });
   </script>
 
