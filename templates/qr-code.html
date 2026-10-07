@@ -22,28 +22,25 @@
       <div class="box">
         <h2>📱 QR Code Generator</h2>
 
-        <label>Text ya URL daalo</label>
-        <input type="text" id="qrText" placeholder="https://example.com ya koi bhi text" style="font-size: 15px;">
+        <form id="qrForm" method="POST" action="/tools/qr-code/process">
+          <label>Text ya URL daalo</label>
+          <input type="text" name="text" placeholder="https://example.com ya koi bhi text" required>
 
-        <label>Size (px)</label>
-        <select id="qrSize">
-          <option value="200">200 x 200</option>
-          <option value="300" selected>300 x 300</option>
-          <option value="400">400 x 400</option>
-          <option value="500">500 x 500</option>
-        </select>
+          <label>Size (px)</label>
+          <select name="size">
+            <option value="200">200 x 200</option>
+            <option value="300" selected>300 x 300</option>
+            <option value="400">400 x 400</option>
+            <option value="500">500 x 500</option>
+          </select>
 
-        <button class="calc-btn" onclick="generateQR()">Generate QR Code</button>
+          <button type="submit" class="calc-btn" id="submitBtn">Generate & Download QR</button>
+        </form>
 
-        <div id="qrResult" class="result" style="display:none; text-align: center;">
-          <div id="qrCanvasHolder" style="display: inline-block; background: white; padding: 16px; border-radius: 12px;"></div>
-          <div style="margin-top: 15px;">
-            <button class="btn btn-primary" onclick="downloadQR()" style="margin-right: 8px;">⬇️ Download PNG</button>
-          </div>
-        </div>
+        <div class="loading" id="loading">⏳ QR ban raha hai... please wait</div>
 
         <div class="info">
-          💡 Tip: QR code me website URL, text, phone number, ya WiFi details daal sakte ho.
+          💡 Tip: QR code me website URL, text, phone number, ya WiFi details daal sakte ho. Image automatically download ho jayegi.
         </div>
 
         <a href="/tools" class="back">← Back to Tools</a>
@@ -53,54 +50,12 @@
 
   <footer><p>© 2025 GD Pulse</p></footer>
 
-  <!-- QR Code library -->
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-
   <script>
-    let currentCanvas = null;
-
-    function generateQR() {
-      const text = document.getElementById("qrText").value.trim();
-      const size = parseInt(document.getElementById("qrSize").value);
-
-      if (!text) {
-        alert("Kuch text ya URL daalo");
-        return;
-      }
-
-      const holder = document.getElementById("qrCanvasHolder");
-      holder.innerHTML = "";
-
-      const canvas = document.createElement("canvas");
-      holder.appendChild(canvas);
-
-      QRCode.toCanvas(canvas, text, {
-        width: size,
-        margin: 2,
-        color: {
-          dark: "#1a1a1a",
-          light: "#ffffff"
-        }
-      }, function(error) {
-        if (error) {
-          alert("QR generate nahi hua: " + error);
-          return;
-        }
-        currentCanvas = canvas;
-        document.getElementById("qrResult").style.display = "block";
-      });
-    }
-
-    function downloadQR() {
-      if (!currentCanvas) {
-        alert("Pehle QR generate karo");
-        return;
-      }
-      const link = document.createElement("a");
-      link.download = "gd-pulse-qr.png";
-      link.href = currentCanvas.toDataURL("image/png");
-      link.click();
-    }
+    document.getElementById("qrForm").addEventListener("submit", function() {
+      document.getElementById("submitBtn").disabled = true;
+      document.getElementById("submitBtn").innerText = "Generating...";
+      document.getElementById("loading").style.display = "block";
+    });
   </script>
 
 </body>
