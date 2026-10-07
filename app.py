@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, send_file
+from flask import Flask, render_template, request, redirect, url_for, session, send_file, make_response
 import os
 import io
 from PIL import Image
@@ -26,11 +26,30 @@ def require_staff():
 def require_admin():
     return current_role() == "admin"
 
+# ---------- Auto-Inject animations.js into all HTML pages ----------
+@app.after_request
+def inject_animations(response):
+    """Automatically inject animations.js before </body> in all HTML responses."""
+    if (
+        response.content_type
+        and "text/html" in response.content_type
+        and response.status_code == 200
+    ):
+        try:
+            html = response.get_data(as_text=True)
+            # Only inject if not already present
+            if "animations.js" not in html and "</body>" in html:
+                script_tag = '  <script src="/static/animations.js"></script>\n</body>'
+                html = html.replace("</body>", script_tag, 1)
+                response.set_data(html)
+        except Exception:
+            pass
+    return response
+
 # ---------- Public Routes ----------
 
 @app.route("/")
 def portfolio():
-    """Public portfolio page"""
     return render_template("portfolio.html", user=current_user())
 
 @app.route("/login", methods=["GET", "POST"])
@@ -55,7 +74,7 @@ def logout():
     session.clear()
     return redirect(url_for("portfolio"))
 
-# ---------- Staff Routes (Tools) ----------
+# ---------- Staff Routes ----------
 
 @app.route("/tools")
 def tools():
@@ -71,7 +90,7 @@ def admin():
         return redirect(url_for("login"))
     return render_template("admin.html", user=current_user())
 
-# ---------- Public Tools (accessible via /tools/*) ----------
+# ---------- Tools ----------
 
 @app.route("/tools/gst")
 def gst_tool():
