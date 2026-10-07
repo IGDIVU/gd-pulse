@@ -6,6 +6,10 @@
 <title>Number to Words — GD Pulse</title>
 <link rel="icon" type="image/png" href="/static/favicon.png">
 <link rel="stylesheet" href="/static/style.css">
+<style>
+  .box h2 { display: flex; align-items: center; gap: 10px; }
+  .box h2 [data-icon] { width: 26px; height: 26px; color: var(--primary); }
+</style>
 </head>
 <body>
 
@@ -13,14 +17,15 @@
     <a href="/" class="logo"><img src="/static/logo-horizontal.png" alt="GD Pulse"></a>
     <nav class="nav-links"><a href="/tools">Tools</a></nav>
     <div class="header-right">
-      <a href="/tools" class="btn btn-outline">← Back</a>
+      <button class="theme-toggle" onclick="toggleTheme(event)" title="Toggle theme"></button>
+      <a href="#" onclick="confirmLogout(event)" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
     </div>
   </header>
 
   <main>
     <div class="container" style="max-width: 650px;">
-      <div class="box">
-        <h2>🔢 Number ko Words me Badlo</h2>
+      <div class="box reveal">
+        <h2><span data-icon="number"></span> Number ko Words me Badlo</h2>
 
         <label>Number Daalo (max 99,99,99,999)</label>
         <input type="number" id="num" placeholder="Jaise: 1234567" style="font-size: 18px;">
@@ -37,17 +42,16 @@
 
   <footer><p>© 2025 GD Pulse</p></footer>
 
+  <script src="/static/icons.js"></script>
   <script>
     const ones = ["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine",
                   "Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen",
                   "Seventeen","Eighteen","Nineteen"];
     const tens = ["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
-
     function twoDigits(n) {
       if (n < 20) return ones[n];
       return tens[Math.floor(n/10)] + (n%10 ? " " + ones[n%10] : "");
     }
-
     function threeDigits(n) {
       let str = "";
       if (n > 99) {
@@ -58,38 +62,31 @@
       if (n > 0) str += twoDigits(n);
       return str;
     }
-
     function numberToWords(num) {
       if (num === 0) return "Zero";
       let str = "";
-      const crore = Math.floor(num / 10000000);
-      num = num % 10000000;
-      const lakh = Math.floor(num / 100000);
-      num = num % 100000;
-      const thousand = Math.floor(num / 1000);
-      num = num % 1000;
+      const crore = Math.floor(num / 10000000); num = num % 10000000;
+      const lakh = Math.floor(num / 100000); num = num % 100000;
+      const thousand = Math.floor(num / 1000); num = num % 1000;
       const hundred = num;
-
       if (crore > 0) str += threeDigits(crore) + " Crore ";
       if (lakh > 0) str += threeDigits(lakh) + " Lakh ";
       if (thousand > 0) str += threeDigits(thousand) + " Thousand ";
       if (hundred > 0) str += threeDigits(hundred);
-
       return str.trim();
     }
-
     function convert() {
       const val = document.getElementById("num").value;
       if (val === "" || val === null) { alert("Number daalo"); return; }
       const num = parseInt(val);
       if (isNaN(num) || num < 0) { alert("Sahi positive number daalo"); return; }
       if (num > 9999999999) { alert("Number bahut bada hai"); return; }
-
       const words = numberToWords(num);
       const result = document.getElementById("result");
       result.innerHTML = "<b style='color: var(--primary);'>" + words + "</b><br><span style='font-size:13px; color: var(--text-dim);'>Rupees " + words + " Only</span>";
       result.style.display = "block";
     }
+    document.addEventListener("DOMContentLoaded", () => { if (window.renderIcons) window.renderIcons(); });
   </script>
 
 </body>
