@@ -5,12 +5,14 @@ from PIL import Image
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "gd_pulse_secret_key_2025")
-app.config["MAX_CONTENT_LENGTH"] = 25 * 1024 * 1024  # 25 MB
+app.config["MAX_CONTENT_LENGTH"] = 25 * 1024 * 1024
 
-# ---------- Users ----------
+# ---------- Users (4 Roles) ----------
 USERS = {
-    "admin": {"password": "gdadmin123", "role": "admin"},
-    "staff": {"password": "gdstaff123", "role": "staff"},
+    "owner": {"password": "gdowner123", "role": "owner",  "name": "Owner"},
+    "admin": {"password": "gdadmin123", "role": "admin",  "name": "Admin"},
+    "staff": {"password": "gdstaff123", "role": "staff",  "name": "Staff"},
+    "user":  {"password": "gduser123",  "role": "user",   "name": "User"},
 }
 
 # ---------- Helpers ----------
@@ -20,20 +22,26 @@ def current_user():
 def current_role():
     return session.get("role")
 
+def current_name():
+    return session.get("name", session.get("user"))
+
+def require_login():
+    return current_role() in ("owner", "admin", "staff", "user")
+
 def require_staff():
-    return current_role() in ("staff", "admin")
+    return current_role() in ("owner", "admin", "staff")
 
 def require_admin():
-    return current_role() == "admin"
+    return current_role() in ("owner", "admin")
 
-# ---------- Auto-Inject animations.js ----------
+def require_owner():
+    return current_role() == "owner"
+
+# ---------- Auto-Inject ----------
 @app.after_request
 def inject_animations(response):
-    if (
-        response.content_type
-        and "text/html" in response.content_type
-        and response.status_code == 200
-    ):
+    if (response.content_type and "text/html" in response.content_type
+        and response.status_code == 200):
         try:
             html = response.get_data(as_text=True)
             if "animations.js" not in html and "</body>" in html:
@@ -44,11 +52,11 @@ def inject_animations(response):
             pass
     return response
 
-# ---------- Public Routes ----------
+# ---------- Routes ----------
 
 @app.route("/")
 def portfolio():
-    return render_template("portfolio.html", user=current_user())
+    return render_template("portfolio.html", user=current_user(), role=current_role())
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -59,8 +67,12 @@ def login():
         if username in USERS and USERS[username]["password"] == password:
             session["user"] = username
             session["role"] = USERS[username]["role"]
-            if USERS[username]["role"] == "admin":
+            session["name"] = USERS[username]["name"]
+            role = USERS[username]["role"]
+            if role in ("owner", "admin"):
                 return redirect(url_for("admin"))
+            elif role == "staff":
+                return redirect(url_for("prompts"))
             else:
                 return redirect(url_for("tools"))
         else:
@@ -76,9 +88,16 @@ def logout():
 
 @app.route("/tools")
 def tools():
+    if not require_login():
+        return redirect(url_for("login"))
+    return render_template("tools.html", user=current_user(), role=current_role(), name=current_name())
+
+@app.route("/prompts")
+def prompts():
+    """Staff bhi prompts dekh sakta hai"""
     if not require_staff():
         return redirect(url_for("login"))
-    return render_template("tools.html", user=current_user(), role=current_role())
+    return render_template("prompts.html", user=current_user(), role=current_role(), name=current_name())
 
 # ---------- Admin Routes ----------
 
@@ -86,48 +105,44 @@ def tools():
 def admin():
     if not require_admin():
         return redirect(url_for("login"))
-    return render_template("admin.html", user=current_user())
+    return render_template("admin.html", user=current_user(), role=current_role(), name=current_name())
 
-# ============================================
-# OFFICE TOOLS
-# ============================================
+# ---------- Tools (common) ----------
 
 @app.route("/tools/gst")
 def gst_tool():
-    if not require_staff(): return redirect(url_for("login"))
-    return render_template("gst.html")
+    if not require_login(): return redirect(url_for("login"))
+    return render_template("gst.html", name=current_name())
 
 @app.route("/tools/emi")
 def emi_tool():
-    if not require_staff(): return redirect(url_for("login"))
-    return render_template("emi.html")
+    if not require_login(): return redirect(url_for("login"))
+    return render_template("emi.html", name=current_name())
 
 @app.route("/tools/age")
 def age_tool():
-    if not require_staff(): return redirect(url_for("login"))
-    return render_template("age.html")
+    if not require_login(): return redirect(url_for("login"))
+    return render_template("age.html", name=current_name())
 
 @app.route("/tools/number-to-words")
 def number_to_words_tool():
-    if not require_staff(): return redirect(url_for("login"))
-    return render_template("number-to-words.html")
+    if not require_login(): return redirect(url_for("login"))
+    return render_template("number-to-words.html", name=current_name())
 
 @app.route("/tools/unit-converter")
 def unit_converter_tool():
-    if not require_staff(): return redirect(url_for("login"))
-    return render_template("unit-converter.html")
+    if not require_login(): return redirect(url_for("login"))
+    return render_template("unit-converter.html", name=current_name())
 
 @app.route("/tools/text-tools")
 def text_tools():
-    if not require_staff(): return redirect(url_for("login"))
-    return render_template("text-tools.html")
-
-# ---------- QR Code ----------
+    if not require_login(): return redirect(url_for("login"))
+    return render_template("text-tools.html", name=current_name())
 
 @app.route("/tools/qr-code")
 def qr_code_tool():
-    if not require_staff(): return redirect(url_for("login"))
-    return render_template("qr-code.html")
+    if not require_login(): return redirect(url_for("login"))
+    return render_template("qr-code.html", name=current_name())
 
 @app.route("/tools/qr-code/process", methods=["POST"])
 def qr_code_process():
@@ -139,33 +154,24 @@ def qr_code_process():
             return "Kuch text daalo", 400
         if size < 100 or size > 1000:
             size = 300
-
-        qr = qrcode.QRCode(
-            version=1,
-            error_correction=qrcode.constants.ERROR_CORRECT_H,
-            box_size=10,
-            border=2,
-        )
+        qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_H,
+                          box_size=10, border=2)
         qr.add_data(text)
         qr.make(fit=True)
         img = qr.make_image(fill_color="#1a1a1a", back_color="white").convert("RGB")
         img = img.resize((size, size), Image.LANCZOS)
-
         output = io.BytesIO()
         img.save(output, format="PNG")
         output.seek(0)
-
         return send_file(output, mimetype="image/png", as_attachment=True,
                          download_name="gd-pulse-qr.png")
     except Exception as e:
         return f"Error: {str(e)}", 500
 
-# ---------- Image Tools ----------
-
 @app.route("/tools/image-resize")
 def image_resize_tool():
-    if not require_staff(): return redirect(url_for("login"))
-    return render_template("image-resize.html")
+    if not require_login(): return redirect(url_for("login"))
+    return render_template("image-resize.html", name=current_name())
 
 @app.route("/tools/image-resize/process", methods=["POST"])
 def image_resize_process():
@@ -181,8 +187,7 @@ def image_resize_process():
         resized = img.resize((width, height), Image.LANCZOS)
         output = io.BytesIO()
         fmt = img.format if img.format else "PNG"
-        if fmt not in ("JPEG", "PNG", "WEBP", "GIF", "BMP"):
-            fmt = "PNG"
+        if fmt not in ("JPEG", "PNG", "WEBP", "GIF", "BMP"): fmt = "PNG"
         if fmt == "JPEG" and resized.mode in ("RGBA", "P"):
             resized = resized.convert("RGB")
         resized.save(output, format=fmt)
@@ -196,8 +201,8 @@ def image_resize_process():
 
 @app.route("/tools/image-compress")
 def image_compress_tool():
-    if not require_staff(): return redirect(url_for("login"))
-    return render_template("image-compress.html")
+    if not require_login(): return redirect(url_for("login"))
+    return render_template("image-compress.html", name=current_name())
 
 @app.route("/tools/image-compress/process", methods=["POST"])
 def image_compress_process():
@@ -222,8 +227,8 @@ def image_compress_process():
 
 @app.route("/tools/image-crop")
 def image_crop_tool():
-    if not require_staff(): return redirect(url_for("login"))
-    return render_template("image-crop.html")
+    if not require_login(): return redirect(url_for("login"))
+    return render_template("image-crop.html", name=current_name())
 
 @app.route("/tools/image-crop/process", methods=["POST"])
 def image_crop_process():
@@ -246,8 +251,7 @@ def image_crop_process():
         cropped = img.crop((x, y, x + width, y + height))
         output = io.BytesIO()
         fmt = img.format if img.format else "PNG"
-        if fmt not in ("JPEG", "PNG", "WEBP", "GIF", "BMP"):
-            fmt = "PNG"
+        if fmt not in ("JPEG", "PNG", "WEBP", "GIF", "BMP"): fmt = "PNG"
         if fmt == "JPEG" and cropped.mode in ("RGBA", "P"):
             cropped = cropped.convert("RGB")
         cropped.save(output, format=fmt)
@@ -259,12 +263,10 @@ def image_crop_process():
     except Exception as e:
         return f"Error: {str(e)}", 500
 
-# ---------- PDF Tools ----------
-
 @app.route("/tools/photo-to-pdf")
 def photo_to_pdf_tool():
-    if not require_staff(): return redirect(url_for("login"))
-    return render_template("photo-to-pdf.html")
+    if not require_login(): return redirect(url_for("login"))
+    return render_template("photo-to-pdf.html", name=current_name())
 
 @app.route("/tools/photo-to-pdf/process", methods=["POST"])
 def photo_to_pdf_process():
@@ -291,8 +293,8 @@ def photo_to_pdf_process():
 
 @app.route("/tools/pdf-merge")
 def pdf_merge_tool():
-    if not require_staff(): return redirect(url_for("login"))
-    return render_template("pdf-merge.html")
+    if not require_login(): return redirect(url_for("login"))
+    return render_template("pdf-merge.html", name=current_name())
 
 @app.route("/tools/pdf-merge/process", methods=["POST"])
 def pdf_merge_process():
@@ -315,14 +317,10 @@ def pdf_merge_process():
     except Exception as e:
         return f"Error: {str(e)}", 500
 
-# ============================================
-# MEDIA TOOLS
-# ============================================
-
 @app.route("/tools/video-to-mp3")
 def video_to_mp3_tool():
-    if not require_staff(): return redirect(url_for("login"))
-    return render_template("video-to-mp3.html")
+    if not require_login(): return redirect(url_for("login"))
+    return render_template("video-to-mp3.html", name=current_name())
 
 @app.route("/tools/video-to-mp3/process", methods=["POST"])
 def video_to_mp3_process():
@@ -343,13 +341,9 @@ def video_to_mp3_process():
     except Exception as e:
         return f"Error: {str(e)}", 500
 
-# ---------- Error Handler ----------
-
 @app.errorhandler(413)
 def too_large(e):
     return "File bahut badi hai. Max 25MB allowed hai.", 413
-
-# ---------- Run ----------
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
