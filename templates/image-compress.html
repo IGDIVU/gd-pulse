@@ -4,88 +4,46 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Image Compressor — GD Pulse</title>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
-  body { background: #0a0f1a; color: #e6edf5; min-height: 100vh; }
-  body::before {
-    content: ""; position: fixed; inset: 0;
-    background: radial-gradient(circle at 20% 30%, rgba(0,184,148,0.12), transparent 40%),
-                radial-gradient(circle at 80% 70%, rgba(108,92,231,0.12), transparent 40%);
-    z-index: -1;
-  }
-  header {
-    background: rgba(15,23,36,0.75); backdrop-filter: blur(14px);
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    color: white; padding: 16px 30px;
-    display: flex; justify-content: space-between; align-items: center;
-    position: sticky; top: 0; z-index: 100;
-  }
-  header h1 { font-size: 20px; }
-  .btn {
-    background: linear-gradient(135deg, #00b894, #019875); color: white;
-    padding: 10px 22px; border: none; border-radius: 30px;
-    cursor: pointer; font-size: 14px; font-weight: bold;
-    text-decoration: none; box-shadow: 0 4px 14px rgba(0,184,148,0.35);
-  }
-  .btn:hover { transform: translateY(-2px); }
-  main { padding: 30px; max-width: 600px; margin: 0 auto; }
-  .box {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    padding: 30px; border-radius: 18px;
-    backdrop-filter: blur(12px);
-  }
-  h2 { margin-bottom: 22px; font-size: 22px; }
-  label { display: block; font-size: 14px; color: #a0aec0; margin-bottom: 8px; margin-top: 15px; }
-  input[type="file"] {
-    width: 100%; padding: 12px; margin-bottom: 10px;
-    border: 1px dashed rgba(0,184,148,0.5);
-    border-radius: 10px; background: rgba(0,184,148,0.05);
-    color: #e6edf5; font-size: 14px; cursor: pointer;
-  }
-  input[type="range"] { width: 100%; accent-color: #00b894; }
-  .quality-display {
-    text-align: center; font-size: 22px;
-    font-weight: bold; color: #00b894; margin: 5px 0;
-  }
-  .calc-btn {
-    width: 100%; padding: 15px; margin-top: 20px;
-    background: linear-gradient(135deg, #00b894, #019875);
-    color: white; border: none; border-radius: 10px;
-    font-size: 16px; cursor: pointer; font-weight: bold;
-    box-shadow: 0 4px 14px rgba(0,184,148,0.35);
-  }
-  .calc-btn:hover { transform: translateY(-2px); }
-  .calc-btn:disabled { background: #555; cursor: not-allowed; box-shadow: none; }
-  .back { display: inline-block; margin-top: 20px; color: #a0aec0; text-decoration: none; font-size: 14px; }
-  .back:hover { color: #00b894; }
-  .loading { text-align: center; color: #00b894; margin-top: 15px; display: none; }
-  .info { font-size: 12px; color: #7d8a9c; margin-top: 8px; }
-</style>
+<link rel="icon" type="image/png" href="/static/favicon.png">
+<link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+
   <header>
-    <h1>🎨 Image Compressor</h1>
-    <a href="/" class="btn">← Dashboard</a>
+    <a href="/" class="logo"><img src="/static/logo-horizontal.png" alt="GD Pulse"></a>
+    <nav class="nav-links"><a href="/tools">Tools</a></nav>
+    <div class="header-right">
+      <a href="/tools" class="btn btn-outline">← Back</a>
+    </div>
   </header>
+
   <main>
-    <div class="box">
-      <h2>Image ka Size Kam Karo</h2>
-      <form id="compressForm" method="POST" action="/tools/image-compress/process" enctype="multipart/form-data">
-        <label>Image Select Karo</label>
-        <input type="file" name="image" accept="image/*" required>
+    <div class="container" style="max-width: 600px;">
+      <div class="box">
+        <h2>🎨 Image ka Size Kam Karo</h2>
 
-        <label>Quality: <span id="qval">70</span>%</label>
-        <input type="range" name="quality" min="10" max="100" value="70" id="qualityRange"
-               oninput="document.getElementById('qval').innerText = this.value">
-        <div class="info">Kam quality = chhoti file, lekin image blur ho sakti hai. 60-80% best hai.</div>
+        <form id="compressForm" method="POST" action="/tools/image-compress/process" enctype="multipart/form-data">
+          <label>Image Select Karo</label>
+          <input type="file" name="image" accept="image/*" required>
 
-        <button type="submit" class="calc-btn" id="submitBtn">Compress & Download</button>
-      </form>
-      <div class="loading" id="loading">⏳ Compressing... please wait</div>
-      <a href="/" class="back">← Back to Dashboard</a>
+          <label>Quality: <span id="qval" style="color: var(--primary); font-weight: 700;">70</span>%</label>
+          <input type="range" name="quality" min="10" max="100" value="70" id="qualityRange"
+                 oninput="document.getElementById('qval').innerText = this.value">
+
+          <div class="info">Kam quality = chhoti file, lekin image blur ho sakti hai. 60-80% best hai.</div>
+
+          <button type="submit" class="calc-btn" id="submitBtn" style="margin-top: 15px;">Compress & Download</button>
+        </form>
+
+        <div class="loading" id="loading">⏳ Compressing... please wait</div>
+
+        <a href="/tools" class="back">← Back to Tools</a>
+      </div>
     </div>
   </main>
+
+  <footer><p>© 2025 GD Pulse</p></footer>
+
   <script>
     document.getElementById("compressForm").addEventListener("submit", function() {
       document.getElementById("submitBtn").disabled = true;
@@ -93,5 +51,6 @@
       document.getElementById("loading").style.display = "block";
     });
   </script>
+
 </body>
 </html>
