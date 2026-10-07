@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDF Merge — GD Pulse</title>
+<link rel="icon" type="image/png" href="/static/favicon.png">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+  <header>
+    <a href="/" class="logo"><img src="/static/logo-horizontal.png" alt="GD Pulse"></a>
+    <nav class="nav-links"><a href="/tools">Tools</a></nav>
+    <div class="header-right">
+      <a href="/tools" class="btn btn-outline">← Back</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="container" style="max-width: 650px;">
+      <div class="box">
+        <h2>📄 PDF Files Merge Karo</h2>
+
+        <form id="mergeForm" method="POST" action="/tools/pdf-merge/process" enctype="multipart/form-data">
+          <label>2 ya zyada PDF files select karo (order matter karta hai)</label>
+          <input type="file" name="pdfs" accept="application/pdf" multiple required>
+
+          <button type="submit" class="calc-btn" id="submitBtn">Merge PDFs</button>
+        </form>
+
+        <div class="loading" id="loading">⏳ PDFs merge ho rahi hain... please wait</div>
+
+        <div class="info">
+          💡 Tip: Multiple files select karne ke liye <b>Ctrl</b> (Windows) ya <b>Cmd</b> (Mac) dabaye rakho aur click karo. Files <b>jis order me select karoge</b>, usi order me merge hongi.
+        </div>
+
+        <a href="/tools" class="back">← Back to Tools</a>
+      </div>
+    </div>
+  </main>
+
+  <footer><p>© 2025 GD Pulse</p></footer>
+
+  <script>
+    document.getElementById("mergeForm").addEventListener("submit", function() {
+      document.getElementById("submitBtn").disabled = true;
+      document.getElementById("submitBtn").innerText = "Processing...";
+      document.getElementById("loading").style.display = "block";
+    });
+  </script>
+
+</body>
+</html>
