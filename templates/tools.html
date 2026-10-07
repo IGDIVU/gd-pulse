@@ -9,6 +9,9 @@
 </head>
 <body>
 
+  <div class="parallax-orb" style="top: 10%; left: 5%;"></div>
+  <div class="parallax-orb" style="bottom: 10%; right: 5%;"></div>
+
   <header>
     <a href="/" class="logo">
       <img src="/static/logo-horizontal.png" alt="GD Pulse">
@@ -19,7 +22,9 @@
     <div class="header-right">
       <div class="search-box">
         <input type="text" placeholder="Search tools..." id="searchInput">
+        <span class="search-icon">🔍</span>
       </div>
+      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
       <div class="avatar" title="{{ user }}">{{ user[0]|upper }}</div>
       <a href="/logout" class="btn btn-outline">Logout</a>
     </div>
@@ -28,92 +33,104 @@
   <main>
     <div class="container">
 
-      <div class="welcome">
+      <div class="welcome reveal">
         <h1>Welcome, <span class="highlight">{{ user }}</span> 👋</h1>
         <p>Aapke saare tools ek jagah — fast, simple, powerful.</p>
       </div>
 
       <div class="stats">
-        <div class="stat-card"><div class="value">12+</div><div class="label">Total Tools</div></div>
-        <div class="stat-card"><div class="value">{{ role }}</div><div class="label">Your Role</div></div>
-        <div class="stat-card"><div class="value">100%</div><div class="label">Free</div></div>
-        <div class="stat-card"><div class="value">24/7</div><div class="label">Available</div></div>
+        <div class="stat-card reveal">
+          <div class="value">12+</div>
+          <div class="label">Total Tools</div>
+        </div>
+        <div class="stat-card reveal">
+          <div class="value">{{ role }}</div>
+          <div class="label">Your Role</div>
+        </div>
+        <div class="stat-card reveal">
+          <div class="value">100%</div>
+          <div class="label">Free</div>
+        </div>
+        <div class="stat-card reveal">
+          <div class="value">24/7</div>
+          <div class="label">Available</div>
+        </div>
       </div>
 
-      <div class="section-header" style="margin-top: 40px;">
+      <div class="section-header reveal" style="margin-top: 40px;">
         <span class="section-tag">Toolkit</span>
         <h2 class="section-title">All <span class="highlight">Tools</span></h2>
       </div>
 
       <div class="grid grid-4">
 
-        <a href="/tools/gst" class="tool-card">
+        <a href="/tools/gst" class="tool-card reveal">
           <div class="icon">🧮</div>
           <div class="title">GST Calculator</div>
           <div class="desc">Quick GST calculation</div>
         </a>
 
-        <a href="/tools/emi" class="tool-card">
+        <a href="/tools/emi" class="tool-card reveal">
           <div class="icon">💰</div>
           <div class="title">EMI Calculator</div>
           <div class="desc">Loan EMI & interest</div>
         </a>
 
-        <a href="/tools/age" class="tool-card">
+        <a href="/tools/age" class="tool-card reveal">
           <div class="icon">📅</div>
           <div class="title">Age Calculator</div>
           <div class="desc">Calculate exact age</div>
         </a>
 
-        <a href="/tools/number-to-words" class="tool-card">
+        <a href="/tools/number-to-words" class="tool-card reveal">
           <div class="icon">🔢</div>
           <div class="title">Number to Words</div>
           <div class="desc">Convert numbers to text</div>
         </a>
 
-        <a href="/tools/unit-converter" class="tool-card">
+        <a href="/tools/unit-converter" class="tool-card reveal">
           <div class="icon">📏</div>
           <div class="title">Unit Converter</div>
           <div class="desc">Length, weight, temp</div>
         </a>
 
-        <a href="/tools/text-tools" class="tool-card">
+        <a href="/tools/text-tools" class="tool-card reveal">
           <div class="icon">🔤</div>
           <div class="title">Text Tools</div>
           <div class="desc">Word count, case change</div>
         </a>
 
-        <a href="/tools/image-resize" class="tool-card">
+        <a href="/tools/image-resize" class="tool-card reveal">
           <div class="icon">🖼️</div>
           <div class="title">Image Resize</div>
           <div class="desc">Resize any image</div>
         </a>
 
-        <a href="/tools/image-compress" class="tool-card">
+        <a href="/tools/image-compress" class="tool-card reveal">
           <div class="icon">🎨</div>
           <div class="title">Image Compressor</div>
           <div class="desc">Reduce image size</div>
         </a>
 
-        <a href="/tools/image-crop" class="tool-card">
+        <a href="/tools/image-crop" class="tool-card reveal">
           <div class="icon">✂️</div>
           <div class="title">Image Cropper</div>
           <div class="desc">Crop images online</div>
         </a>
 
-        <a href="/tools/photo-to-pdf" class="tool-card">
+        <a href="/tools/photo-to-pdf" class="tool-card reveal">
           <div class="icon">📄</div>
           <div class="title">Photo to PDF</div>
           <div class="desc">Convert images to PDF</div>
         </a>
 
-        <a href="/tools/video-to-mp3" class="tool-card">
+        <a href="/tools/video-to-mp3" class="tool-card reveal">
           <div class="icon">🎵</div>
           <div class="title">Video to MP3</div>
           <div class="desc">Extract audio from video</div>
         </a>
 
-        <div class="tool-card" onclick="alert('Coming soon! 🚧')" style="opacity: 0.6;">
+        <div class="tool-card reveal" onclick="alert('Coming soon! 🚧')" style="opacity: 0.6;">
           <div class="icon">📊</div>
           <div class="title">Doc / Excel</div>
           <div class="desc">Coming soon</div>
@@ -128,6 +145,7 @@
     <p>© 2025 GD Pulse — Creative Digital Studio</p>
   </footer>
 
+  <script src="/static/animations.js"></script>
   <script>
     document.getElementById("searchInput").addEventListener("keypress", (e) => {
       if (e.key === "Enter") alert("Search feature jald aa raha hai! 🔍");
