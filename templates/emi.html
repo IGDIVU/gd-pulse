@@ -6,6 +6,10 @@
 <title>EMI Calculator — GD Pulse</title>
 <link rel="icon" type="image/png" href="/static/favicon.png">
 <link rel="stylesheet" href="/static/style.css">
+<style>
+  .box h2 { display: flex; align-items: center; gap: 10px; }
+  .box h2 [data-icon] { width: 26px; height: 26px; color: var(--primary); }
+</style>
 </head>
 <body>
 
@@ -13,14 +17,15 @@
     <a href="/" class="logo"><img src="/static/logo-horizontal.png" alt="GD Pulse"></a>
     <nav class="nav-links"><a href="/tools">Tools</a></nav>
     <div class="header-right">
-      <a href="/tools" class="btn btn-outline">← Back</a>
+      <button class="theme-toggle" onclick="toggleTheme(event)" title="Toggle theme"></button>
+      <a href="#" onclick="confirmLogout(event)" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
     </div>
   </header>
 
   <main>
     <div class="container" style="max-width: 650px;">
-      <div class="box">
-        <h2>💰 Loan EMI Calculate Karo</h2>
+      <div class="box reveal">
+        <h2><span data-icon="emi"></span> Loan EMI Calculate Karo</h2>
 
         <label>Loan Amount (₹)</label>
         <input type="number" id="principal" placeholder="Jaise: 500000" min="0">
@@ -50,37 +55,32 @@
 
   <footer><p>© 2025 GD Pulse</p></footer>
 
+  <script src="/static/icons.js"></script>
   <script>
     function calculateEMI() {
       const principal = parseFloat(document.getElementById("principal").value);
       const annualRate = parseFloat(document.getElementById("rate").value);
       let tenure = parseFloat(document.getElementById("tenure").value);
       const tenureType = document.getElementById("tenureType").value;
-
       if (isNaN(principal) || principal <= 0 || isNaN(annualRate) || annualRate < 0 || isNaN(tenure) || tenure <= 0) {
         alert("Sahi values daalo"); return;
       }
-
       let months = tenureType === "years" ? tenure * 12 : tenure;
       const monthlyRate = annualRate / 12 / 100;
       let emi, totalPayment, totalInterest;
-
       if (monthlyRate === 0) {
-        emi = principal / months;
-        totalPayment = principal;
-        totalInterest = 0;
+        emi = principal / months; totalPayment = principal; totalInterest = 0;
       } else {
         const factor = Math.pow(1 + monthlyRate, months);
         emi = (principal * monthlyRate * factor) / (factor - 1);
-        totalPayment = emi * months;
-        totalInterest = totalPayment - principal;
+        totalPayment = emi * months; totalInterest = totalPayment - principal;
       }
-
       document.getElementById("r-emi").innerText = "₹" + emi.toFixed(2);
       document.getElementById("r-interest").innerText = "₹" + totalInterest.toFixed(2);
       document.getElementById("r-total").innerText = "₹" + totalPayment.toFixed(2);
       document.getElementById("result").style.display = "block";
     }
+    document.addEventListener("DOMContentLoaded", () => { if (window.renderIcons) window.renderIcons(); });
   </script>
 
 </body>
