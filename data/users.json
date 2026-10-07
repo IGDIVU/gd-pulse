@@ -1,7 +1,8 @@
 {
   "users": {
-    "owner": {"password": "gdowner123", "role": "owner", "name": "Owner"},
     "admin": {"password": "gdadmin123", "role": "admin", "name": "Admin"},
+    "owner": {"password": "gdowner123", "role": "owner", "name": "Owner"},
+    "manager": {"password": "gdmanager123", "role": "manager", "name": "Manager"},
     "staff": {"password": "gdstaff123", "role": "staff", "name": "Staff"},
     "user": {"password": "gduser123", "role": "user", "name": "User"}
   }
