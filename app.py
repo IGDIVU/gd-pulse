@@ -21,6 +21,13 @@ def require_prompts_crud(): return current_role() in ("admin", "owner")
 def require_admin(): return current_role() in ("admin", "owner")
 def require_owner(): return current_role() in ("admin", "owner")
 
+# Purav Carting credentials (hardcoded)
+PURAV_CARTING = {
+    "username": "PC",
+    "password": "123",
+    "display_name": "Purav Carting"
+}
+
 @app.after_request
 def inject_animations(response):
     if (response.content_type and "text/html" in response.content_type
@@ -77,6 +84,44 @@ def prompts():
 def tools():
     if not require_staff(): return redirect(url_for("login"))
     return render_template("tools.html", user=current_user(), role=current_role(), name=current_name())
+
+# ============================================
+# PURAV WORK ROUTES
+# ============================================
+
+@app.route("/purav")
+def purav_dashboard():
+    if not require_staff(): return redirect(url_for("login"))
+    return render_template("purav/dashboard.html", user=current_user(), role=current_role(), name=current_name())
+
+@app.route("/purav/login", methods=["GET", "POST"])
+def purav_login():
+    if not require_staff(): return redirect(url_for("login"))
+    biz = request.args.get("biz", "carting")
+    error = None
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "").strip()
+        if username == PURAV_CARTING["username"] and password == PURAV_CARTING["password"]:
+            session["purav_biz"] = biz
+            session["purav_user"] = username
+            session["purav_name"] = PURAV_CARTING["display_name"]
+            return redirect(url_for("purav_carting"))
+        else:
+            error = "Galat username ya password"
+    return render_template("purav/login.html", user=current_user(), role=current_role(),
+                          name=current_name(), biz=biz, error=error)
+
+@app.route("/purav/carting")
+def purav_carting():
+    if not require_staff(): return redirect(url_for("login"))
+    if session.get("purav_biz") != "carting":
+        return redirect(url_for("purav_login", biz="carting"))
+    return render_template("purav/carting.html", user=current_user(), role=current_role(), name=current_name())
+
+# ============================================
+# ADMIN / OWNER
+# ============================================
 
 @app.route("/admin")
 def admin():
@@ -198,6 +243,11 @@ def owner_update_role():
 # TOOLS
 # ============================================
 
+@app.route("/tools/invoice")
+def invoice_tool():
+    if not require_staff(): return redirect(url_for("login"))
+    return render_template("invoice.html", name=current_name())
+
 @app.route("/tools/gst")
 def gst_tool():
     if not require_staff(): return redirect(url_for("login"))
@@ -227,11 +277,6 @@ def unit_converter_tool():
 def text_tools():
     if not require_staff(): return redirect(url_for("login"))
     return render_template("text-tools.html", name=current_name())
-
-@app.route("/tools/invoice")
-def invoice_tool():
-    if not require_staff(): return redirect(url_for("login"))
-    return render_template("invoice.html", name=current_name())
 
 @app.route("/tools/qr-code")
 def qr_code_tool():
