@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Staff — Purav Carting</title>
+<link rel="icon" type="image/png" href="/static/favicon.png">
+<link rel="stylesheet" href="/static/style.css">
+<style>
+  .pc-nav { background: linear-gradient(135deg, #1e3a8a 0%, #ea580c 100%); padding: 0 20px; display: flex; align-items: center; gap: 4px; overflow-x: auto; box-shadow: 0 4px 20px rgba(30,58,138,0.3); position: sticky; top: 70px; z-index: 90; white-space: nowrap; }
+  .pc-nav a { color: rgba(255,255,255,0.85); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; border-bottom: 3px solid transparent; }
+  .pc-nav a:hover, .pc-nav a.active { color: white; background: rgba(255,255,255,0.1); }
+  .pc-nav a.active { border-bottom-color: white; }
+  .pc-nav a [data-icon] { width: 15px; height: 15px; }
+
+  .page-head { padding: 30px 40px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; border-bottom: 1px solid var(--border); margin-bottom: 30px; }
+  .page-head h1 { font-size: 28px; font-weight: 900; color: var(--text); letter-spacing: -1px; display: flex; align-items: center; gap: 12px; }
+  .page-head h1 [data-icon] { width: 32px; height: 32px; color: #1e3a8a; }
+
+  .btn-pc { background: linear-gradient(135deg, #1e3a8a, #ea580c); color: white; border: none; padding: 12px 24px; border-radius: 30px; font-weight: 800; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s; box-shadow: 0 8px 20px rgba(30,58,138,0.3); }
+  .btn-pc:hover { transform: translateY(-3px); }
+  .btn-pc [data-icon] { width: 16px; height: 16px; }
+
+  .alert-box { padding: 14px 20px; border-radius: 12px; margin: 0 40px 20px; font-size: 14px; font-weight: 600; }
+  .alert-box.success { background: rgba(16,185,129,0.1); color: #10b981; border-left: 4px solid #10b981; }
+  .alert-box.error { background: rgba(239,68,68,0.1); color: #ef4444; border-left: 4px solid #ef4444; }
+
+  .staff-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding: 0 40px 40px; }
+  .staff-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 22px; transition: all 0.35s; position: relative; overflow: hidden; }
+  .staff-card::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, #1e3a8a, #ea580c); transform: scaleX(0); transform-origin: left; transition: transform 0.4s; }
+  .staff-card:hover::before { transform: scaleX(1); }
+  .staff-card:hover { transform: translateY(-4px); box-shadow: 0 15px 35px rgba(30,58,138,0.12); }
+
+  .staff-avatar {
+    width: 50px; height: 50px; border-radius: 50%;
+    background: linear-gradient(135deg, #1e3a8a, #ea580c);
+    color: white; display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 900; margin-bottom: 12px;
+    box-shadow: 0 6px 15px rgba(30,58,138,0.3);
+  }
+  .staff-card .sc-name { font-size: 17px; font-weight: 900; color: var(--text); margin-bottom: 2px; }
+  .staff-card .sc-role { font-size: 12px; color: #ea580c; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+  .staff-card .sc-info { font-size: 13px; color: var(--text-dim); margin-bottom: 5px; display: flex; justify-content: space-between; }
+  .staff-card .sc-actions { display: flex; gap: 8px; margin-top: 16px; }
+
+  .badge-status { padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+  .badge-status.Active { background: rgba(16,185,129,0.15); color: #10b981; }
+  .badge-status.Inactive { background: rgba(107,114,128,0.15); color: #6b7280; }
+
+  .btn-sm { padding: 7px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--text-dim); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; transition: all 0.25s; flex: 1; justify-content: center; }
+  .btn-sm:hover { background: var(--primary); color: white; border-color: var(--primary); }
+  .btn-sm.danger:hover { background: #ef4444; border-color: #ef4444; }
+  .btn-sm [data-icon] { width: 12px; height: 12px; }
+
+  .empty-state { text-align: center; padding: 60px 20px; background: var(--card); border: 2px dashed var(--border); border-radius: 16px; margin: 0 40px; }
+  .empty-state [data-icon] { width: 50px; height: 50px; color: #1e3a8a; opacity: 0.4; margin-bottom: 15px; }
+  .empty-state h3 { color: var(--text); margin-bottom: 8px; }
+  .empty-state p { color: var(--text-dim); font-size: 14px; margin-bottom: 20px; }
+
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 9999; display: none; justify-content: center; align-items: center; padding: 20px; }
+  .modal-overlay.active { display: flex; }
+  .modal-box { background: var(--card); border-radius: 20px; padding: 32px; max-width: 550px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 60px rgba(0,0,0,0.4); animation: scaleIn 0.3s; }
+  .modal-box h2 { font-size: 22px; margin-bottom: 20px; color: var(--text); display: flex; align-items: center; gap: 10px; }
+  .modal-box h2 [data-icon] { width: 24px; height: 24px; color: #1e3a8a; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+  .form-row.full { grid-template-columns: 1fr; }
+  .modal-box label { display: block; font-size: 12px; color: var(--text-dim); font-weight: 700; margin-bottom: 6px; }
+  .modal-box input, .modal-box select { width: 100%; padding: 11px 14px; margin: 0; border: 1.5px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-size: 14px; outline: none; }
+  .modal-box input:focus, .modal-box select:focus { border-color: #1e3a8a; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+  .modal-actions button { flex: 1; padding: 12px; border-radius: 10px; font-weight: 800; font-size: 14px; cursor: pointer; border: none; }
+  .modal-actions .btn-cancel { background: var(--bg); color: var(--text); border: 1.5px solid var(--border); }
+  .modal-actions .btn-save { background: linear-gradient(135deg, #1e3a8a, #ea580c); color: white; }
+
+  @media (max-width: 700px) {
+    .page-head, .staff-grid, .alert-box { padding-left: 20px; padding-right: 20px; }
+    .empty-state { margin: 0 20px; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+  <header>
+    <a href="/" class="logo"><img src="/static/logo-horizontal.png" alt="GD Pulse"></a>
+    <nav class="nav-links"><a href="/purav/carting" class="active">Purav Carting</a></nav>
+    <div class="header-right">
+      <button class="theme-toggle" onclick="toggleTheme(event)"></button>
+      <a href="#" onclick="confirmLogout(event)" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
+    </div>
+  </header>
+
+  <nav class="pc-nav">
+    <a href="/purav/carting"><span data-icon="grid"></span> Dashboard</a>
+    <a href="/purav/carting/trucks"><span data-icon="sand"></span> Trucks</a>
+    <a href="/purav/carting/customers"><span data-icon="users"></span> Customers</a>
+    <a href="/purav/carting/suppliers"><span data-icon="retail"></span> Suppliers</a>
+    <a href="/purav/carting/materials"><span data-icon="assets"></span> Materials</a>
+    <a href="/purav/carting/staff" class="active"><span data-icon="users"></span> Staff</a>
+    <a href="/purav/carting/entry"><span data-icon="prompts"></span> Daily Entry</a>
+    <a href="/purav/carting/ledger"><span data-icon="analytics"></span> Ledger</a>
+  </nav>
+
+  <div class="page-head">
+    <h1><span data-icon="users"></span> Staff Master</h1>
+    <button class="btn-pc" onclick="openStaffModal()"><span data-icon="plus"></span> Add Staff</button>
+  </div>
+
+  {% if request.args.get('success') == 'added' %}<div class="alert-box success">Staff add ho gaya!</div>{% endif %}
+  {% if request.args.get('success') == 'updated' %}<div class="alert-box success">Staff update ho gaya!</div>{% endif %}
+  {% if request.args.get('success') == 'deleted' %}<div class="alert-box success">Staff delete ho gaya!</div>{% endif %}
+  {% if request.args.get('error') == 'missing' %}<div class="alert-box error">Name required hai</div>{% endif %}
+
+  {% if staff %}
+    <div class="staff-grid">
+      {% for s in staff %}
+      <div class="staff-card">
+        <div class="staff-avatar">{{ s.name[0]|upper }}</div>
+        <div class="sc-name">{{ s.name }}</div>
+        <div class="sc-role">{{ s.role }} · {{ s.salary_type }}</div>
+        <div class="sc-info"><span>Phone:</span><span>{{ s.phone or '—' }}</span></div>
+        <div class="sc-info"><span>Rate:</span><span>₹{{ "{:,.0f}".format(s.rate) }} / {{ s.salary_type }}</span></div>
+        {% if s.joining_date %}<div class="sc-info"><span>Joined:</span><span>{{ s.joining_date }}</span></div>{% endif %}
+        <div style="margin-top:10px;"><span class="badge-status {{ s.status }}">{{ s.status }}</span></div>
+        <div class="sc-actions">
+          <button class="btn-sm" onclick='editStaff({{ s|tojson }})'><span data-icon="edit"></span> Edit</button>
+          <a href="#" class="btn-sm danger" onclick="confirmDeleteStaff('{{ s.id }}','{{ s.name }}');return false;"><span data-icon="trash"></span> Delete</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <span data-icon="users"></span>
+      <h3>Koi staff nahi</h3>
+      <p>Drivers, labours, manager add karo.</p>
+      <button class="btn-pc" onclick="openStaffModal()"><span data-icon="plus"></span> Add First Staff</button>
+    </div>
+  {% endif %}
+
+  <div class="modal-overlay" id="staffModal" onclick="closeModalBg(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <h2><span data-icon="users"></span> <span id="modalTitle">Add Staff</span></h2>
+      <form method="POST" id="staffForm" action="/purav/carting/staff/add">
+        <div class="form-row">
+          <div><label>Name *</label><input type="text" name="name" id="st_name" required></div>
+          <div><label>Phone</label><input type="text" name="phone" id="st_phone"></div>
+        </div>
+        <div class="form-row">
+          <div>
+            <label>Role</label>
+            <select name="role" id="st_role">
+              <option value="Driver">Driver</option>
+              <option value="Labour">Labour</option>
+              <option value="Manager">Manager</option>
+              <option value="Supervisor">Supervisor</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label>Salary Type</label>
+            <select name="salary_type" id="st_salary_type">
+              <option value="Daily">Daily</option>
+              <option value="Monthly">Monthly</option>
+              <option value="Trip">Per Trip</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div><label>Rate (₹)</label><input type="number" name="rate" id="st_rate" value="0" step="0.01"></div>
+          <div><label>Joining Date</label><input type="date" name="joining_date" id="st_joining"></div>
+        </div>
+        <div class="form-row full">
+          <div><label>Address</label><input type="text" name="address" id="st_address"></div>
+        </div>
+        <div class="form-row">
+          <div>
+            <label>Status</label>
+            <select name="status" id="st_status">
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+          <div><label>Notes</label><input type="text" name="notes" id="st_notes"></div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+          <button type="submit" class="btn-save">Save Staff</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer><p>© 2025 GD Pulse — Purav Carting</p></footer>
+
+  <script src="/static/icons.js"></script>
+  <script>
+    function openStaffModal() {
+      document.getElementById("modalTitle").innerText = "Add Staff";
+      document.getElementById("staffForm").action = "/purav/carting/staff/add";
+      document.getElementById("staffForm").reset();
+      document.getElementById("staffModal").classList.add("active");
+    }
+    function editStaff(s) {
+      document.getElementById("modalTitle").innerText = "Edit Staff";
+      document.getElementById("staffForm").action = "/purav/carting/staff/edit/" + s.id;
+      document.getElementById("st_name").value = s.name || "";
+      document.getElementById("st_phone").value = s.phone || "";
+      document.getElementById("st_role").value = s.role || "Labour";
+      document.getElementById("st_salary_type").value = s.salary_type || "Daily";
+      document.getElementById("st_rate").value = s.rate || 0;
+      document.getElementById("st_joining").value = s.joining_date || "";
+      document.getElementById("st_address").value = s.address || "";
+      document.getElementById("st_status").value = s.status || "Active";
+      document.getElementById("st_notes").value = s.notes || "";
+      document.getElementById("staffModal").classList.add("active");
+    }
+    function closeModal() { document.getElementById("staffModal").classList.remove("active"); }
+    function closeModalBg(e) { if (e.target.id === "staffModal") closeModal(); }
+    function confirmDeleteStaff(id, name) {
+      showConfirm("Delete Staff?", `"${name}" ko delete karna hai?`, "Yes, Delete", () => {
+        window.location.href = "/purav/carting/staff/delete/" + id;
+      });
+    }
+    document.addEventListener("DOMContentLoaded", () => { if (window.renderIcons) window.renderIcons(); });
+  </script>
+
+</body>
+</html>
