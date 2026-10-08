@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Purav Work — Dashboard</title>
+<link rel="icon" type="image/png" href="/static/favicon.png">
+<link rel="stylesheet" href="/static/style.css">
+<style>
+  .purav-hero {
+    background: linear-gradient(135deg, #1e3a8a 0%, #ea580c 100%);
+    color: white;
+    padding: 60px 40px;
+    border-radius: 0 0 30px 30px;
+    margin-bottom: 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .purav-hero::before {
+    content: "";
+    position: absolute;
+    top: -50%; right: -20%;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(255,255,255,0.15), transparent 70%);
+    border-radius: 50%;
+  }
+  .purav-hero h1 {
+    font-size: 42px; font-weight: 900;
+    letter-spacing: -1.5px; margin-bottom: 8px;
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 15px;
+  }
+  .purav-hero p {
+    font-size: 16px; opacity: 0.9;
+    position: relative; z-index: 1;
+  }
+  .purav-hero .brand-icon {
+    width: 50px; height: 50px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 15px;
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(10px);
+  }
+  .purav-hero .brand-icon svg { width: 28px; height: 28px; color: white; }
+
+  .business-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    margin-top: 20px;
+  }
+  .business-card {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 20px;
+    padding: 30px 26px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+  .business-card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 6px;
+  }
+  .business-card.carting::before { background: linear-gradient(90deg, #1e3a8a, #ea580c); }
+  .business-card.dj::before { background: linear-gradient(90deg, #8b5cf6, #ec4899); }
+  .business-card.restaurant::before { background: linear-gradient(90deg, #ef4444, #f59e0b); }
+  .business-card.water::before { background: linear-gradient(90deg, #06b6d4, #3b82f6); }
+
+  .business-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    border-color: var(--primary);
+  }
+  .business-card .biz-icon {
+    width: 70px; height: 70px;
+    border-radius: 18px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 20px;
+    color: white;
+    transition: all 0.4s;
+  }
+  .business-card:hover .biz-icon {
+    transform: scale(1.1) rotate(-5deg);
+  }
+  .business-card.carting .biz-icon { background: linear-gradient(135deg, #1e3a8a, #ea580c); box-shadow: 0 8px 20px rgba(30,58,138,0.3); }
+  .business-card.dj .biz-icon { background: linear-gradient(135deg, #8b5cf6, #ec4899); box-shadow: 0 8px 20px rgba(139,92,246,0.3); }
+  .business-card.restaurant .biz-icon { background: linear-gradient(135deg, #ef4444, #f59e0b); box-shadow: 0 8px 20px rgba(239,68,68,0.3); }
+  .business-card.water .biz-icon { background: linear-gradient(135deg, #06b6d4, #3b82f6); box-shadow: 0 8px 20px rgba(6,182,212,0.3); }
+
+  .business-card .biz-icon svg { width: 36px; height: 36px; }
+  .business-card h3 {
+    font-size: 22px; font-weight: 800;
+    margin-bottom: 8px; color: var(--text);
+    letter-spacing: -0.5px;
+  }
+  .business-card .biz-desc {
+    font-size: 13px; color: var(--text-dim);
+    margin-bottom: 18px; line-height: 1.5;
+  }
+  .business-card .biz-status {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 14px; border-radius: 20px;
+    font-size: 11px; font-weight: 800;
+    letter-spacing: 1px; text-transform: uppercase;
+  }
+  .business-card.carting .biz-status {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    box-shadow: 0 4px 12px rgba(16,185,129,0.4);
+  }
+  .business-card.dj .biz-status,
+  .business-card.restaurant .biz-status,
+  .business-card.water .biz-status {
+    background: rgba(107,114,128,0.15);
+    color: var(--text-mute);
+  }
+  .business-card .biz-status svg { width: 12px; height: 12px; }
+  .business-card .biz-badge {
+    position: absolute; top: 20px; right: 20px;
+    font-size: 40px; opacity: 0.1;
+    font-weight: 900;
+    color: var(--text);
+  }
+
+  @media (max-width: 600px) {
+    .purav-hero { padding: 40px 20px; }
+    .purav-hero h1 { font-size: 28px; }
+    .business-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="parallax-orb" style="top: 10%; left: 5%;"></div>
+  <div class="parallax-orb" style="bottom: 10%; right: 5%;"></div>
+
+  <header>
+    <a href="/" class="logo"><img src="/static/logo-horizontal.png" alt="GD Pulse"></a>
+    <nav class="nav-links">
+      <a href="/tools">Tools</a>
+      <a href="/prompts">Prompts</a>
+      <a href="/purav" class="active">Purav Work</a>
+    </nav>
+    <div class="header-right">
+      <button class="theme-toggle" onclick="toggleTheme(event)" title="Toggle theme"></button>
+      <a href="#" onclick="confirmLogout(event)" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="purav-hero">
+      <h1>
+        <span class="brand-icon"><span data-icon="software"></span></span>
+        Purav Work
+      </h1>
+      <p>Multi-business management platform — analytics, operations, aur reports sab ek jagah.</p>
+    </div>
+
+    <div class="container">
+      <div class="section-header reveal" style="margin-bottom: 20px;">
+        <span class="section-tag">Select Business</span>
+        <h2 class="section-title">Apna <span class="highlight">Business Chuno</span></h2>
+        <p class="section-subtitle">Har business ka apna dashboard, data, aur operations.</p>
+      </div>
+
+      <div class="business-grid">
+
+        <!-- PURAV CARTING (Active) -->
+        <a href="/purav/login?biz=carting" class="business-card carting reveal">
+          <div class="biz-badge">01</div>
+          <div class="biz-icon"><span data-icon="sand"></span></div>
+          <h3>Purav Carting</h3>
+          <p class="biz-desc">Sand, gravel, bricks, cement, steel — transport & material supply business.</p>
+          <span class="biz-status"><span data-icon="check"></span> Active</span>
+        </a>
+
+        <!-- PURAV DJ (Coming Soon) -->
+        <div class="business-card dj reveal" onclick="alert('Purav DJ — coming soon! 🚧')">
+          <div class="biz-badge">02</div>
+          <div class="biz-icon"><span data-icon="audio"></span></div>
+          <h3>Purav DJ</h3>
+          <p class="biz-desc">DJ services, event management, sound system rental.</p>
+          <span class="biz-status">Coming Soon</span>
+        </div>
+
+        <!-- PURAV RESTAURANT (Coming Soon) -->
+        <div class="business-card restaurant reveal" onclick="alert('Purav Restaurant — coming soon! 🚧')">
+          <div class="biz-badge">03</div>
+          <div class="biz-icon"><span data-icon="restaurant"></span></div>
+          <h3>Purav Restaurant</h3>
+          <p class="biz-desc">Restaurant & food business management — POS, inventory, orders.</p>
+          <span class="biz-status">Coming Soon</span>
+        </div>
+
+        <!-- PURAV WATER (Coming Soon) -->
+        <div class="business-card water reveal" onclick="alert('Purav Water — coming soon! 🚧')">
+          <div class="biz-badge">04</div>
+          <div class="biz-icon"><span data-icon="audio"></span></div>
+          <h3>Purav Water</h3>
+          <p class="biz-desc">Water supply, tanker service, delivery management.</p>
+          <span class="biz-status">Coming Soon</span>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <footer><p>© 2025 GD Pulse — Purav Work Platform</p></footer>
+
+  <script src="/static/icons.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => { if (window.renderIcons) window.renderIcons(); });
+  </script>
+
+</body>
+</html>
