@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trucks — Purav Carting</title>
+<link rel="icon" type="image/png" href="/static/favicon.png">
+<link rel="stylesheet" href="/static/style.css">
+<style>
+  .pc-nav {
+    background: linear-gradient(135deg, #1e3a8a 0%, #ea580c 100%);
+    padding: 0 20px; display: flex; align-items: center; gap: 4px;
+    overflow-x: auto; box-shadow: 0 4px 20px rgba(30,58,138,0.3);
+    position: sticky; top: 70px; z-index: 90; white-space: nowrap;
+  }
+  .pc-nav a {
+    color: rgba(255,255,255,0.85); text-decoration: none;
+    padding: 14px 16px; font-size: 13px; font-weight: 600;
+    display: inline-flex; align-items: center; gap: 6px;
+    border-bottom: 3px solid transparent; transition: all 0.25s;
+  }
+  .pc-nav a:hover, .pc-nav a.active { color: white; background: rgba(255,255,255,0.1); }
+  .pc-nav a.active { border-bottom-color: white; }
+  .pc-nav a [data-icon] { width: 15px; height: 15px; }
+
+  .page-head {
+    padding: 30px 40px 20px;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 15px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 30px;
+  }
+  .page-head h1 {
+    font-size: 28px; font-weight: 900; color: var(--text); letter-spacing: -1px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .page-head h1 [data-icon] { width: 32px; height: 32px; color: #1e3a8a; }
+
+  .btn-pc {
+    background: linear-gradient(135deg, #1e3a8a, #ea580c);
+    color: white; border: none; padding: 12px 24px;
+    border-radius: 30px; font-weight: 800; font-size: 14px;
+    cursor: pointer; transition: all 0.3s;
+    display: inline-flex; align-items: center; gap: 8px;
+    box-shadow: 0 8px 20px rgba(30,58,138,0.3);
+  }
+  .btn-pc:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(30,58,138,0.45); }
+  .btn-pc [data-icon] { width: 16px; height: 16px; }
+
+  .alert-box { padding: 14px 20px; border-radius: 12px; margin: 0 40px 20px; font-size: 14px; font-weight: 600; }
+  .alert-box.success { background: rgba(16,185,129,0.1); color: #10b981; border-left: 4px solid #10b981; }
+  .alert-box.error { background: rgba(239,68,68,0.1); color: #ef4444; border-left: 4px solid #ef4444; }
+
+  .truck-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px; padding: 0 40px 40px;
+  }
+  .truck-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 22px; transition: all 0.35s;
+    position: relative; overflow: hidden;
+  }
+  .truck-card::before {
+    content: ""; position: absolute; top: 0; left: 0;
+    width: 100%; height: 4px;
+    background: linear-gradient(90deg, #1e3a8a, #ea580c);
+    transform: scaleX(0); transform-origin: left; transition: transform 0.4s;
+  }
+  .truck-card:hover::before { transform: scaleX(1); }
+  .truck-card:hover { transform: translateY(-4px); box-shadow: 0 15px 35px rgba(30,58,138,0.12); }
+
+  .truck-card .tc-head {
+    display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;
+  }
+  .truck-card .tc-number {
+    font-size: 20px; font-weight: 900; color: var(--text); letter-spacing: -0.5px;
+  }
+  .truck-card .tc-model { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+  .badge-status {
+    padding: 4px 12px; border-radius: 20px; font-size: 10px;
+    font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .badge-status.Active { background: rgba(16,185,129,0.15); color: #10b981; }
+  .badge-status.Inactive { background: rgba(107,114,128,0.15); color: #6b7280; }
+  .badge-status.Maintenance { background: rgba(251,191,36,0.15); color: #f59e0b; }
+
+  .truck-card .tc-stats {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;
+    padding: 12px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+  .truck-card .tc-stat { text-align: center; }
+  .truck-card .tc-stat .val { font-size: 15px; font-weight: 800; color: var(--text); }
+  .truck-card .tc-stat .lbl { font-size: 9px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
+
+  .truck-card .tc-expiry {
+    font-size: 11px; color: var(--text-dim); display: flex; flex-direction: column; gap: 4px;
+    margin-bottom: 14px;
+  }
+  .truck-card .tc-expiry .exp-item { display: flex; justify-content: space-between; }
+  .truck-card .tc-expiry .exp-item.warn { color: #f59e0b; font-weight: 700; }
+  .truck-card .tc-expiry .exp-item.danger { color: #ef4444; font-weight: 700; }
+
+  .truck-card .tc-actions { display: flex; gap: 8px; }
+  .btn-sm {
+    padding: 7px 14px; border-radius: 20px; font-size: 11px; font-weight: 700;
+    cursor: pointer; border: 1px solid var(--border); background: transparent;
+    color: var(--text-dim); text-decoration: none;
+    display: inline-flex; align-items: center; gap: 4px;
+    transition: all 0.25s; flex: 1; justify-content: center;
+  }
+  .btn-sm:hover { background: var(--primary); color: white; border-color: var(--primary); }
+  .btn-sm.danger:hover { background: #ef4444; border-color: #ef4444; }
+  .btn-sm [data-icon] { width: 12px; height: 12px; }
+
+  .empty-state {
+    text-align: center; padding: 60px 20px;
+    background: var(--card); border: 2px dashed var(--border);
+    border-radius: 16px; margin: 0 40px;
+  }
+  .empty-state [data-icon] { width: 50px; height: 50px; color: #1e3a8a; opacity: 0.4; margin-bottom: 15px; }
+  .empty-state h3 { color: var(--text); margin-bottom: 8px; }
+  .empty-state p { color: var(--text-dim); font-size: 14px; margin-bottom: 20px; }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px); z-index: 9999;
+    display: none; justify-content: center; align-items: center; padding: 20px;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal-box {
+    background: var(--card); border-radius: 20px;
+    padding: 32px; max-width: 500px; width: 100%;
+    max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+    animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  .modal-box h2 { font-size: 22px; margin-bottom: 20px; color: var(--text); display: flex; align-items: center; gap: 10px; }
+  .modal-box h2 [data-icon] { width: 24px; height: 24px; color: #1e3a8a; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+  .form-row.full { grid-template-columns: 1fr; }
+  .modal-box label { display: block; font-size: 12px; color: var(--text-dim); font-weight: 700; margin-bottom: 6px; }
+  .modal-box input, .modal-box select, .modal-box textarea {
+    width: 100%; padding: 11px 14px; margin: 0;
+    border: 1.5px solid var(--border); border-radius: 10px;
+    background: var(--bg); color: var(--text); font-size: 14px; outline: none;
+    transition: all 0.25s;
+  }
+  .modal-box input:focus, .modal-box select:focus, .modal-box textarea:focus {
+    border-color: #1e3a8a; box-shadow: 0 0 0 3px rgba(30,58,138,0.1);
+  }
+  .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+  .modal-actions button { flex: 1; padding: 12px; border-radius: 10px; font-weight: 800; font-size: 14px; cursor: pointer; border: none; transition: all 0.25s; }
+  .modal-actions .btn-cancel { background: var(--bg); color: var(--text); border: 1.5px solid var(--border); }
+  .modal-actions .btn-save { background: linear-gradient(135deg, #1e3a8a, #ea580c); color: white; }
+
+  @media (max-width: 700px) {
+    .page-head, .truck-grid, .alert-box { padding-left: 20px; padding-right: 20px; }
+    .empty-state { margin: 0 20px; }
+  }
+</style>
+</head>
+<body>
+
+  <header>
+    <a href="/" class="logo"><img src="/static/logo-horizontal.png" alt="GD Pulse"></a>
+    <nav class="nav-links"><a href="/purav/carting" class="active">Purav Carting</a></nav>
+    <div class="header-right">
+      <button class="theme-toggle" onclick="toggleTheme(event)"></button>
+      <a href="#" onclick="confirmLogout(event)" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
+    </div>
+  </header>
+
+  <nav class="pc-nav">
+    <a href="/purav/carting"><span data-icon="grid"></span> Dashboard</a>
+    <a href="/purav/carting/trucks" class="active"><span data-icon="sand"></span> Trucks</a>
+    <a href="/purav/carting/customers"><span data-icon="users"></span> Customers</a>
+    <a href="/purav/carting/suppliers"><span data-icon="retail"></span> Suppliers</a>
+    <a href="/purav/carting/materials"><span data-icon="assets"></span> Materials</a>
+    <a href="/purav/carting/staff"><span data-icon="users"></span> Staff</a>
+    <a href="/purav/carting/entry"><span data-icon="prompts"></span> Daily Entry</a>
+    <a href="/purav/carting/ledger"><span data-icon="analytics"></span> Ledger</a>
+  </nav>
+
+  <div class="page-head">
+    <h1><span data-icon="sand"></span> Truck Master</h1>
+    <button class="btn-pc" onclick="openTruckModal()"><span data-icon="plus"></span> Add Truck</button>
+  </div>
+
+  {% if request.args.get('success') == 'added' %}
+    <div class="alert-box success">Truck add ho gaya!</div>
+  {% elif request.args.get('success') == 'updated' %}
+    <div class="alert-box success">Truck update ho gaya!</div>
+  {% elif request.args.get('success') == 'deleted' %}
+    <div class="alert-box success">Truck delete ho gaya!</div>
+  {% elif request.args.get('error') == 'missing' %}
+    <div class="alert-box error">Truck number required hai</div>
+  {% endif %}
+
+  {% if trucks %}
+    <div class="truck-grid">
+      {% for t in trucks %}
+      <div class="truck-card">
+        <div class="tc-head">
+          <div>
+            <div class="tc-number">{{ t.number }}</div>
+            <div class="tc-model">{{ t.model or '—' }} · {{ t.owner }}</div>
+          </div>
+          <span class="badge-status {{ t.status }}">{{ t.status }}</span>
+        </div>
+
+        <div class="tc-stats">
+          <div class="tc-stat"><div class="val">{{ t.total_trips }}</div><div class="lbl">Trips</div></div>
+          <div class="tc-stat"><div class="val">₹{{ "{:,.0f}".format(t.total_sale) }}</div><div class="lbl">Sale</div></div>
+          <div class="tc-stat"><div class="val" style="color:#10b981;">₹{{ "{:,.0f}".format(t.total_profit) }}</div><div class="lbl">Profit</div></div>
+        </div>
+
+        <div class="tc-expiry">
+          {% if t.insurance_expiry %}<div class="exp-item {% if t.insurance_expiry_days is defined and t.insurance_expiry_days < 30 %}danger{% endif %}"><span>Insurance</span><span>{{ t.insurance_expiry }}</span></div>{% endif %}
+          {% if t.fitness_expiry %}<div class="exp-item"><span>Fitness</span><span>{{ t.fitness_expiry }}</span></div>{% endif %}
+          {% if t.permit_expiry %}<div class="exp-item"><span>Permit</span><span>{{ t.permit_expiry }}</span></div>{% endif %}
+        </div>
+
+        <div class="tc-actions">
+          <button class="btn-sm" onclick='editTruck({{ t|tojson }})'><span data-icon="edit"></span> Edit</button>
+          <a href="#" class="btn-sm danger" onclick="confirmDeleteTruck('{{ t.id }}','{{ t.number }}');return false;"><span data-icon="trash"></span> Delete</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <span data-icon="sand"></span>
+      <h3>Koi truck nahi</h3>
+      <p>Pehla truck add karo — number plate, model, expiry dates.</p>
+      <button class="btn-pc" onclick="openTruckModal()"><span data-icon="plus"></span> Add First Truck</button>
+    </div>
+  {% endif %}
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="truckModal" onclick="closeModalBg(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <h2><span data-icon="sand"></span> <span id="modalTitle">Add Truck</span></h2>
+      <form method="POST" id="truckForm" action="/purav/carting/trucks/add">
+        <div class="form-row">
+          <div><label>Truck Number *</label><input type="text" name="number" id="t_number" placeholder="GJ-01-AB-1234" required></div>
+          <div><label>Model</label><input type="text" name="model" id="t_model" placeholder="Tata 407"></div>
+        </div>
+        <div class="form-row">
+          <div>
+            <label>Owner</label>
+            <select name="owner" id="t_owner">
+              <option value="Self">Self</option>
+              <option value="Hired">Hired</option>
+            </select>
+          </div>
+          <div>
+            <label>Status</label>
+            <select name="status" id="t_status">
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+              <option value="Maintenance">Maintenance</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div><label>Insurance Expiry</label><input type="date" name="insurance_expiry" id="t_insurance"></div>
+          <div><label>Fitness Expiry</label><input type="date" name="fitness_expiry" id="t_fitness"></div>
+        </div>
+        <div class="form-row">
+          <div><label>Permit Expiry</label><input type="date" name="permit_expiry" id="t_permit"></div>
+          <div><label>Notes</label><input type="text" name="notes" id="t_notes" placeholder="Optional"></div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+          <button type="submit" class="btn-save">Save Truck</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer><p>© 2025 GD Pulse — Purav Carting</p></footer>
+
+  <script src="/static/icons.js"></script>
+  <script>
+    function openTruckModal() {
+      document.getElementById("modalTitle").innerText = "Add Truck";
+      document.getElementById("truckForm").action = "/purav/carting/trucks/add";
+      document.getElementById("truckForm").reset();
+      document.getElementById("truckModal").classList.add("active");
+      if (window.renderIcons) window.renderIcons();
+    }
+    function editTruck(t) {
+      document.getElementById("modalTitle").innerText = "Edit Truck";
+      document.getElementById("truckForm").action = "/purav/carting/trucks/edit/" + t.id;
+      document.getElementById("t_number").value = t.number || "";
+      document.getElementById("t_model").value = t.model || "";
+      document.getElementById("t_owner").value = t.owner || "Self";
+      document.getElementById("t_status").value = t.status || "Active";
+      document.getElementById("t_insurance").value = t.insurance_expiry || "";
+      document.getElementById("t_fitness").value = t.fitness_expiry || "";
+      document.getElementById("t_permit").value = t.permit_expiry || "";
+      document.getElementById("t_notes").value = t.notes || "";
+      document.getElementById("truckModal").classList.add("active");
+      if (window.renderIcons) window.renderIcons();
+    }
+    function closeModal() { document.getElementById("truckModal").classList.remove("active"); }
+    function closeModalBg(e) { if (e.target.id === "truckModal") closeModal(); }
+    function confirmDeleteTruck(id, number) {
+      showConfirm("Delete Truck?", `"${number}" ko delete karna hai? Ye undo nahi ho sakta.`, "Yes, Delete", () => {
+        window.location.href = "/purav/carting/trucks/delete/" + id;
+      });
+    }
+    document.addEventListener("DOMContentLoaded", () => { if (window.renderIcons) window.renderIcons(); });
+  </script>
+
+</body>
+</html>
