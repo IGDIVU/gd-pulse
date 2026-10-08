@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Customers — Purav Carting</title>
+<link rel="icon" type="image/png" href="/static/favicon.png">
+<link rel="stylesheet" href="/static/style.css">
+<style>
+  .pc-nav { background: linear-gradient(135deg, #1e3a8a 0%, #ea580c 100%); padding: 0 20px; display: flex; align-items: center; gap: 4px; overflow-x: auto; box-shadow: 0 4px 20px rgba(30,58,138,0.3); position: sticky; top: 70px; z-index: 90; white-space: nowrap; }
+  .pc-nav a { color: rgba(255,255,255,0.85); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; border-bottom: 3px solid transparent; transition: all 0.25s; }
+  .pc-nav a:hover, .pc-nav a.active { color: white; background: rgba(255,255,255,0.1); }
+  .pc-nav a.active { border-bottom-color: white; }
+  .pc-nav a [data-icon] { width: 15px; height: 15px; }
+
+  .page-head { padding: 30px 40px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; border-bottom: 1px solid var(--border); margin-bottom: 30px; }
+  .page-head h1 { font-size: 28px; font-weight: 900; color: var(--text); letter-spacing: -1px; display: flex; align-items: center; gap: 12px; }
+  .page-head h1 [data-icon] { width: 32px; height: 32px; color: #1e3a8a; }
+
+  .btn-pc { background: linear-gradient(135deg, #1e3a8a, #ea580c); color: white; border: none; padding: 12px 24px; border-radius: 30px; font-weight: 800; font-size: 14px; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 8px 20px rgba(30,58,138,0.3); }
+  .btn-pc:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(30,58,138,0.45); }
+  .btn-pc [data-icon] { width: 16px; height: 16px; }
+
+  .alert-box { padding: 14px 20px; border-radius: 12px; margin: 0 40px 20px; font-size: 14px; font-weight: 600; }
+  .alert-box.success { background: rgba(16,185,129,0.1); color: #10b981; border-left: 4px solid #10b981; }
+  .alert-box.error { background: rgba(239,68,68,0.1); color: #ef4444; border-left: 4px solid #ef4444; }
+
+  .search-bar { padding: 0 40px 20px; }
+  .search-bar input { width: 100%; max-width: 400px; padding: 12px 18px; border: 1.5px solid var(--border); border-radius: 12px; background: var(--card); color: var(--text); font-size: 14px; outline: none; }
+  .search-bar input:focus { border-color: #1e3a8a; }
+
+  .cust-table { margin: 0 40px 40px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+  .cust-table table { width: 100%; border-collapse: collapse; }
+  .cust-table th, .cust-table td { padding: 14px 18px; text-align: left; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .cust-table th { background: rgba(30,58,138,0.08); font-weight: 800; color: var(--text); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .cust-table tr:last-child td { border-bottom: none; }
+  .cust-table tr:hover td { background: rgba(30,58,138,0.03); }
+  .badge-type { padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+  .badge-type.Regular { background: rgba(30,58,138,0.15); color: #1e3a8a; }
+  .badge-type.Local { background: rgba(107,114,128,0.15); color: #6b7280; }
+  .badge-type.Credit { background: rgba(251,191,36,0.15); color: #f59e0b; }
+
+  .tbl-actions { display: flex; gap: 6px; }
+  .btn-sm { padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--text-dim); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; transition: all 0.25s; }
+  .btn-sm:hover { background: var(--primary); color: white; border-color: var(--primary); }
+  .btn-sm.danger:hover { background: #ef4444; border-color: #ef4444; }
+  .btn-sm [data-icon] { width: 11px; height: 11px; }
+
+  .empty-state { text-align: center; padding: 60px 20px; background: var(--card); border: 2px dashed var(--border); border-radius: 16px; margin: 0 40px; }
+  .empty-state [data-icon] { width: 50px; height: 50px; color: #1e3a8a; opacity: 0.4; margin-bottom: 15px; }
+  .empty-state h3 { color: var(--text); margin-bottom: 8px; }
+  .empty-state p { color: var(--text-dim); font-size: 14px; margin-bottom: 20px; }
+
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 9999; display: none; justify-content: center; align-items: center; padding: 20px; }
+  .modal-overlay.active { display: flex; }
+  .modal-box { background: var(--card); border-radius: 20px; padding: 32px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 60px rgba(0,0,0,0.4); animation: scaleIn 0.3s; }
+  .modal-box h2 { font-size: 22px; margin-bottom: 20px; color: var(--text); display: flex; align-items: center; gap: 10px; }
+  .modal-box h2 [data-icon] { width: 24px; height: 24px; color: #1e3a8a; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+  .form-row.full { grid-template-columns: 1fr; }
+  .modal-box label { display: block; font-size: 12px; color: var(--text-dim); font-weight: 700; margin-bottom: 6px; }
+  .modal-box input, .modal-box select, .modal-box textarea { width: 100%; padding: 11px 14px; margin: 0; border: 1.5px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-size: 14px; outline: none; }
+  .modal-box input:focus, .modal-box select:focus, .modal-box textarea:focus { border-color: #1e3a8a; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+  .modal-actions button { flex: 1; padding: 12px; border-radius: 10px; font-weight: 800; font-size: 14px; cursor: pointer; border: none; }
+  .modal-actions .btn-cancel { background: var(--bg); color: var(--text); border: 1.5px solid var(--border); }
+  .modal-actions .btn-save { background: linear-gradient(135deg, #1e3a8a, #ea580c); color: white; }
+
+  @media (max-width: 700px) {
+    .page-head, .cust-table, .alert-box, .search-bar { padding-left: 20px; padding-right: 20px; }
+    .cust-table { margin: 0 20px 30px; overflow-x: auto; }
+    .empty-state { margin: 0 20px; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+  <header>
+    <a href="/" class="logo"><img src="/static/logo-horizontal.png" alt="GD Pulse"></a>
+    <nav class="nav-links"><a href="/purav/carting" class="active">Purav Carting</a></nav>
+    <div class="header-right">
+      <button class="theme-toggle" onclick="toggleTheme(event)"></button>
+      <a href="#" onclick="confirmLogout(event)" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
+    </div>
+  </header>
+
+  <nav class="pc-nav">
+    <a href="/purav/carting"><span data-icon="grid"></span> Dashboard</a>
+    <a href="/purav/carting/trucks"><span data-icon="sand"></span> Trucks</a>
+    <a href="/purav/carting/customers" class="active"><span data-icon="users"></span> Customers</a>
+    <a href="/purav/carting/suppliers"><span data-icon="retail"></span> Suppliers</a>
+    <a href="/purav/carting/materials"><span data-icon="assets"></span> Materials</a>
+    <a href="/purav/carting/staff"><span data-icon="users"></span> Staff</a>
+    <a href="/purav/carting/entry"><span data-icon="prompts"></span> Daily Entry</a>
+    <a href="/purav/carting/ledger"><span data-icon="analytics"></span> Ledger</a>
+  </nav>
+
+  <div class="page-head">
+    <h1><span data-icon="users"></span> Customers</h1>
+    <button class="btn-pc" onclick="openCustModal()"><span data-icon="plus"></span> Add Customer</button>
+  </div>
+
+  {% if request.args.get('success') == 'added' %}<div class="alert-box success">Customer add ho gaya!</div>{% endif %}
+  {% if request.args.get('success') == 'updated' %}<div class="alert-box success">Customer update ho gaya!</div>{% endif %}
+  {% if request.args.get('success') == 'deleted' %}<div class="alert-box success">Customer delete ho gaya!</div>{% endif %}
+  {% if request.args.get('error') == 'missing' %}<div class="alert-box error">Customer name required hai</div>{% endif %}
+
+  {% if customers %}
+    <div class="search-bar">
+      <input type="text" id="custSearch" placeholder="Search customer by name, phone, GST..." oninput="filterCust()">
+    </div>
+
+    <div class="cust-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>GSTIN</th>
+            <th>Type</th>
+            <th>Pending</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="custBody">
+          {% for c in customers %}
+          <tr data-search="{{ c.name|lower }} {{ c.phone }} {{ c.gstin|lower }}">
+            <td><b>{{ c.name }}</b></td>
+            <td>{{ c.phone or '—' }}</td>
+            <td>{{ c.gstin or '—' }}</td>
+            <td><span class="badge-type {{ c.type }}">{{ c.type }}</span></td>
+            <td>
+              {% if c.pending_count > 0 %}
+              <span style="color:#f59e0b;font-weight:800;">{{ c.pending_count }} challan · ₹{{ "{:,.0f}".format(c.pending_amount) }}</span>
+              {% else %}
+              <span style="color:#10b981;">Clear</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="tbl-actions">
+                <button class="btn-sm" onclick='editCust({{ c|tojson }})'><span data-icon="edit"></span> Edit</button>
+                <a href="#" class="btn-sm danger" onclick="confirmDeleteCust('{{ c.id }}','{{ c.name }}');return false;"><span data-icon="trash"></span></a>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <span data-icon="users"></span>
+      <h3>Koi customer nahi</h3>
+      <p>Pehla customer add karo — jinko material bechte ho.</p>
+      <button class="btn-pc" onclick="openCustModal()"><span data-icon="plus"></span> Add First Customer</button>
+    </div>
+  {% endif %}
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="custModal" onclick="closeModalBg(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <h2><span data-icon="users"></span> <span id="modalTitle">Add Customer</span></h2>
+      <form method="POST" id="custForm" action="/purav/carting/customers/add">
+        <div class="form-row">
+          <div><label>Name *</label><input type="text" name="name" id="c_name" required></div>
+          <div><label>Phone</label><input type="text" name="phone" id="c_phone"></div>
+        </div>
+        <div class="form-row">
+          <div><label>GSTIN</label><input type="text" name="gstin" id="c_gstin"></div>
+          <div><label>PAN</label><input type="text" name="pan" id="c_pan"></div>
+        </div>
+        <div class="form-row full">
+          <div><label>Address</label><input type="text" name="address" id="c_address"></div>
+        </div>
+        <div class="form-row">
+          <div><label>State</label><input type="text" name="state" id="c_state" placeholder="24-Gujarat"></div>
+          <div>
+            <label>Type</label>
+            <select name="type" id="c_type">
+              <option value="Regular">Regular</option>
+              <option value="Credit">Credit</option>
+              <option value="Local">Local (One-time)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div><label>Opening Balance (₹)</label><input type="number" name="opening_balance" id="c_opening" value="0" step="0.01"></div>
+          <div><label>Email</label><input type="email" name="email" id="c_email"></div>
+        </div>
+        <div class="form-row full">
+          <div><label>Notes</label><input type="text" name="notes" id="c_notes"></div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+          <button type="submit" class="btn-save">Save Customer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer><p>© 2025 GD Pulse — Purav Carting</p></footer>
+
+  <script src="/static/icons.js"></script>
+  <script>
+    function openCustModal() {
+      document.getElementById("modalTitle").innerText = "Add Customer";
+      document.getElementById("custForm").action = "/purav/carting/customers/add";
+      document.getElementById("custForm").reset();
+      document.getElementById("custModal").classList.add("active");
+    }
+    function editCust(c) {
+      document.getElementById("modalTitle").innerText = "Edit Customer";
+      document.getElementById("custForm").action = "/purav/carting/customers/edit/" + c.id;
+      document.getElementById("c_name").value = c.name || "";
+      document.getElementById("c_phone").value = c.phone || "";
+      document.getElementById("c_gstin").value = c.gstin || "";
+      document.getElementById("c_pan").value = c.pan || "";
+      document.getElementById("c_address").value = c.address || "";
+      document.getElementById("c_state").value = c.state || "";
+      document.getElementById("c_type").value = c.type || "Regular";
+      document.getElementById("c_opening").value = c.opening_balance || 0;
+      document.getElementById("c_email").value = c.email || "";
+      document.getElementById("c_notes").value = c.notes || "";
+      document.getElementById("custModal").classList.add("active");
+    }
+    function closeModal() { document.getElementById("custModal").classList.remove("active"); }
+    function closeModalBg(e) { if (e.target.id === "custModal") closeModal(); }
+    function confirmDeleteCust(id, name) {
+      showConfirm("Delete Customer?", `"${name}" ko delete karna hai?`, "Yes, Delete", () => {
+        window.location.href = "/purav/carting/customers/delete/" + id;
+      });
+    }
+    function filterCust() {
+      const q = document.getElementById("custSearch").value.toLowerCase().trim();
+      document.querySelectorAll("#custBody tr").forEach(tr => {
+        const text = tr.getAttribute("data-search");
+        tr.style.display = (q === "" || text.includes(q)) ? "" : "none";
+      });
+    }
+    document.addEventListener("DOMContentLoaded", () => { if (window.renderIcons) window.renderIcons(); });
+  </script>
+
+</body>
+</html>
