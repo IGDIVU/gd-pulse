@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, session, send_file
 import os
 import io
+import uuid
+from datetime import datetime
 from PIL import Image
 import database
 
@@ -21,12 +23,7 @@ def require_prompts_crud(): return current_role() in ("admin", "owner")
 def require_admin(): return current_role() in ("admin", "owner")
 def require_owner(): return current_role() in ("admin", "owner")
 
-# Purav Carting credentials (hardcoded)
-PURAV_CARTING = {
-    "username": "PC",
-    "password": "123",
-    "display_name": "Purav Carting"
-}
+PURAV_CARTING = {"username": "PC", "password": "123", "display_name": "Purav Carting"}
 
 @app.after_request
 def inject_animations(response):
@@ -86,7 +83,7 @@ def tools():
     return render_template("tools.html", user=current_user(), role=current_role(), name=current_name())
 
 # ============================================
-# PURAV WORK ROUTES
+# PURAV WORK
 # ============================================
 
 @app.route("/purav")
@@ -112,117 +109,375 @@ def purav_login():
     return render_template("purav/login.html", user=current_user(), role=current_role(),
                           name=current_name(), biz=biz, error=error)
 
+def purav_logged_in():
+    return session.get("purav_biz") == "carting"
+
+def purav_guard():
+    if not require_staff(): return redirect(url_for("login"))
+    if not purav_logged_in(): return redirect(url_for("purav_login", biz="carting"))
+    return None
+
 @app.route("/purav/carting")
 def purav_carting():
-    if not require_staff(): return redirect(url_for("login"))
-    if session.get("purav_biz") != "carting":
-        return redirect(url_for("purav_login", biz="carting"))
-    return render_template("purav/carting.html", user=current_user(), role=current_role(), name=current_name())
+    g = purav_guard()
+    if g: return g
+    # Stats for dashboard
+    trucks = database.get_trucks()
+    entries = database.get_entries()
+    today = datetime.now().strftime("%Y-%m-%d")
+    month = datetime.now().strftime("%Y-%m")
+
+    today_entries = [e for e in entries if e.get("date") == today]
+    month_entries = [e for e in entries if e.get("date", "").startswith(month)]
+
+    stats = {
+        "today_trips": sum(e.get("trips", 0) for e in today_entries),
+        "today_sale": sum(e.get("sale", 0) for e in today_entries),
+        "today_diesel": sum(e.get("diesel", 0) for e in today_entries),
+        "today_profit": sum(e.get("profit", 0) for e in today_entries),
+        "month_trips": sum(e.get("trips", 0) for e in month_entries),
+        "month_sale": sum(e.get("sale", 0) for e in month_entries),
+        "month_cost": sum(e.get("total_cost", 0) for e in month_entries),
+        "month_profit": sum(e.get("profit", 0) for e in month_entries),
+    }
+
+    # Recent entries with truck number
+    truck_map = {t["id"]: t for t in trucks}
+    recent = sorted(entries, key=lambda x: x.get("created_at", ""), reverse=True)[:5]
+    for e in recent:
+        e["truck_number"] = truck_map.get(e.get("truck_id", ""), {}).get("number", "—")
+
+    # Truck-wise today
+    truck_today = {}
+    for e in today_entries:
+        tid = e.get("truck_id", "")
+        if tid not in truck_today:
+            truck_today[tid] = {"trips": 0, "sale": 0, "profit": 0, "number": truck_map.get(tid, {}).get("number", "—")}
+        truck_today[tid]["trips"] += e.get("trips", 0)
+        truck_today[tid]["sale"] += e.get("sale", 0)
+        truck_today[tid]["profit"] += e.get("profit", 0)
+
+    # Alerts
+    alerts = []
+    for t in trucks:
+        for field, label in [("insurance_expiry", "Insurance"), ("fitness_expiry", "Fitness"), ("permit_expiry", "Permit")]:
+            exp = t.get(field, "")
+            if exp:
+                try:
+                    exp_date = datetime.strptime(exp, "%Y-%m-%d")
+                    days = (exp_date - datetime.now()).days
+                    if 0 <= days <= 30:
+                        alerts.append({"type": "warn", "msg": f"{label} expiring: {t['number']} ({days} days)"})
+                    elif days < 0:
+                        alerts.append({"type": "danger", "msg": f"{label} EXPIRED: {t['number']}"})
+                except Exception:
+                    pass
+
+    return render_template("purav/carting.html", user=current_user(), role=current_role(),
+                          name=current_name(), stats=stats, recent=recent,
+                          truck_today=truck_today, alerts=alerts, truck_count=len(trucks))
 
 # ============================================
-# ADMIN / OWNER
+# TRUCK MASTER
 # ============================================
 
-@app.route("/admin")
-def admin():
-    if not require_admin(): return redirect(url_for("login"))
-    users = database.load_users()
-    prompts = database.load_prompts()
-    return render_template("admin.html", user=current_user(), role=current_role(),
-                          name=current_name(), all_users=users, all_prompts=prompts)
+@app.route("/purav/carting/trucks")
+def purav_trucks():
+    g = purav_guard()
+    if g: return g
+    trucks = database.get_trucks()
+    entries = database.get_entries()
+    # Attach stats to each truck
+    for t in trucks:
+        t_entries = [e for e in entries if e.get("truck_id") == t["id"]]
+        t["total_trips"] = sum(e.get("trips", 0) for e in t_entries)
+        t["total_sale"] = sum(e.get("sale", 0) for e in t_entries)
+        t["total_profit"] = sum(e.get("profit", 0) for e in t_entries)
+    return render_template("purav/trucks.html", user=current_user(), role=current_role(),
+                          name=current_name(), trucks=trucks)
 
-@app.route("/admin/add-user", methods=["POST"])
-def admin_add_user():
-    if not require_admin(): return redirect(url_for("login"))
-    username = request.form.get("username", "").strip()
-    password = request.form.get("password", "").strip()
-    role = request.form.get("role", "user").strip()
-    name = request.form.get("name", "").strip() or username
-    if not username or not password:
-        return redirect(url_for("admin") + "?tab=users&error=missing")
-    if role not in ("admin", "owner", "manager", "hr", "staff", "user"): role = "user"
-    if current_role() == "owner" and role == "admin": role = "owner"
-    database.add_user(username, password, role, name)
-    return redirect(url_for("admin") + "?tab=users&success=added")
+@app.route("/purav/carting/trucks/add", methods=["POST"])
+def purav_trucks_add():
+    g = purav_guard()
+    if g: return g
+    number = request.form.get("number", "").strip().upper()
+    if not number: return redirect(url_for("purav_trucks") + "?error=missing")
+    truck = {
+        "id": str(uuid.uuid4())[:8],
+        "number": number,
+        "model": request.form.get("model", "").strip(),
+        "owner": request.form.get("owner", "Self").strip(),
+        "insurance_expiry": request.form.get("insurance_expiry", ""),
+        "fitness_expiry": request.form.get("fitness_expiry", ""),
+        "permit_expiry": request.form.get("permit_expiry", ""),
+        "status": request.form.get("status", "Active").strip(),
+        "notes": request.form.get("notes", "").strip(),
+        "created_at": datetime.now().isoformat()
+    }
+    database.add_truck(truck)
+    return redirect(url_for("purav_trucks") + "?success=added")
 
-@app.route("/admin/delete-user/<username>")
-def admin_delete_user(username):
-    if not require_admin(): return redirect(url_for("login"))
-    if username == current_user(): return redirect(url_for("admin") + "?tab=users&error=self")
-    if username == "admin": return redirect(url_for("admin") + "?tab=users&error=protected")
-    database.delete_user(username)
-    return redirect(url_for("admin") + "?tab=users&success=deleted")
+@app.route("/purav/carting/trucks/edit/<tid>", methods=["POST"])
+def purav_trucks_edit(tid):
+    g = purav_guard()
+    if g: return g
+    truck = {
+        "number": request.form.get("number", "").strip().upper(),
+        "model": request.form.get("model", "").strip(),
+        "owner": request.form.get("owner", "Self").strip(),
+        "insurance_expiry": request.form.get("insurance_expiry", ""),
+        "fitness_expiry": request.form.get("fitness_expiry", ""),
+        "permit_expiry": request.form.get("permit_expiry", ""),
+        "status": request.form.get("status", "Active").strip(),
+        "notes": request.form.get("notes", "").strip(),
+    }
+    database.update_truck(tid, truck)
+    return redirect(url_for("purav_trucks") + "?success=updated")
 
-@app.route("/admin/add-prompt", methods=["POST"])
-def admin_add_prompt():
-    if not require_admin(): return redirect(url_for("login"))
-    key = request.form.get("key", "").strip().lower().replace(" ", "-")
-    title = request.form.get("title", "").strip()
-    sub = request.form.get("sub", "").strip()
-    cat = request.form.get("cat", "single").strip()
-    text = request.form.get("text", "").strip()
-    if not key or not title or not text:
-        return redirect(url_for("admin") + "?tab=prompts&error=missing")
-    database.add_prompt(key, {"title": title, "sub": sub, "cat": cat,
-        "steps": [{"label": "Prompt", "name": title, "text": text}]})
-    return redirect(url_for("admin") + "?tab=prompts&success=added")
+@app.route("/purav/carting/trucks/delete/<tid>")
+def purav_trucks_delete(tid):
+    g = purav_guard()
+    if g: return g
+    database.delete_truck(tid)
+    return redirect(url_for("purav_trucks") + "?success=deleted")
 
-@app.route("/admin/edit-prompt/<key>", methods=["GET", "POST"])
-def admin_edit_prompt(key):
-    if not require_admin(): return redirect(url_for("login"))
-    prompts = database.load_prompts()
-    if key not in prompts: return redirect(url_for("admin") + "?tab=prompts&error=notfound")
-    if request.method == "POST":
-        title = request.form.get("title", "").strip()
-        sub = request.form.get("sub", "").strip()
-        cat = request.form.get("cat", "single").strip()
-        text = request.form.get("text", "").strip()
-        if not title or not text: return redirect(url_for("admin") + "?tab=prompts&error=missing")
-        prompts[key]["title"] = title
-        prompts[key]["sub"] = sub
-        prompts[key]["cat"] = cat
-        prompts[key]["steps"] = [{"label": "Prompt", "name": title, "text": text}]
-        database.save_prompts(prompts)
-        return redirect(url_for("admin") + "?tab=prompts&success=updated")
-    return render_template("edit-prompt.html", user=current_user(), role=current_role(),
-                          name=current_name(), key=key, prompt=prompts[key])
+# ============================================
+# CUSTOMER MASTER
+# ============================================
 
-@app.route("/admin/delete-prompt/<key>")
-def admin_delete_prompt(key):
-    if not require_admin(): return redirect(url_for("login"))
-    database.delete_prompt(key)
-    return redirect(url_for("admin") + "?tab=prompts&success=deleted")
+@app.route("/purav/carting/customers")
+def purav_customers():
+    g = purav_guard()
+    if g: return g
+    customers = database.get_customers()
+    challans = database.get_challans()
+    # Outstanding per customer (challans not invoiced)
+    for c in customers:
+        c_challans = [ch for ch in challans if ch.get("customer_id") == c["id"] and not ch.get("invoiced")]
+        c["pending_count"] = len(c_challans)
+        c["pending_amount"] = sum(ch.get("amount", 0) for ch in c_challans)
+    return render_template("purav/customers.html", user=current_user(), role=current_role(),
+                          name=current_name(), customers=customers)
 
-@app.route("/admin/delete-all-prompts")
-def admin_delete_all_prompts():
-    if not require_admin(): return redirect(url_for("login"))
-    database.save_prompts({})
-    return redirect(url_for("admin") + "?tab=prompts&success=all_deleted")
+@app.route("/purav/carting/customers/add", methods=["POST"])
+def purav_customers_add():
+    g = purav_guard()
+    if g: return g
+    name = request.form.get("name", "").strip()
+    if not name: return redirect(url_for("purav_customers") + "?error=missing")
+    customer = {
+        "id": str(uuid.uuid4())[:8],
+        "name": name,
+        "phone": request.form.get("phone", "").strip(),
+        "email": request.form.get("email", "").strip(),
+        "gstin": request.form.get("gstin", "").strip(),
+        "pan": request.form.get("pan", "").strip(),
+        "address": request.form.get("address", "").strip(),
+        "state": request.form.get("state", "").strip(),
+        "type": request.form.get("type", "Regular").strip(),
+        "opening_balance": float(request.form.get("opening_balance", 0) or 0),
+        "notes": request.form.get("notes", "").strip(),
+        "created_at": datetime.now().isoformat()
+    }
+    database.add_customer(customer)
+    return redirect(url_for("purav_customers") + "?success=added")
 
-@app.route("/owner")
-def owner():
-    if not require_owner(): return redirect(url_for("login"))
-    users = database.load_users()
-    return render_template("owner.html", user=current_user(), role=current_role(),
-                          name=current_name(), all_users=users)
+@app.route("/purav/carting/customers/edit/<cid>", methods=["POST"])
+def purav_customers_edit(cid):
+    g = purav_guard()
+    if g: return g
+    customer = {
+        "name": request.form.get("name", "").strip(),
+        "phone": request.form.get("phone", "").strip(),
+        "email": request.form.get("email", "").strip(),
+        "gstin": request.form.get("gstin", "").strip(),
+        "pan": request.form.get("pan", "").strip(),
+        "address": request.form.get("address", "").strip(),
+        "state": request.form.get("state", "").strip(),
+        "type": request.form.get("type", "Regular").strip(),
+        "opening_balance": float(request.form.get("opening_balance", 0) or 0),
+        "notes": request.form.get("notes", "").strip(),
+    }
+    database.update_customer(cid, customer)
+    return redirect(url_for("purav_customers") + "?success=updated")
 
-@app.route("/owner/add-user", methods=["POST"])
-def owner_add_user():
-    if not require_owner(): return redirect(url_for("login"))
-    username = request.form.get("username", "").strip()
-    password = request.form.get("password", "").strip()
-    role = request.form.get("role", "user").strip()
-    name = request.form.get("name", "").strip() or username
-    if not username or not password:
-        return redirect(url_for("owner") + "?tab=roles&error=missing")
-    if role not in ("admin", "owner", "manager", "hr", "staff", "user"): role = "user"
-    if current_role() == "owner" and role == "admin": role = "owner"
-    database.add_user(username, password, role, name)
-    return redirect(url_for("owner") + "?tab=roles&success=added")
+@app.route("/purav/carting/customers/delete/<cid>")
+def purav_customers_delete(cid):
+    g = purav_guard()
+    if g: return g
+    database.delete_customer(cid)
+    return redirect(url_for("purav_customers") + "?success=deleted")
 
-@app.route("/owner/delete-user/<username>")
-def owner_delete_user(username):
-    if not require_owner(): return redirect(url_for("login"))
+# ============================================
+# SUPPLIER MASTER
+# ============================================
+
+@app.route("/purav/carting/suppliers")
+def purav_suppliers():
+    g = purav_guard()
+    if g: return g
+    suppliers = database.get_suppliers()
+    return render_template("purav/suppliers.html", user=current_user(), role=current_role(),
+                          name=current_name(), suppliers=suppliers)
+
+@app.route("/purav/carting/suppliers/add", methods=["POST"])
+def purav_suppliers_add():
+    g = purav_guard()
+    if g: return g
+    name = request.form.get("name", "").strip()
+    if not name: return redirect(url_for("purav_suppliers") + "?error=missing")
+    supplier = {
+        "id": str(uuid.uuid4())[:8],
+        "name": name,
+        "phone": request.form.get("phone", "").strip(),
+        "email": request.form.get("email", "").strip(),
+        "gstin": request.form.get("gstin", "").strip(),
+        "address": request.form.get("address", "").strip(),
+        "type": request.form.get("type", "Material").strip(),
+        "opening_balance": float(request.form.get("opening_balance", 0) or 0),
+        "notes": request.form.get("notes", "").strip(),
+        "created_at": datetime.now().isoformat()
+    }
+    database.add_supplier(supplier)
+    return redirect(url_for("purav_suppliers") + "?success=added")
+
+@app.route("/purav/carting/suppliers/edit/<sid>", methods=["POST"])
+def purav_suppliers_edit(sid):
+    g = purav_guard()
+    if g: return g
+    supplier = {
+        "name": request.form.get("name", "").strip(),
+        "phone": request.form.get("phone", "").strip(),
+        "email": request.form.get("email", "").strip(),
+        "gstin": request.form.get("gstin", "").strip(),
+        "address": request.form.get("address", "").strip(),
+        "type": request.form.get("type", "Material").strip(),
+        "opening_balance": float(request.form.get("opening_balance", 0) or 0),
+        "notes": request.form.get("notes", "").strip(),
+    }
+    database.update_supplier(sid, supplier)
+    return redirect(url_for("purav_suppliers") + "?success=updated")
+
+@app.route("/purav/carting/suppliers/delete/<sid>")
+def purav_suppliers_delete(sid):
+    g = purav_guard()
+    if g: return g
+    database.delete_supplier(sid)
+    return redirect(url_for("purav_suppliers") + "?success=deleted")
+
+# ============================================
+# STAFF MASTER
+# ============================================
+
+@app.route("/purav/carting/staff")
+def purav_staff():
+    g = purav_guard()
+    if g: return g
+    staff = database.get_staff()
+    return render_template("purav/staff.html", user=current_user(), role=current_role(),
+                          name=current_name(), staff=staff)
+
+@app.route("/purav/carting/staff/add", methods=["POST"])
+def purav_staff_add():
+    g = purav_guard()
+    if g: return g
+    name = request.form.get("name", "").strip()
+    if not name: return redirect(url_for("purav_staff") + "?error=missing")
+    member = {
+        "id": str(uuid.uuid4())[:8],
+        "name": name,
+        "phone": request.form.get("phone", "").strip(),
+        "role": request.form.get("role", "Labour").strip(),
+        "salary_type": request.form.get("salary_type", "Daily").strip(),
+        "rate": float(request.form.get("rate", 0) or 0),
+        "address": request.form.get("address", "").strip(),
+        "joining_date": request.form.get("joining_date", ""),
+        "notes": request.form.get("notes", "").strip(),
+        "status": request.form.get("status", "Active").strip(),
+        "created_at": datetime.now().isoformat()
+    }
+    database.add_staff(member)
+    return redirect(url_for("purav_staff") + "?success=added")
+
+@app.route("/purav/carting/staff/edit/<sid>", methods=["POST"])
+def purav_staff_edit(sid):
+    g = purav_guard()
+    if g: return g
+    member = {
+        "name": request.form.get("name", "").strip(),
+        "phone": request.form.get("phone", "").strip(),
+        "role": request.form.get("role", "Labour").strip(),
+        "salary_type": request.form.get("salary_type", "Daily").strip(),
+        "rate": float(request.form.get("rate", 0) or 0),
+        "address": request.form.get("address", "").strip(),
+        "joining_date": request.form.get("joining_date", ""),
+        "notes": request.form.get("notes", "").strip(),
+        "status": request.form.get("status", "Active").strip(),
+    }
+    database.update_staff(sid, member)
+    return redirect(url_for("purav_staff") + "?success=updated")
+
+@app.route("/purav/carting/staff/delete/<sid>")
+def purav_staff_delete(sid):
+    g = purav_guard()
+    if g: return g
+    database.delete_staff(sid)
+    return redirect(url_for("purav_staff") + "?success=deleted")
+
+# ============================================
+# MATERIAL MASTER
+# ============================================
+
+@app.route("/purav/carting/materials")
+def purav_materials():
+    g = purav_guard()
+    if g: return g
+    materials = database.get_materials()
+    return render_template("purav/materials.html", user=current_user(), role=current_role(),
+                          name=current_name(), materials=materials)
+
+@app.route("/purav/carting/materials/add", methods=["POST"])
+def purav_materials_add():
+    g = purav_guard()
+    if g: return g
+    name = request.form.get("name", "").strip()
+    if not name: return redirect(url_for("purav_materials") + "?error=missing")
+    material = {
+        "id": str(uuid.uuid4())[:8],
+        "name": name,
+        "category": request.form.get("category", "Sand").strip(),
+        "unit": request.form.get("unit", "Ton").strip(),
+        "default_rate": float(request.form.get("default_rate", 0) or 0),
+        "hsn": request.form.get("hsn", "").strip(),
+        "gst_rate": float(request.form.get("gst_rate", 0) or 0),
+        "notes": request.form.get("notes", "").strip(),
+        "created_at": datetime.now().isoformat()
+    }
+    database.add_material(material)
+    return redirect(url_for("purav_materials") + "?success=added")
+
+@app.route("/purav/carting/materials/edit/<mid>", methods=["POST"])
+def purav_materials_edit(mid):
+    g = purav_guard()
+    if g: return g
+    material = {
+        "name": request.form.get("name", "").strip(),
+        "category": request.form.get("category", "Sand").strip(),
+        "unit": request.form.get("unit", "Ton").strip(),
+        "default_rate": float(request.form.get("default_rate", 0) or 0),
+        "hsn": request.form.get("hsn", "").strip(),
+        "gst_rate": float(request.form.get("gst_rate", 0) or 0),
+        "notes": request.form.get("notes", "").strip(),
+    }
+    database.update_material(mid, material)
+    return redirect(url_for("purav_materials") + "?success=updated")
+
+@app.route("/purav/carting/materials/delete/<mid>")
+def purav_materials_delete(mid):
+    g = purav_guard()
+    if g: return g
+    database.delete_material(mid)
+    return redirect(url_for("purav_matef not require_owner(): return redirect(url_for("login"))
     if username == current_user(): return redirect(url_for("owner") + "?tab=roles&error=self")
     if username == "admin": return redirect(url_for("owner") + "?tab=roles&error=protected")
     database.delete_user(username)
