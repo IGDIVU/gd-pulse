@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Invoice Generator — GD Pulse</title>
+<link rel="icon" type="image/png" href="/static/favicon.png">
+<link rel="stylesheet" href="/static/style.css">
+<style>
+  /* ===== SCREEN STYLES ===== */
+  .invoice-container { max-width: 1300px; margin: 0 auto; padding: 30px 20px; }
+  .form-section {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 28px; margin-bottom: 30px;
+  }
+  .form-section h2 {
+    font-size: 20px; margin-bottom: 20px; color: var(--text);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .form-section h2 [data-icon] { width: 24px; height: 24px; color: var(--primary); }
+  .form-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 15px; }
+  .form-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 15px; }
+  @media (max-width: 700px) {
+    .form-grid-3, .form-grid-2 { grid-template-columns: 1fr; }
+  }
+  .items-table-input { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+  .items-table-input th, .items-table-input td {
+    padding: 8px 6px; border: 1px solid var(--border); font-size: 12px;
+  }
+  .items-table-input th {
+    background: rgba(139, 92, 246, 0.08); font-weight: 700; text-align: left;
+  }
+  .items-table-input input {
+    width: 100%; padding: 8px; margin: 0; font-size: 12px;
+    border: 1px solid var(--border); border-radius: 6px; background: var(--bg);
+    color: var(--text); outline: none;
+  }
+  .items-table-input input:focus { border-color: var(--primary); }
+  .items-table-input .num { width: 70px; }
+  .items-table-input .small { width: 60px; }
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
+  .btn-row .btn { flex: none; }
+
+  /* ===== INVOICE PREVIEW (A4) ===== */
+  .invoice-preview {
+    background: white; color: #000;
+    width: 210mm; min-height: 297mm;
+    margin: 0 auto 30px; padding: 10mm 12mm;
+    box-shadow: 0 4px 30px rgba(0,0,0,0.2);
+    font-family: 'Arial', sans-serif;
+    font-size: 10px;
+    line-height: 1.3;
+    box-sizing: border-box;
+  }
+  .invoice-preview * { box-sizing: border-box; }
+
+  .inv-page { position: relative; page-break-after: always; }
+  .inv-page:last-child { page-break-after: auto; }
+
+  .inv-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 8px; }
+  .inv-header .company-name { font-size: 22px; font-weight: 900; letter-spacing: 1px; }
+  .inv-header .company-sub { font-size: 10px; margin-top: 2px; }
+  .inv-header .company-sub b { font-weight: 700; }
+  .inv-title {
+    text-align: center; font-size: 14px; font-weight: 800;
+    border-top: 1px solid #000; border-bottom: 1px solid #000;
+    padding: 3px 0; margin: 6px 0; letter-spacing: 2px;
+  }
+
+  .inv-info-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 8px; margin-bottom: 6px;
+    border: 1px solid #000; padding: 5px;
+    font-size: 9px;
+  }
+  .inv-info-grid .info-col { border-right: 1px solid #000; padding-right: 6px; }
+  .inv-info-grid .info-col:last-child { border-right: none; padding-right: 0; padding-left: 6px; }
+  .inv-info-row { display: flex; justify-content: space-between; padding: 1px 0; }
+  .inv-info-row span:first-child { font-weight: 700; }
+
+  .inv-billed {
+    border: 1px solid #000; padding: 5px; margin-bottom: 6px; font-size: 9px;
+  }
+  .inv-billed .lbl { font-weight: 700; }
+
+  .inv-table { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
+  .inv-table th, .inv-table td {
+    border: 1px solid #000; padding: 3px 4px; font-size: 9px;
+    text-align: left; vertical-align: top;
+  }
+  .inv-table th { background: #f0f0f0; font-weight: 700; text-align: center; font-size: 9px; }
+  .inv-table td.num { text-align: right; }
+  .inv-table td.center { text-align: center; }
+  .inv-table tr.totals-row td { font-weight: 700; background: #f5f5f5; }
+
+  .inv-tax-table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+  .inv-tax-table th, .inv-tax-table td {
+    border: 1px solid #000; padding: 3px 5px; font-size: 9px;
+  }
+  .inv-tax-table th { background: #f0f0f0; font-weight: 700; text-align: center; }
+  .inv-tax-table td.num { text-align: right; }
+  .inv-tax-table tr.gross td { font-weight: 800; font-size: 10px; background: #e8e8e8; }
+
+  .inv-footer-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+    border: 1px solid #000; margin-top: 6px; font-size: 9px;
+  }
+  .inv-footer-grid > div { padding: 5px; border-right: 1px solid #000; }
+  .inv-footer-grid > div:last-child { border-right: none; }
+  .inv-footer-grid .lbl { font-weight: 700; }
+
+  .inv-rupees {
+    border: 1px solid #000; border-top: none;
+    padding: 4px 6px; font-size: 9px; font-weight: 700;
+  }
+
+  .inv-terms {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+    border: 1px solid #000; border-top: none; font-size: 8.5px;
+  }
+  .inv-terms > div { padding: 5px; border-right: 1px solid #000; }
+  .inv-terms > div:last-child { border-right: none; }
+
+  .inv-sign {
+    text-align: right; padding: 15px 5px 5px;
+    font-size: 9px; font-weight: 700;
+  }
+
+  .inv-dispatch {
+    text-align: center; border-top: 1px solid #000;
+    padding-top: 3px; font-size: 8px; margin-top: 4px;
+  }
+
+  /* ===== PRINT STYLES ===== */
+  @media print {
+    @page { size: A4; margin: 0; }
+    body * { visibility: hidden; }
+    .invoice-preview, .invoice-preview * { visibility: visible; }
+    .invoice-preview {
+      position: absolute; left: 0; top: 0;
+      margin: 0; box-shadow: none; width: 210mm;
+      padding: 10mm 12mm;
+    }
+    .no-print { display: none !important; }
+    .inv-page { page-break-after: always; }
+    .inv-page:last-child { page-break-after: auto; }
+  }
+</style>
+</head>
+<body>
+
+  <header class="no-print">
+    <a href="/" class="logo"><img src="/static/logo-horizontal.png" alt="GD Pulse"></a>
+    <nav class="nav-links">
+      <a href="/tools">Tools</a>
+    </nav>
+    <div class="header-right">
+      <button class="theme-toggle" onclick="toggleTheme(event)" title="Toggle theme"></button>
+      <a href="#" onclick="confirmLogout(event)" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
+    </div>
+  </header>
+
+  <main class="no-print">
+    <div class="invoice-container">
+
+      <div class="welcome reveal" style="margin-bottom: 25px;">
+        <h1>Invoice <span class="highlight">Generator</span></h1>
+        <p>GST Tax Invoice banao — multi-page support with B/F & C/F totals.</p>
+      </div>
+
+      <!-- COMPANY DETAILS -->
+      <div class="form-section reveal">
+        <h2><span data-icon="retail"></span> Company Details (Seller)</h2>
+        <div class="form-grid-3">
+          <div><label>Company Name</label><input type="text" id="c_name" placeholder="SHAH SUPPLIERS LLP"></div>
+          <div><label>GSTIN</label><input type="text" id="c_gstin" placeholder="24ADXFS5900R1Z5"></div>
+          <div><label>PAN No</label><input type="text" id="c_pan" placeholder="ADXFS5900R"></div>
+        </div>
+        <div class="form-grid-2">
+          <div><label>Address Line 1</label><input type="text" id="c_addr1" placeholder="GROUND, SHOP NO.10"></div>
+          <div><label>Address Line 2</label><input type="text" id="c_addr2" placeholder="Village, City, Pincode"></div>
+        </div>
+        <div class="form-grid-3">
+          <div><label>Email</label><input type="text" id="c_email" placeholder="email@example.com"></div>
+          <div><label>Mobile 1</label><input type="text" id="c_mob1" placeholder="9876543210"></div>
+          <div><label>FSSAI License</label><input type="text" id="c_fssai" placeholder="10725025000280"></div>
+        </div>
+      </div>
+
+      <!-- INVOICE META -->
+      <div class="form-section reveal">
+        <h2><span data-icon="prompts"></span> Invoice Details</h2>
+        <div class="form-grid-3">
+          <div><label>Tax Invoice No</label><input type="text" id="m_invno" placeholder="000499"></div>
+          <div><label>Date</label><input type="date" id="m_date"></div>
+          <div><label>Due Date</label><input type="date" id="m_duedate"></div>
+        </div>
+        <div class="form-grid-3">
+          <div><label>Challan No</label><input type="text" id="m_challan"></div>
+          <div><label>Order No</label><input type="text" id="m_orderno"></div>
+          <div><label>Order Date</label><input type="date" id="m_orderdate"></div>
+        </div>
+        <div class="form-grid-3">
+          <div><label>Payment Term</label><input type="text" id="m_payterm" placeholder="15 Days"></div>
+          <div><label>Broker Name</label><input type="text" id="m_broker"></div>
+          <div><label>Place of Supply</label><input type="text" id="m_supply" placeholder="24-Gujarat"></div>
+        </div>
+        <div class="form-grid-3">
+          <div><label>Transporter</label><input type="text" id="m_transporter"></div>
+          <div><label>LR No</label><input type="text" id="m_lrno"></div>
+          <div><label>Vehicle No</label><input type="text" id="m_vehicle"></div>
+        </div>
+      </div>
+
+      <!-- BILLED TO -->
+      <div class="form-section reveal">
+        <h2><span data-icon="users"></span> Billed To (Customer)</h2>
+        <div class="form-grid-2">
+          <div><label>Customer Name</label><input type="text" id="b_name" placeholder="RUJAL BRANDS PRIVATE LIMITED"></div>
+          <div><label>GSTIN</label><input type="text" id="b_gstin" placeholder="24AALCR8322G1ZB"></div>
+        </div>
+        <div class="form-grid-2">
+          <div><label>Address</label><input type="text" id="b_addr" placeholder="Full Address"></div>
+          <div><label>State</label><input type="text" id="b_state" placeholder="24 - Gujarat"></div>
+        </div>
+        <div class="form-grid-3">
+          <div><label>Tel No</label><input type="text" id="b_tel" placeholder="9821284350"></div>
+          <div><label>PAN No</label><input type="text" id="b_pan" placeholder="AALCR8322G"></div>
+          <div><label>FSSAI No</label><input type="text" id="b_fssai"></div>
+        </div>
+      </div>
+
+      <!-- BANK DETAILS -->
+      <div class="form-section reveal">
+        <h2><span data-icon="retail"></span> Bank & Payment Details</h2>
+        <div class="form-grid-2">
+          <div><label>Bank Name</label><input type="text" id="bank_name" placeholder="SARASWAT CO-OPERATIVE BANK LTD."></div>
+          <div><label>Branch</label><input type="text" id="bank_branch" placeholder="VILE PARLE"></div>
+        </div>
+        <div class="form-grid-2">
+          <div><label>A/C No</label><input type="text" id="bank_acc" placeholder="6100000005864"></div>
+          <div><label>IFSC Code</label><input type="text" id="bank_ifsc" placeholder="SRCB0000284"></div>
+        </div>
+        <div class="form-grid-2">
+          <div><label>Terms & Conditions</label><input type="text" id="m_terms" placeholder="Subject to BHILAD Jurisdiction"></div>
+          <div><label>Prepared By</label><input type="text" id="m_prepared" placeholder="GOLU"></div>
+        </div>
+      </div>
+
+      <!-- ITEMS -->
+      <div class="form-section reveal">
+        <h2><span data-icon="tools"></span> Items / Products</h2>
+        <div style="overflow-x: auto;">
+          <table class="items-table-input" id="itemsInputTable">
+            <thead>
+              <tr>
+                <th style="width:30px;">#</th>
+                <th>Description</th>
+                <th style="width:80px;">HSN/SAC</th>
+                <th style="width:70px;">Qty</th>
+                <th style="width:70px;">Rate</th>
+                <th style="width:50px;">Per</th>
+                <th style="width:60px;">MRP</th>
+                <th style="width:70px;">CGST%</th>
+                <th style="width:70px;">SGST%</th>
+                <th style="width:40px;"></th>
+              </tr>
+            </thead>
+            <tbody id="itemsInputBody">
+              <!-- Rows added by JS -->
+            </tbody>
+          </table>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="addItemRow()">
+            <span data-icon="plus"></span> Add Item
+          </button>
+          <button class="btn btn-outline" onclick="clearAll()">
+            <span data-icon="trash"></span> Clear All
+          </button>
+        </div>
+      </div>
+
+      <!-- BUTTONS -->
+      <div class="form-section reveal" style="text-align: center;">
+        <h2 style="justify-content: center;"><span data-icon="sparkle"></span> Generate Invoice</h2>
+        <p style="color: var(--text-dim); margin-bottom: 20px; font-size: 14px;">
+          Items per page: <input type="number" id="itemsPerPage" value="19" min="5" max="30" style="width: 70px; padding: 6px; display: inline-block; margin: 0 5px;">
+        </p>
+        <div class="btn-row" style="justify-content: center;">
+          <button class="btn btn-primary" onclick="generateInvoice()">
+            <span data-icon="sparkle"></span> Generate Invoice Preview
+          </button>
+          <button class="btn btn-primary" onclick="printInvoice()" style="background: linear-gradient(135deg, #10b981, #059669);">
+            <span data-icon="download"></span> Print / Save as PDF
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- INVOICE PREVIEW -->
+  <div class="invoice-preview" id="invoicePreview" style="display: none;">
+    <!-- Generated by JS -->
+  </div>
+
+  <footer class="no-print"><p>© 2025 GD Pulse — Invoice Generator</p></footer>
+
+  <script src="/static/icons.js"></script>
+  <script>
+    // ============================================
+    // ITEMS MANAGEMENT
+    // ============================================
+    let rowCounter = 0;
+
+    function addItemRow(data = null) {
+      rowCounter++;
+      const tbody = document.getElementById("itemsInputBody");
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td style="text-align:center;">${rowCounter}</td>
+        <td><input type="text" class="i-desc" placeholder="Item description" value="${data?.desc || ''}"></td>
+        <td><input type="text" class="i-hsn" placeholder="HSN" value="${data?.hsn || ''}"></td>
+        <td><input type="number" class="i-qty" placeholder="0" value="${data?.qty || ''}"></td>
+        <td><input type="number" class="i-rate" placeholder="0" value="${data?.rate || ''}"></td>
+        <td><input type="text" class="i-per" placeholder="Pkt" value="${data?.per || 'Pkt'}" style="width:50px;"></td>
+        <td><input type="number" class="i-mrp" placeholder="0" value="${data?.mrp || '0'}"></td>
+        <td><input type="number" class="i-cgst" placeholder="2.5" value="${data?.cgst || '2.5'}" step="0.01"></td>
+        <td><input type="number" class="i-sgst" placeholder="2.5" value="${data?.sgst || '2.5'}" step="0.01"></td>
+        <td style="text-align:center;">
+          <button onclick="this.closest('tr').remove(); renumberRows();" style="background:#ef4444;color:white;border:none;padding:4px 8px;border-radius:6px;cursor:pointer;font-size:11px;">×</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    }
+
+    function renumberRows() {
+      document.querySelectorAll("#itemsInputBody tr").forEach((tr, i) => {
+        tr.querySelector("td").innerText = i + 1;
+      });
+      rowCounter = document.querySelectorAll("#itemsInputBody tr").length;
+    }
+
+    function clearAll() {
+      showConfirm("Clear All?", "Saare items aur details clear ho jayenge.", "Yes, Clear", () => {
+        document.getElementById("itemsInputBody").innerHTML = "";
+        rowCounter = 0;
+        document.getElementById("invoicePreview").style.display = "none";
+        localStorage.removeItem("gd_invoice_data");
+      });
+    }
+
+    // ============================================
+    // GENERATE INVOICE
+    // ============================================
+    function generateInvoice() {
+      const items = collectItems();
+      if (items.length === 0) {
+        alert("Kam se kam 1 item add karo");
+        return;
+      }
+      const data = collectFormData();
+      const perPage = parseInt(document.getElementById("itemsPerPage").value) || 19;
+
+      saveToLocalStorage();
+
+      const html = buildInvoiceHTML(data, items, perPage);
+      const preview = document.getElementById("invoicePreview");
+      preview.innerHTML = html;
+      preview.style.display = "block";
+      preview.scrollIntoView({ behavior: "smooth" });
+    }
+
+    function collectItems() {
+      const items = [];
+      document.querySelectorAll("#itemsInputBody tr").forEach(tr => {
+        const desc = tr.querySelector(".i-desc").value.trim();
+        if (!desc) return;
+        items.push({
+          desc: desc,
+          hsn: tr.querySelector(".i-hsn").value.trim(),
+          qty: parseFloat(tr.querySelector(".i-qty").value) || 0,
+          rate: parseFloat(tr.querySelector(".i-rate").value) || 0,
+          per: tr.querySelector(".i-per").value.trim() || "Pkt",
+          mrp: parseFloat(tr.querySelector(".i-mrp").value) || 0,
+          cgst: parseFloat(tr.querySelector(".i-cgst").value) || 0,
+          sgst: parseFloat(tr.querySelector(".i-sgst").value) || 0,
+        });
+      });
+      return items;
+    }
+
+    function collectFormData() {
+      const g = id => document.getElementById(id).value.trim();
+      return {
+        company: {
+          name: g("c_name"), gstin: g("c_gstin"), pan: g("c_pan"),
+          addr1: g("c_addr1"), addr2: g("c_addr2"),
+          email: g("c_email"), mob1: g("c_mob1"), fssai: g("c_fssai")
+        },
+        meta: {
+          invno: g("m_invno"), date: g("m_date"), duedate: g("m_duedate"),
+          challan: g("m_challan"), orderno: g("m_orderno"), orderdate: g("m_orderdate"),
+          payterm: g("m_payterm"), broker: g("m_broker"), supply: g("m_supply"),
+          transporter: g("m_transporter"), lrno: g("m_lrno"), vehicle: g("m_vehicle"),
+          terms: g("m_terms"), prepared: g("m_prepared")
+        },
+        billed: {
+          name: g("b_name"), gstin: g("b_gstin"), addr: g("b_addr"),
+          state: g("b_state"), tel: g("b_tel"), pan: g("b_pan"), fssai: g("b_fssai")
+        },
+        bank: {
+          name: g("bank_name"), branch: g("bank_branch"),
+          acc: g("bank_acc"), ifsc: g("bank_ifsc")
+        }
+      };
+    }
+
+    // ============================================
+    // BUILD INVOICE HTML
+    // ============================================
+    function buildInvoiceHTML(data, items, perPage) {
+      const pages = [];
+      for (let i = 0; i < items.length; i += perPage) {
+        pages.push(items.slice(i, i + perPage));
+      }
+
+      let grandTotal = 0;
+      let totalCGST25 = 0, totalCGST9 = 0, totalSGST25 = 0, totalSGST9 = 0;
+      let totalExempt = 0;
+      let netAmount = 0;
+
+      items.forEach(it => {
+        const amt = it.qty * it.rate;
+        grandTotal += amt;
+        if (it.cgst === 2.5) {
+          totalCGST25 += amt * 0.025;
+          totalSGST25 += amt * 0.025;
+          netAmount += amt;
+        } else if (it.cgst === 9) {
+          totalCGST9 += amt * 0.09;
+          totalSGST9 += amt * 0.09;
+          netAmount += amt;
+        } else if (it.cgst === 0) {
+          totalExempt += amt;
+        } else {
+          // Custom rate
+          totalCGST25 += amt * (it.cgst / 100);
+          totalSGST25 += amt * (it.sgst / 100);
+          netAmount += amt;
+        }
+      });
+
+      const totalCGST = totalCGST25 + totalCGST9;
+      const totalSGST = totalSGST25 + totalSGST9;
+      const beforeRound = grandTotal + totalCGST + totalSGST;
+      const roundedTotal = Math.round(beforeRound);
+      const roundOff = roundedTotal - beforeRound;
+
+      const amountWords = numberToWords(roundedTotal);
+
+      // ===== BUILD HTML FOR EACH PAGE =====
+      let html = "";
+      let runningTotal = 0;
+      let sNoGlobal = 1;
+
+      pages.forEach((pageItems, pageIndex) => {
+        const isFirst = pageIndex === 0;
+        const isLast = pageIndex === pages.length - 1;
+        const pageRunningStart = runningTotal;
+
+        html += `<div class="inv-page">`;
+
+        // ---- HEADER ----
+        html += `
+          <div class="inv-header">
+            <div class="company-name">${data.company.name || "COMPANY NAME"}</div>
+            <div class="company-sub">
+              ${data.company.addr1 || ""}<br>
+              ${data.company.addr2 || ""}<br>
+              <b>GST NO:</b> ${data.company.gstin || ""} &nbsp; <b>PAN:</b> ${data.company.pan || ""}<br>
+              <b>Email:</b> ${data.company.email || ""} &nbsp; <b>Mob:</b> ${data.company.mob1 || ""}<br>
+              <b>FSSAI LIC NO:</b> ${data.company.fssai || ""}
+            </div>
+          </div>
+          <div class="inv-title">TAX INVOICE</div>
+        `;
+
+        // ---- INVOICE INFO ----
+        html += `
+          <div class="inv-info-grid">
+            <div class="info-col">
+              <div class="inv-info-row"><span>Tax Inv. No</span><span>${data.meta.invno || ""}</span></div>
+              <div class="inv-info-row"><span>Challan No</span><span>${data.meta.challan || ""}</span></div>
+              <div class="inv-info-row"><span>Order No</span><span>${data.meta.orderno || ""}</span></div>
+              <div class="inv-info-row"><span>Order Date</span><span>${data.meta.orderdate || ""}</span></div>
+              <div class="inv-info-row"><span>Payment Term</span><span>${data.meta.payterm || ""}</span></div>
+              <div class="inv-info-row"><span>Broker Name</span><span>${data.meta.broker || ""}</span></div>
+            </div>
+            <div class="info-col">
+              <div class="inv-info-row"><span>Date</span><span>${data.meta.date || ""}</span></div>
+              <div class="inv-info-row"><span>Due On</span><span>${data.meta.duedate || ""}</span></div>
+              <div class="inv-info-row"><span>Transporter</span><span>${data.meta.transporter || ""}</span></div>
+              <div class="inv-info-row"><span>LR No</span><span>${data.meta.lrno || ""}</span></div>
+              <div class="inv-info-row"><span>Vehicle No</span><span>${data.meta.vehicle || ""}</span></div>
+              <div class="inv-info-row"><span>Place of Supply</span><span>${data.meta.supply || ""}</span></div>
+            </div>
+          </div>
+        `;
+
+        // ---- BILLED TO (Only on first page) ----
+        if (isFirst) {
+          html += `
+            <div class="inv-billed">
+              <div><span class="lbl">Billed To:</span> ${data.billed.name || ""}</div>
+              <div>${data.billed.addr || ""}</div>
+              <div><span class="lbl">State:</span> ${data.billed.state || ""} &nbsp; <span class="lbl">Tel No:</span> ${data.billed.tel || ""}</div>
+              <div><span class="lbl">GSTIN:</span> ${data.billed.gstin || ""} &nbsp; <span class="lbl">P.A.No.:</span> ${data.billed.pan || ""}</div>
+              ${data.billed.fssai ? `<div><span class="lbl">FSSAI No:</span> ${data.billed.fssai}</div>` : ""}
+            </div>
+          `;
+        }
+
+        // ---- ITEMS TABLE ----
+        html += `<table class="inv-table"><thead><tr>
+          <th style="width:25px;">Sno</th>
+          <th>Description of Goods</th>
+          <th style="width:65px;">HSN/SAC</th>
+          <th style="width:60px;">Quantity</th>
+          <th style="width:50px;">Rate</th>
+          <th style="width:35px;">Per</th>
+          <th style="width:50px;">MRP</th>
+          <th style="width:60px;">Amount ₹</th>
+          <th style="width:40px;">CGST%</th>
+          <th style="width:40px;">SGST%</th>
+        </tr></thead><tbody>`;
+
+        // B/F row (except first page)
+        if (!isFirst) {
+          html += `<tr class="totals-row"><td colspan="7" style="text-align:left;"><b>TOTAL B/F :-</b></td><td class="num"><b>${pageRunningStart.toFixed(2)}</b></td><td colspan="2"></td></tr>`;
+        }
+
+        // Items
+        pageItems.forEach((it, idx) => {
+          const amt = it.qty * it.rate;
+          runningTotal += amt;
+          html += `<tr>
+            <td class="center">${sNoGlobal}</td>
+            <td>${it.desc}</td>
+            <td class="center">${it.hsn}</td>
+            <td class="num">${it.qty.toFixed(3)}</td>
+            <td class="num">${it.rate.toFixed(2)}</td>
+            <td class="center">${it.per}</td>
+            <td class="num">${it.mrp.toFixed(2)}</td>
+            <td class="num">${amt.toFixed(2)}</td>
+            <td class="center">${it.cgst.toFixed(2)}</td>
+            <td class="center">${it.sgst.toFixed(2)}</td>
+          </tr>`;
+          sNoGlobal++;
+        });
+
+        // C/F row (except last page)
+        if (!isLast) {
+          html += `<tr class="totals-row"><td colspan="7" style="text-align:left;"><b>TOTAL C/F :-</b></td><td class="num"><b>${runningTotal.toFixed(2)}</b></td><td colspan="2"></td></tr>`;
+        }
+
+        html += `</tbody></table>`;
+
+        // ---- FINAL TOTALS (Last page only) ----
+        if (isLast) {
+          html += `
+            <table class="inv-tax-table">
+              <tr>
+                <td style="width:50%;"><b>Net Amount</b></td>
+                <td class="num">${netAmount.toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td>CGST @ 2.5% on Rs. ${(totalCGST25 > 0 ? (totalCGST25 / 0.025).toFixed(2) : "0")}</td>
+                <td class="num">${totalCGST25.toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td>CGST @ 9% on Rs. ${(totalCGST9 > 0 ? (totalCGST9 / 0.09).toFixed(2) : "0")}</td>
+                <td class="num">${totalCGST9.toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td>CGST Exempted on Rs. ${totalExempt.toFixed(2)}</td>
+                <td class="num">0.00</td>
+              </tr>
+              <tr>
+                <td>SGST @ 2.5% on Rs. ${(totalSGST25 > 0 ? (totalSGST25 / 0.025).toFixed(2) : "0")}</td>
+                <td class="num">${totalSGST25.toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td>SGST @ 9% on Rs. ${(totalSGST9 > 0 ? (totalSGST9 / 0.09).toFixed(2) : "0")}</td>
+                <td class="num">${totalSGST9.toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td>SGST Exempted on Rs. ${totalExempt.toFixed(2)}</td>
+                <td class="num">0.00</td>
+              </tr>
+              <tr>
+                <td>Round Off</td>
+                <td class="num">${roundOff.toFixed(2)}</td>
+              </tr>
+              <tr class="gross">
+                <td><b>Gross Amount</b></td>
+                <td class="num"><b>${roundedTotal.toFixed(2)}</b></td>
+              </tr>
+            </table>
+          `;
+        }
+
+        // ---- FOOTER (Every page) ----
+        html += `
+          <div class="inv-footer-grid">
+            <div>
+              <div><span class="lbl">Bank Details:</span> ${data.bank.name || ""}</div>
+              <div><span class="lbl">A/C No:</span> ${data.bank.acc || ""}</div>
+            </div>
+            <div>
+              <div><span class="lbl">Branch:</span> ${data.bank.branch || ""}</div>
+              <div><span class="lbl">RTGS/NEFT/IFSC Code:</span> ${data.bank.ifsc || ""}</div>
+            </div>
+          </div>
+        `;
+
+        // Amount in words (only last page)
+        if (isLast) {
+          html += `<div class="inv-rupees">Rupees : ${amountWords} Only</div>`;
+        }
+
+        // Terms + Declaration (every page)
+        html += `
+          <div class="inv-terms">
+            <div>
+              <div><span class="lbl">GSTIN:</span> ${data.company.gstin || ""} &nbsp; <span class="lbl">P.A.No.:</span> ${data.company.pan || ""}</div>
+              <div style="margin-top: 4px;"><span class="lbl">Terms & Conditions:</span></div>
+              <div>• ${data.meta.terms || "Subject to Jurisdiction"}</div>
+              <div>• Goods Once Sold Will not be taken back.</div>
+              <div>• Payment within Due Date otherwise 21% p.a. interest will be charged.</div>
+              <div style="margin-top: 4px;"><span class="lbl">Prepared By:</span> ${data.meta.prepared || ""}</div>
+            </div>
+            <div>
+              <div><span class="lbl">DECLARATION Form E:</span> We hereby certify that food/foods mention in this invoice is/are warranted to be of nature & quality which is/their purposes/purported to be.</div>
+              <div style="margin-top: 4px;">Certified that the particulars given above are true and correct.</div>
+              <div class="inv-sign">
+                For ${data.company.name || "COMPANY"}<br><br><br>
+                Authorised Signatory
+              </div>
+            </div>
+          </div>
+          <div class="inv-dispatch">
+            Dispatch From: ${data.company.addr1 || ""} ${data.company.addr2 || ""}
+          </div>
+          <div style="text-align: right; font-size: 8px; margin-top: 3px;">Page ${pageIndex + 1} of ${pages.length}</div>
+        `;
+
+        html += `</div>`;
+      });
+
+      return html;
+    }
+
+    // ============================================
+    // NUMBER TO WORDS (Indian)
+    // ============================================
+    function numberToWords(num) {
+      num = Math.round(num);
+      const ones = ["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine",
+                    "Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen",
+                    "Seventeen","Eighteen","Nineteen"];
+      const tens = ["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
+      function two(n) {
+        if (n < 20) return ones[n];
+        return tens[Math.floor(n/10)] + (n%10 ? " " + ones[n%10] : "");
+      }
+      function three(n) {
+        let s = "";
+        if (n > 99) { s += ones[Math.floor(n/100)] + " Hundred"; n %= 100; if (n > 0) s += " "; }
+        if (n > 0) s += two(n);
+        return s;
+      }
+      if (num === 0) return "Zero";
+      let str = "";
+      const crore = Math.floor(num / 10000000); num %= 10000000;
+      const lakh = Math.floor(num / 100000); num %= 100000;
+      const thousand = Math.floor(num / 1000); num %= 1000;
+      if (crore > 0) str += three(crore) + " Crore ";
+      if (lakh > 0) str += three(lakh) + " Lakh ";
+      if (thousand > 0) str += three(thousand) + " Thousand ";
+      if (num > 0) str += three(num);
+      return str.trim();
+    }
+
+    // ============================================
+    // SAVE / LOAD localStorage
+    // ============================================
+    function saveToLocalStorage() {
+      const data = collectFormData();
+      data.items = collectItems();
+      localStorage.setItem("gd_invoice_data", JSON.stringify(data));
+    }
+
+    function loadFromLocalStorage() {
+      try {
+        const saved = localStorage.getItem("gd_invoice_data");
+        if (!saved) return;
+        const data = JSON.parse(saved);
+
+        // Fill form fields
+        const set = (id, val) => { if (val !== undefined && val !== null) document.getElementById(id).value = val; };
+        set("c_name", data.company?.name); set("c_gstin", data.company?.gstin);
+        set("c_pan", data.company?.pan); set("c_addr1", data.company?.addr1);
+        set("c_addr2", data.company?.addr2); set("c_email", data.company?.email);
+        set("c_mob1", data.company?.mob1); set("c_fssai", data.company?.fssai);
+        set("m_invno", data.meta?.invno); set("m_date", data.meta?.date);
+        set("m_duedate", data.meta?.duedate); set("m_challan", data.meta?.challan);
+        set("m_orderno", data.meta?.orderno); set("m_orderdate", data.meta?.orderdate);
+        set("m_payterm", data.meta?.payterm); set("m_broker", data.meta?.broker);
+        set("m_supply", data.meta?.supply); set("m_transporter", data.meta?.transporter);
+        set("m_lrno", data.meta?.lrno); set("m_vehicle", data.meta?.vehicle);
+        set("m_terms", data.meta?.terms); set("m_prepared", data.meta?.prepared);
+        set("b_name", data.billed?.name); set("b_gstin", data.billed?.gstin);
+        set("b_addr", data.billed?.addr); set("b_state", data.billed?.state);
+        set("b_tel", data.billed?.tel); set("b_pan", data.billed?.pan);
+        set("b_fssai", data.billed?.fssai);
+        set("bank_name", data.bank?.name); set("bank_branch", data.bank?.branch);
+        set("bank_acc", data.bank?.acc); set("bank_ifsc", data.bank?.ifsc);
+
+        // Fill items
+        if (data.items && Array.isArray(data.items)) {
+          data.items.forEach(it => addItemRow(it));
+        }
+      } catch (e) { console.error("Load error:", e); }
+    }
+
+    // ============================================
+    // PRINT
+    // ============================================
+    function printInvoice() {
+      const preview = document.getElementById("invoicePreview");
+      if (preview.style.display === "none" || !preview.innerHTML.trim()) {
+        generateInvoice();
+        setTimeout(() => window.print(), 300);
+      } else {
+        window.print();
+      }
+    }
+
+    // ============================================
+    // INIT
+    // ============================================
+    document.addEventListener("DOMContentLoaded", () => {
+      if (window.renderIcons) window.renderIcons();
+      // Set today's date
+      const today = new Date().toISOString().split("T")[0];
+      document.getElementById("m_date").value = today;
+      // Load saved data
+      loadFromLocalStorage();
+      // If no items, add 3 empty rows
+      if (document.querySelectorAll("#itemsInputBody tr").length === 0) {
+        addItemRow(); addItemRow(); addItemRow();
+      }
+    });
+  </script>
+
+</body>
+</html>
