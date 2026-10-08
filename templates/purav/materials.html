@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Materials — Purav Carting</title>
+<link rel="icon" type="image/png" href="/static/favicon.png">
+<link rel="stylesheet" href="/static/style.css">
+<style>
+  .pc-nav { background: linear-gradient(135deg, #1e3a8a 0%, #ea580c 100%); padding: 0 20px; display: flex; align-items: center; gap: 4px; overflow-x: auto; box-shadow: 0 4px 20px rgba(30,58,138,0.3); position: sticky; top: 70px; z-index: 90; white-space: nowrap; }
+  .pc-nav a { color: rgba(255,255,255,0.85); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; border-bottom: 3px solid transparent; }
+  .pc-nav a:hover, .pc-nav a.active { color: white; background: rgba(255,255,255,0.1); }
+  .pc-nav a.active { border-bottom-color: white; }
+  .pc-nav a [data-icon] { width: 15px; height: 15px; }
+
+  .page-head { padding: 30px 40px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; border-bottom: 1px solid var(--border); margin-bottom: 30px; }
+  .page-head h1 { font-size: 28px; font-weight: 900; color: var(--text); letter-spacing: -1px; display: flex; align-items: center; gap: 12px; }
+  .page-head h1 [data-icon] { width: 32px; height: 32px; color: #1e3a8a; }
+
+  .btn-pc { background: linear-gradient(135deg, #1e3a8a, #ea580c); color: white; border: none; padding: 12px 24px; border-radius: 30px; font-weight: 800; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s; box-shadow: 0 8px 20px rgba(30,58,138,0.3); }
+  .btn-pc:hover { transform: translateY(-3px); }
+  .btn-pc [data-icon] { width: 16px; height: 16px; }
+
+  .alert-box { padding: 14px 20px; border-radius: 12px; margin: 0 40px 20px; font-size: 14px; font-weight: 600; }
+  .alert-box.success { background: rgba(16,185,129,0.1); color: #10b981; border-left: 4px solid #10b981; }
+  .alert-box.error { background: rgba(239,68,68,0.1); color: #ef4444; border-left: 4px solid #ef4444; }
+
+  .mat-table { margin: 0 40px 40px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+  .mat-table table { width: 100%; border-collapse: collapse; }
+  .mat-table th, .mat-table td { padding: 14px 18px; text-align: left; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .mat-table th { background: rgba(30,58,138,0.08); font-weight: 800; color: var(--text); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .mat-table tr:last-child td { border-bottom: none; }
+  .mat-table tr:hover td { background: rgba(30,58,138,0.03); }
+
+  .badge-cat { padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 800; text-transform: uppercase; background: rgba(30,58,138,0.15); color: #1e3a8a; }
+  .badge-unit { padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 800; background: rgba(234,88,12,0.15); color: #ea580c; }
+
+  .tbl-actions { display: flex; gap: 6px; }
+  .btn-sm { padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--text-dim); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; transition: all 0.25s; }
+  .btn-sm:hover { background: var(--primary); color: white; border-color: var(--primary); }
+  .btn-sm.danger:hover { background: #ef4444; border-color: #ef4444; }
+  .btn-sm [data-icon] { width: 11px; height: 11px; }
+
+  .empty-state { text-align: center; padding: 60px 20px; background: var(--card); border: 2px dashed var(--border); border-radius: 16px; margin: 0 40px; }
+  .empty-state [data-icon] { width: 50px; height: 50px; color: #1e3a8a; opacity: 0.4; margin-bottom: 15px; }
+  .empty-state h3 { color: var(--text); margin-bottom: 8px; }
+  .empty-state p { color: var(--text-dim); font-size: 14px; margin-bottom: 20px; }
+
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 9999; display: none; justify-content: center; align-items: center; padding: 20px; }
+  .modal-overlay.active { display: flex; }
+  .modal-box { background: var(--card); border-radius: 20px; padding: 32px; max-width: 550px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 60px rgba(0,0,0,0.4); animation: scaleIn 0.3s; }
+  .modal-box h2 { font-size: 22px; margin-bottom: 20px; color: var(--text); display: flex; align-items: center; gap: 10px; }
+  .modal-box h2 [data-icon] { width: 24px; height: 24px; color: #1e3a8a; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+  .form-row.full { grid-template-columns: 1fr; }
+  .modal-box label { display: block; font-size: 12px; color: var(--text-dim); font-weight: 700; margin-bottom: 6px; }
+  .modal-box input, .modal-box select { width: 100%; padding: 11px 14px; margin: 0; border: 1.5px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-size: 14px; outline: none; }
+  .modal-box input:focus, .modal-box select:focus { border-color: #1e3a8a; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+  .modal-actions button { flex: 1; padding: 12px; border-radius: 10px; font-weight: 800; font-size: 14px; cursor: pointer; border: none; }
+  .modal-actions .btn-cancel { background: var(--bg); color: var(--text); border: 1.5px solid var(--border); }
+  .modal-actions .btn-save { background: linear-gradient(135deg, #1e3a8a, #ea580c); color: white; }
+
+  @media (max-width: 700px) {
+    .page-head, .mat-table, .alert-box { padding-left: 20px; padding-right: 20px; }
+    .mat-table { margin: 0 20px 30px; overflow-x: auto; }
+    .empty-state { margin: 0 20px; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+  <header>
+    <a href="/" class="logo"><img src="/static/logo-horizontal.png" alt="GD Pulse"></a>
+    <nav class="nav-links"><a href="/purav/carting" class="active">Purav Carting</a></nav>
+    <div class="header-right">
+      <button class="theme-toggle" onclick="toggleTheme(event)"></button>
+      <a href="#" onclick="confirmLogout(event)" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
+    </div>
+  </header>
+
+  <nav class="pc-nav">
+    <a href="/purav/carting"><span data-icon="grid"></span> Dashboard</a>
+    <a href="/purav/carting/trucks"><span data-icon="sand"></span> Trucks</a>
+    <a href="/purav/carting/customers"><span data-icon="users"></span> Customers</a>
+    <a href="/purav/carting/suppliers"><span data-icon="retail"></span> Suppliers</a>
+    <a href="/purav/carting/materials" class="active"><span data-icon="assets"></span> Materials</a>
+    <a href="/purav/carting/staff"><span data-icon="users"></span> Staff</a>
+    <a href="/purav/carting/entry"><span data-icon="prompts"></span> Daily Entry</a>
+    <a href="/purav/carting/ledger"><span data-icon="analytics"></span> Ledger</a>
+  </nav>
+
+  <div class="page-head">
+    <h1><span data-icon="assets"></span> Materials</h1>
+    <button class="btn-pc" onclick="openMatModal()"><span data-icon="plus"></span> Add Material</button>
+  </div>
+
+  {% if request.args.get('success') == 'added' %}<div class="alert-box success">Material add ho gaya!</div>{% endif %}
+  {% if request.args.get('success') == 'updated' %}<div class="alert-box success">Material update ho gaya!</div>{% endif %}
+  {% if request.args.get('success') == 'deleted' %}<div class="alert-box success">Material delete ho gaya!</div>{% endif %}
+  {% if request.args.get('error') == 'missing' %}<div class="alert-box error">Name required hai</div>{% endif %}
+
+  {% if materials %}
+    <div class="mat-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Unit</th>
+            <th>Default Rate</th>
+            <th>HSN</th>
+            <th>GST %</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in materials %}
+          <tr>
+            <td><b>{{ m.name }}</b></td>
+            <td><span class="badge-cat">{{ m.category }}</span></td>
+            <td><span class="badge-unit">{{ m.unit }}</span></td>
+            <td>₹{{ "{:,.2f}".format(m.default_rate) }}</td>
+            <td>{{ m.hsn or '—' }}</td>
+            <td>{{ m.gst_rate }}%</td>
+            <td>
+              <div class="tbl-actions">
+                <button class="btn-sm" onclick='editMat({{ m|tojson }})'><span data-icon="edit"></span> Edit</button>
+                <a href="#" class="btn-sm danger" onclick="confirmDeleteMat('{{ m.id }}','{{ m.name }}');return false;"><span data-icon="trash"></span></a>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <span data-icon="assets"></span>
+      <h3>Koi material nahi</h3>
+      <p>Sand, Gravel, Bricks, Cement, Steel — material add karo.</p>
+      <button class="btn-pc" onclick="openMatModal()"><span data-icon="plus"></span> Add First Material</button>
+    </div>
+  {% endif %}
+
+  <div class="modal-overlay" id="matModal" onclick="closeModalBg(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <h2><span data-icon="assets"></span> <span id="modalTitle">Add Material</span></h2>
+      <form method="POST" id="matForm" action="/purav/carting/materials/add">
+        <div class="form-row">
+          <div><label>Name *</label><input type="text" name="name" id="m_name" placeholder="Sand" required></div>
+          <div>
+            <label>Category</label>
+            <select name="category" id="m_category">
+              <option value="Sand">Sand</option>
+              <option value="Gravel">Gravel</option>
+              <option value="Bricks">Bricks</option>
+              <option value="Cement">Cement</option>
+              <option value="Steel">Steel</option>
+              <option value="Stone">Stone</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div>
+            <label>Unit</label>
+            <select name="unit" id="m_unit">
+              <option value="Ton">Ton</option>
+              <option value="Trip">Trip</option>
+              <option value="Fera">Fera</option>
+              <option value="Kg">Kg</option>
+              <option value="Piece">Piece</option>
+              <option value="Bag">Bag</option>
+            </select>
+          </div>
+          <div><label>Default Rate (₹)</label><input type="number" name="default_rate" id="m_rate" value="0" step="0.01"></div>
+        </div>
+        <div class="form-row">
+          <div><label>HSN/SAC Code</label><input type="text" name="hsn" id="m_hsn"></div>
+          <div><label>GST Rate (%)</label><input type="number" name="gst_rate" id="m_gst" value="0" step="0.01"></div>
+        </div>
+        <div class="form-row full">
+          <div><label>Notes</label><input type="text" name="notes" id="m_notes"></div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+          <button type="submit" class="btn-save">Save Material</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer><p>© 2025 GD Pulse — Purav Carting</p></footer>
+
+  <script src="/static/icons.js"></script>
+  <script>
+    function openMatModal() {
+      document.getElementById("modalTitle").innerText = "Add Material";
+      document.getElementById("matForm").action = "/purav/carting/materials/add";
+      document.getElementById("matForm").reset();
+      document.getElementById("matModal").classList.add("active");
+    }
+    function editMat(m) {
+      document.getElementById("modalTitle").innerText = "Edit Material";
+      document.getElementById("matForm").action = "/purav/carting/materials/edit/" + m.id;
+      document.getElementById("m_name").value = m.name || "";
+      document.getElementById("m_category").value = m.category || "Sand";
+      document.getElementById("m_unit").value = m.unit || "Ton";
+      document.getElementById("m_rate").value = m.default_rate || 0;
+      document.getElementById("m_hsn").value = m.hsn || "";
+      document.getElementById("m_gst").value = m.gst_rate || 0;
+      document.getElementById("m_notes").value = m.notes || "";
+      document.getElementById("matModal").classList.add("active");
+    }
+    function closeModal() { document.getElementById("matModal").classList.remove("active"); }
+    function closeModalBg(e) { if (e.target.id === "matModal") closeModal(); }
+    function confirmDeleteMat(id, name) {
+      showConfirm("Delete Material?", `"${name}" ko delete karna hai?`, "Yes, Delete", () => {
+        window.location.href = "/purav/carting/materials/delete/" + id;
+      });
+    }
+    document.addEventListener("DOMContentLoaded", () => { if (window.renderIcons) window.renderIcons(); });
+  </script>
+
+</body>
+</html>
