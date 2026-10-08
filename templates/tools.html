@@ -32,7 +32,6 @@
   .tool-card:hover .tool-icon { color: white; transform: translateY(-4px) scale(1.15); }
   .cat-icon [data-icon] { width: 26px; height: 26px; }
   .cat-icon svg { width: 26px; height: 26px; color: white; }
-  .search-box .search-icon svg { width: 16px; height: 16px; }
 </style>
 </head>
 <body>
@@ -67,7 +66,7 @@
       </div>
 
       <div class="stats">
-        <div class="stat-card reveal"><div class="value">14+</div><div class="label">Total Tools</div></div>
+        <div class="stat-card reveal"><div class="value">15+</div><div class="label">Total Tools</div></div>
         <div class="stat-card reveal"><div class="value">{{ role }}</div><div class="label">Your Role</div></div>
         <div class="stat-card reveal"><div class="value">2</div><div class="label">Categories</div></div>
         <div class="stat-card reveal"><div class="value">24/7</div><div class="label">Available</div></div>
@@ -77,12 +76,13 @@
         <div class="cat-icon"><span data-icon="tools"></span></div>
         <div class="cat-info">
           <h2>GD Workspace</h2>
-          <p>Office tools — GST, PDF, Image, Calculator, Text</p>
+          <p>Office tools — Invoice, GST, PDF, Image, Calculator, Text</p>
         </div>
-        <div class="cat-count">12 Tools</div>
+        <div class="cat-count">13 Tools</div>
       </div>
 
       <div class="grid grid-4">
+        <a href="/tools/invoice" class="tool-card reveal"><span class="tool-icon" data-icon="retail"></span><div class="title">Invoice Generator</div><div class="desc">GST Tax Invoice</div></a>
         <a href="/tools/gst" class="tool-card reveal"><span class="tool-icon" data-icon="gst"></span><div class="title">GST Calculator</div><div class="desc">Quick GST</div></a>
         <a href="/tools/emi" class="tool-card reveal"><span class="tool-icon" data-icon="emi"></span><div class="title">EMI Calculator</div><div class="desc">Loan EMI</div></a>
         <a href="/tools/age" class="tool-card reveal"><span class="tool-icon" data-icon="age"></span><div class="title">Age Calculator</div><div class="desc">Exact age</div></a>
@@ -145,19 +145,6 @@
     </div>
   </main>
 
-  <!-- Confirm Dialog -->
-  <div class="confirm-overlay" id="confirmOverlay">
-    <div class="confirm-box">
-      <div class="warn-icon"><span data-icon="warning"></span></div>
-      <h3 id="confirmTitle">Are you sure?</h3>
-      <p id="confirmMessage">This action cannot be undone.</p>
-      <div class="confirm-actions">
-        <button class="btn-cancel" onclick="closeConfirm()">Cancel</button>
-        <button class="btn-confirm" id="confirmYes">Yes</button>
-      </div>
-    </div>
-  </div>
-
   <footer><p>© 2025 GD Pulse — Creative Digital Studio</p></footer>
 
   <script src="/static/icons.js"></script>
@@ -165,28 +152,6 @@
     document.getElementById("searchInput").addEventListener("keypress", (e) => {
       if (e.key === "Enter") alert("Search feature jald aa raha hai!");
     });
-    let pendingAction = null;
-    function showConfirm(title, message, btnText, callback) {
-      document.getElementById("confirmTitle").innerText = title;
-      document.getElementById("confirmMessage").innerText = message;
-      document.getElementById("confirmYes").innerText = btnText;
-      pendingAction = callback;
-      document.getElementById("confirmOverlay").classList.add("active");
-      if (window.renderIcons) window.renderIcons();
-    }
-    function closeConfirm() {
-      document.getElementById("confirmOverlay").classList.remove("active");
-      pendingAction = null;
-    }
-    document.getElementById("confirmYes").addEventListener("click", () => {
-      if (pendingAction) { const action = pendingAction; closeConfirm(); action(); }
-    });
-    function confirmLogout(e) {
-      if (e) e.preventDefault();
-      showConfirm("Logout?", "Kya tum sach me logout karna chahte ho?", "Yes, Logout", () => {
-        window.location.href = "/logout";
-      });
-    }
     document.addEventListener("DOMContentLoaded", () => { if (window.renderIcons) window.renderIcons(); });
   </script>
 
