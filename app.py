@@ -2,7 +2,8 @@ from flask import Flask, render_template, request, redirect, url_for, session, s
 import os
 import io
 import uuid
-from datetime import datetime
+import random
+from datetime import datetime, timedelta
 from PIL import Image
 import database
 
@@ -180,6 +181,212 @@ def purav_carting():
     return render_template("purav/carting.html", user=current_user(), role=current_role(),
                           name=current_name(), stats=stats, recent=recent,
                           truck_today=truck_today, alerts=alerts, truck_count=len(trucks))
+
+# ============================================
+# TEST DATA
+# ============================================
+
+@app.route("/purav/carting/test-data")
+def purav_test_data():
+    g = purav_guard()
+    if g: return g
+    try:
+        # Clear all existing data first
+        database.save_purav_carting({
+            "trucks": [], "customers": [], "suppliers": [], "staff": [], "materials": [],
+            "entries": [], "challans": [], "purchases": [], "payments": [],
+            "invoices": [], "trips": [], "salary_payments": [], "advance_payments": [],
+            "settings": database.DEFAULT_PURAV_CARTING["settings"]
+        })
+
+        # 1. MATERIALS
+        materials_data = [
+            {"name": "Sand (River)", "category": "Sand", "unit": "Ton", "default_rate": 800, "hsn": "250510", "gst_rate": 5},
+            {"name": "Sand (Pit)", "category": "Sand", "unit": "Fera", "default_rate": 5000, "hsn": "250510", "gst_rate": 5},
+            {"name": "Gravel 20mm", "category": "Gravel", "unit": "Ton", "default_rate": 950, "hsn": "251710", "gst_rate": 5},
+            {"name": "Bricks Red", "category": "Bricks", "unit": "Piece", "default_rate": 8, "hsn": "690410", "gst_rate": 12},
+            {"name": "Cement OPC 53", "category": "Cement", "unit": "Bag", "default_rate": 380, "hsn": "252329", "gst_rate": 28},
+            {"name": "Steel TMT 12mm", "category": "Steel", "unit": "Kg", "default_rate": 65, "hsn": "721420", "gst_rate": 18},
+            {"name": "Stone Aggregate", "category": "Stone", "unit": "Ton", "default_rate": 1100, "hsn": "251710", "gst_rate": 5},
+        ]
+        material_ids = []
+        for m in materials_data:
+            m["id"] = str(uuid.uuid4())[:8]
+            m["notes"] = ""
+            m["created_at"] = datetime.now().isoformat()
+            database.add_material(m)
+            material_ids.append(m)
+
+        # 2. TRUCKS
+        trucks_data = [
+            {"number": "GJ-01-AB-1234", "model": "Tata 407", "owner": "Self"},
+            {"number": "GJ-05-CD-5678", "model": "Tata 707", "owner": "Self"},
+            {"number": "GJ-12-EF-9012", "model": "Ashok Leyland 3118", "owner": "Hired"},
+            {"number": "GJ-15-GH-3456", "model": "BharatBenz 1917R", "owner": "Self"},
+        ]
+        truck_ids = []
+        for t in trucks_data:
+            t["id"] = str(uuid.uuid4())[:8]
+            t["insurance_expiry"] = (datetime.now() + timedelta(days=random.randint(10, 300))).strftime("%Y-%m-%d")
+            t["fitness_expiry"] = (datetime.now() + timedelta(days=random.randint(10, 500))).strftime("%Y-%m-%d")
+            t["permit_expiry"] = (datetime.now() + timedelta(days=random.randint(10, 400))).strftime("%Y-%m-%d")
+            t["status"] = "Active"
+            t["notes"] = ""
+            t["created_at"] = datetime.now().isoformat()
+            database.add_truck(t)
+            truck_ids.append(t)
+
+        # 3. CUSTOMERS
+        customers_data = [
+            {"name": "Shree Balaji Construction", "phone": "9876543210", "gstin": "24AABCS1234F1Z5", "address": "Surat", "state": "24-Gujarat"},
+            {"name": "Patel Builders", "phone": "9876543211", "gstin": "24AACPP5678G1Z6", "address": "Ahmedabad", "state": "24-Gujarat"},
+            {"name": "Krishna Infra Pvt Ltd", "phone": "9876543212", "gstin": "24AADCK9012H1Z7", "address": "Vadodara", "state": "24-Gujarat"},
+            {"name": "Mahavir Developers", "phone": "9876543213", "gstin": "24AAECM3456I1Z8", "address": "Rajkot", "state": "24-Gujarat"},
+            {"name": "Ramesh Bhai (Local)", "phone": "9876543214", "gstin": "", "address": "Village", "state": "24-Gujarat", "type": "Local"},
+        ]
+        customer_ids = []
+        for c in customers_data:
+            c["id"] = str(uuid.uuid4())[:8]
+            c["email"] = ""
+            c["pan"] = ""
+            c["type"] = c.get("type", "Regular")
+            c["opening_balance"] = 0
+            c["notes"] = ""
+            c["created_at"] = datetime.now().isoformat()
+            database.add_customer(c)
+            customer_ids.append(c)
+
+        # 4. SUPPLIERS
+        suppliers_data = [
+            {"name": "Godavari Sand Suppliers", "phone": "9111111111", "gstin": "24AAFFG1111A1Z1", "type": "Material"},
+            {"name": "Krishna Gravel Traders", "phone": "9111111112", "gstin": "24AAFFK2222B1Z2", "type": "Material"},
+            {"name": "Ambuja Cement Dealer", "phone": "9111111113", "gstin": "24AAFFA3333C1Z3", "type": "Material"},
+            {"name": "Diesel Pump (HP)", "phone": "9111111114", "gstin": "", "type": "Fuel"},
+        ]
+        for s in suppliers_data:
+            s["id"] = str(uuid.uuid4())[:8]
+            s["email"] = ""
+            s["address"] = "Gujarat"
+            s["opening_balance"] = 0
+            s["notes"] = ""
+            s["created_at"] = datetime.now().isoformat()
+            database.add_supplier(s)
+
+        # 5. STAFF
+        staff_data = [
+            {"name": "Ramesh Driver", "role": "Driver", "salary_type": "Daily", "rate": 500, "phone": "9222222221"},
+            {"name": "Suresh Driver", "role": "Driver", "salary_type": "Daily", "rate": 550, "phone": "9222222222"},
+            {"name": "Mahesh Driver", "role": "Driver", "salary_type": "Monthly", "rate": 18000, "phone": "9222222223"},
+            {"name": "Kiran Labour", "role": "Labour", "salary_type": "Trip", "rate": 500, "phone": "9222222224"},
+            {"name": "Dinesh Labour", "role": "Labour", "salary_type": "Trip", "rate": 500, "phone": "9222222225"},
+            {"name": "Hitesh Labour", "role": "Labour", "salary_type": "Trip", "rate": 500, "phone": "9222222226"},
+            {"name": "Jayesh Manager", "role": "Manager", "salary_type": "Monthly", "rate": 35000, "phone": "9222222227"},
+        ]
+        for s in staff_data:
+            s["id"] = str(uuid.uuid4())[:8]
+            s["address"] = ""
+            s["joining_date"] = (datetime.now() - timedelta(days=random.randint(60, 900))).strftime("%Y-%m-%d")
+            s["notes"] = ""
+            s["status"] = "Active"
+            s["created_at"] = datetime.now().isoformat()
+            database.add_staff(s)
+
+        # 6. DAILY ENTRIES (last 30 days, random trucks)
+        for i in range(30):
+            d = (datetime.now() - timedelta(days=i)).strftime("%Y-%m-%d")
+            for t in truck_ids[:random.randint(2, 4)]:
+                trips = random.randint(2, 8)
+                sale = trips * random.randint(8000, 15000)
+                diesel = trips * random.randint(2500, 4000)
+                labour = trips * 500
+                driver = 500
+                maintenance = random.choice([0, 0, 0, 0, 2000, 5000])
+                other = random.randint(100, 500)
+                total_cost = diesel + labour + driver + maintenance + other
+                database.add_entry({
+                    "id": str(uuid.uuid4())[:8], "date": d,
+                    "truck_id": t["id"], "trips": trips, "sale": sale,
+                    "diesel": diesel, "labour": labour, "driver": driver,
+                    "maintenance": maintenance, "other": other,
+                    "total_cost": total_cost, "profit": sale - total_cost,
+                    "notes": "", "created_at": datetime.now().isoformat()
+                })
+
+        # 7. CHALLANS (last 20 days, random)
+        for i in range(20):
+            d = (datetime.now() - timedelta(days=i)).strftime("%Y-%m-%d")
+            cust = random.choice(customer_ids)
+            truck = random.choice(truck_ids)
+            mat = random.choice(material_ids)
+            qty = random.randint(5, 20) if mat["unit"] == "Ton" else random.randint(1, 3)
+            rate = mat["default_rate"]
+            database.add_challan({
+                "id": str(uuid.uuid4())[:8],
+                "challan_no": database.next_challan_no(),
+                "date": d,
+                "customer_id": cust["id"], "customer_name": cust["name"],
+                "truck_id": truck["id"], "truck_number": truck["number"],
+                "material_id": mat["id"], "material_name": mat["name"],
+                "unit": mat["unit"],
+                "quantity": qty, "rate": rate, "amount": qty * rate,
+                "driver": "", "vehicle": truck["number"],
+                "notes": "", "invoiced": False, "invoice_id": None,
+                "created_at": datetime.now().isoformat()
+            })
+
+        # 8. PURCHASES (last 15 days)
+        for i in range(15):
+            d = (datetime.now() - timedelta(days=i)).strftime("%Y-%m-%d")
+            sup = random.choice(database.get_suppliers())
+            mat = random.choice(material_ids)
+            qty = random.randint(20, 100) if mat["unit"] == "Ton" else random.randint(50, 500)
+            rate = mat["default_rate"] * 0.85
+            database.add_purchase({
+                "id": str(uuid.uuid4())[:8],
+                "bill_no": f"BILL-{random.randint(1000, 9999)}",
+                "date": d, "supplier_id": sup["id"], "supplier_name": sup["name"],
+                "material_id": mat["id"], "material_name": mat["name"],
+                "unit": mat["unit"], "quantity": qty, "rate": rate, "amount": qty * rate,
+                "vehicle": "", "driver": "",
+                "payment_status": random.choice(["Paid", "Pending", "Pending"]),
+                "notes": "", "created_at": datetime.now().isoformat()
+            })
+
+        # 9. TRIPS (last 10 days)
+        for i in range(10):
+            d = (datetime.now() - timedelta(days=i)).strftime("%Y-%m-%d")
+            truck = random.choice(truck_ids)
+            cust = random.choice(customer_ids)
+            mat = random.choice(material_ids)
+            qty = random.randint(5, 15) if mat["unit"] == "Ton" else random.randint(1, 3)
+            rate = mat["default_rate"]
+            sale = qty * rate
+            diesel = random.randint(3000, 6000)
+            labour = 500
+            driver = 500
+            maintenance = 0
+            other = 200
+            total_cost = diesel + labour + driver + maintenance + other
+            database.add_trip({
+                "id": str(uuid.uuid4())[:8],
+                "date": d,
+                "truck_id": truck["id"], "truck_number": truck["number"],
+                "customer_id": cust["id"], "customer_name": cust["name"],
+                "material_id": mat["id"], "material_name": mat["name"],
+                "unit": mat["unit"], "quantity": qty, "rate": rate, "sale": sale,
+                "diesel": diesel, "labour": labour, "driver": driver,
+                "maintenance": maintenance, "other": other,
+                "total_cost": total_cost, "profit": sale - total_cost,
+                "distance": random.randint(20, 60),
+                "route": random.choice(["River → Godown → Site", "Pit → Site", "Godown → Site"]),
+                "notes": "", "created_at": datetime.now().isoformat()
+            })
+
+        return redirect(url_for("purav_carting") + "?success=testdata")
+
+    except Exception as e:
+        import traceback
+        return f"Error generating test data: {str(e)}<br><pre>{traceback.format_exc()}</pre>", 500
 
 # ============================================
 # TRUCK / CUSTOMER / SUPPLIER / STAFF / MATERIAL
@@ -465,7 +672,7 @@ def purav_materials_delete(mid):
     return redirect(url_for("purav_materials") + "?success=deleted")
 
 # ============================================
-# DAILY ENTRY
+# DAILY ENTRY (renamed to "Sale Entry" in UI)
 # ============================================
 
 @app.route("/purav/carting/entry")
@@ -718,7 +925,7 @@ def purav_purchase_mark_paid(pid):
     return redirect(url_for("purav_purchase_list") + "?success=paid")
 
 # ============================================
-# INVOICE (Tax Invoice from Challans)
+# INVOICE
 # ============================================
 
 @app.route("/purav/carting/invoice")
@@ -758,7 +965,7 @@ def purav_invoice_generate():
     invoice_id = str(uuid.uuid4())[:8]
     invoice_no = database.next_invoice_no()
 
-    invoice = {
+    database.add_invoice({
         "id": invoice_id,
         "invoice_no": invoice_no,
         "date": request.form.get("date", datetime.now().strftime("%Y-%m-%d")),
@@ -770,17 +977,12 @@ def purav_invoice_generate():
         "customer_state": customer.get("state", ""),
         "customer_pan": customer.get("pan", ""),
         "challans": challan_ids,
-        "subtotal": subtotal,
-        "gst_rate": gst_rate,
-        "cgst": cgst,
-        "sgst": sgst,
-        "total": total_rounded,
-        "round_off": round_off,
+        "subtotal": subtotal, "gst_rate": gst_rate,
+        "cgst": cgst, "sgst": sgst,
+        "total": total_rounded, "round_off": round_off,
         "notes": request.form.get("notes", "").strip(),
         "created_at": datetime.now().isoformat()
-    }
-    database.add_invoice(invoice)
-    # Mark challans as invoiced
+    })
     for c in challans_selected:
         database.update_challan(c["id"], {"invoiced": True, "invoice_id": invoice_id})
     return redirect(url_for("purav_invoice_view", iid=invoice_id) + "?success=created")
@@ -828,7 +1030,7 @@ def purav_invoice_delete(iid):
     return redirect(url_for("purav_invoice_list") + "?success=deleted")
 
 # ============================================
-# PAYMENT (Customer Payment)
+# PAYMENT
 # ============================================
 
 @app.route("/purav/carting/payment")
@@ -894,7 +1096,7 @@ def purav_payment_delete(pid):
     return redirect(url_for("purav_payment_list") + "?success=deleted")
 
 # ============================================
-# STAFF SALARY & ADVANCE
+# STAFF SALARY / ADVANCE
 # ============================================
 
 @app.route("/purav/carting/staff-salary")
@@ -975,7 +1177,7 @@ def purav_staff_advance_delete(pid):
     return redirect(url_for("purav_staff_advance") + "?success=deleted")
 
 # ============================================
-# TRIP MANAGEMENT (detailed)
+# TRIP
 # ============================================
 
 @app.route("/purav/carting/trip")
@@ -1064,7 +1266,7 @@ def purav_trip_delete(tid):
     return redirect(url_for("purav_trip_list") + "?success=deleted")
 
 # ============================================
-# ALERTS
+# ALERTS / REPORTS / SETTINGS / LEDGER
 # ============================================
 
 @app.route("/purav/carting/alerts")
@@ -1072,10 +1274,7 @@ def purav_alerts():
     g = purav_guard()
     if g: return g
     trucks = database.get_trucks()
-    customers = database.get_customers()
-    materials = database.get_materials()
     alerts = []
-
     for t in trucks:
         for field, label in [("insurance_expiry", "Insurance"), ("fitness_expiry", "Fitness"), ("permit_expiry", "Permit")]:
             exp = t.get(field, "")
@@ -1087,18 +1286,11 @@ def purav_alerts():
                     elif days < 0:
                         alerts.append({"type": "danger", "category": "Vehicle", "msg": f"{label} EXPIRED: {t['number']}"})
                 except Exception: pass
-
-    outstanding = database.get_all_outstanding()
-    for o in outstanding:
+    for o in database.get_all_outstanding():
         if o["balance"] > 50000:
             alerts.append({"type": "warn", "category": "Outstanding", "msg": f"High outstanding: {o['customer']['name']} (₹{o['balance']:,.0f})"})
-
     return render_template("purav/alerts.html", user=current_user(), role=current_role(),
                           name=current_name(), alerts=alerts)
-
-# ============================================
-# REPORTS
-# ============================================
 
 @app.route("/purav/carting/reports")
 def purav_reports():
@@ -1109,7 +1301,6 @@ def purav_reports():
     purchases = [p for p in database.get_purchases() if p.get("date", "").startswith(month)]
     payments = [p for p in database.get_payments() if p.get("date", "").startswith(month)]
     invoices = [i for i in database.get_invoices() if i.get("date", "").startswith(month)]
-
     report = {
         "month": month,
         "sales": sum(e.get("sale", 0) for e in entries),
@@ -1123,10 +1314,6 @@ def purav_reports():
     return render_template("purav/reports.html", user=current_user(), role=current_role(),
                           name=current_name(), report=report,
                           outstanding=database.get_all_outstanding())
-
-# ============================================
-# SETTINGS
-# ============================================
 
 @app.route("/purav/carting/settings", methods=["GET", "POST"])
 def purav_settings():
@@ -1154,10 +1341,6 @@ def purav_settings():
         return redirect(url_for("purav_settings") + "?success=saved")
     return render_template("purav/settings.html", user=current_user(), role=current_role(),
                           name=current_name(), settings=database.get_settings())
-
-# ============================================
-# LEDGER
-# ============================================
 
 @app.route("/purav/carting/ledger")
 def purav_ledger():
