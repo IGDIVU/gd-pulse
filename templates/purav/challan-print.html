@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Challan Print — {{ challan.challan_no }}</title>
+<link rel="icon" type="image/png" href="/static/favicon.png">
+<link rel="stylesheet" href="/static/style.css">
+<style>
+  body { background: #e5e7eb; padding: 20px; }
+  .print-toolbar {
+    max-width: 210mm; margin: 0 auto 15px;
+    display: flex; gap: 10px; justify-content: flex-end;
+  }
+  .print-toolbar button, .print-toolbar a {
+    padding: 10px 20px; border-radius: 10px; font-weight: 800;
+    font-size: 13px; cursor: pointer; border: none;
+    text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+    background: linear-gradient(135deg, #1e3a8a, #ea580c);
+    color: white; box-shadow: 0 8px 20px rgba(30,58,138,0.3);
+    transition: all 0.25s;
+  }
+  .print-toolbar button:hover, .print-toolbar a:hover { transform: translateY(-2px); }
+  .print-toolbar .btn-back { background: var(--card); color: var(--text); border: 1.5px solid var(--border); box-shadow: none; }
+
+  /* A4 Sheet */
+  .a4-sheet {
+    background: white; color: #000;
+    width: 210mm; min-height: 297mm;
+    margin: 0 auto; padding: 12mm 14mm;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    font-family: 'Arial', sans-serif;
+    font-size: 11px; line-height: 1.4;
+    box-sizing: border-box;
+    position: relative;
+  }
+  .a4-sheet * { box-sizing: border-box; }
+
+  .ch-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 10px; position: relative; }
+  .ch-company-name { font-size: 24px; font-weight: 900; letter-spacing: 1px; }
+  .ch-company-sub { font-size: 10px; margin-top: 3px; }
+
+  .ch-title {
+    text-align: center; font-size: 16px; font-weight: 900;
+    border: 2px solid #000; padding: 5px 0; margin: 10px 0;
+    letter-spacing: 3px; background: #f0f0f0;
+  }
+
+  .ch-info-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 0; border: 1px solid #000; margin-bottom: 10px; font-size: 10px;
+  }
+  .ch-info-grid > div { padding: 8px 10px; }
+  .ch-info-grid > div:first-child { border-right: 1px solid #000; }
+  .ch-info-row { display: flex; justify-content: space-between; padding: 2px 0; }
+  .ch-info-row span:first-child { font-weight: 700; }
+
+  .ch-customer {
+    border: 1px solid #000; padding: 10px; margin-bottom: 10px; font-size: 10px;
+  }
+  .ch-customer .ch-cust-title { font-weight: 900; font-size: 11px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .ch-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+  .ch-table th, .ch-table td { border: 1px solid #000; padding: 8px 10px; font-size: 11px; text-align: left; }
+  .ch-table th { background: #f0f0f0; font-weight: 900; text-align: center; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .ch-table td.num { text-align: right; font-weight: 700; }
+  .ch-table td.center { text-align: center; }
+  .ch-table tr.total-row td { background: #f0f0f0; font-weight: 900; font-size: 13px; }
+
+  .ch-amount-words {
+    border: 1px solid #000; padding: 8px 10px;
+    margin-bottom: 10px; font-size: 10px;
+  }
+  .ch-amount-words b { text-transform: uppercase; }
+
+  .ch-sign-grid {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 0; border: 1px solid #000; margin-top: 30px;
+  }
+  .ch-sign-grid > div { padding: 40px 10px 10px; text-align: center; font-size: 10px; font-weight: 700; border-right: 1px solid #000; }
+  .ch-sign-grid > div:last-child { border-right: none; }
+
+  .ch-footer {
+    text-align: center; font-size: 9px; margin-top: 15px;
+    padding-top: 8px; border-top: 1px solid #000;
+    color: #555;
+  }
+
+  .ch-watermark {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%) rotate(-30deg);
+    font-size: 100px; font-weight: 900; color: rgba(30,58,138,0.04);
+    pointer-events: none; user-select: none; letter-spacing: 5px;
+  }
+
+  @media print {
+    @page { size: A4; margin: 0; }
+    body { background: white; padding: 0; }
+    .print-toolbar { display: none; }
+    .a4-sheet { box-shadow: none; margin: 0; }
+  }
+
+  @media (max-width: 800px) {
+    body { padding: 5px; }
+    .a4-sheet { width: 100%; min-height: auto; padding: 15px; }
+    .ch-company-name { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="print-toolbar">
+    <a href="/purav/carting/challan/list" class="btn-back">← Back to List</a>
+    <button onclick="window.print()">🖨️ Print / Save as PDF</button>
+  </div>
+
+  <div class="a4-sheet">
+    <div class="ch-watermark">CHALLAN</div>
+
+    <!-- HEADER -->
+    <div class="ch-header">
+      <div class="ch-company-name">{{ settings.company_name or 'PURAV CARTING' }}</div>
+      <div class="ch-company-sub">
+        {% if settings.company_address %}{{ settings.company_address }}<br>{% endif %}
+        {% if settings.company_gst %}<b>GST NO:</b> {{ settings.company_gst }} &nbsp; {% endif %}
+        {% if settings.company_phone %}<b>Mob:</b> {{ settings.company_phone }}{% endif %}
+      </div>
+    </div>
+
+    <!-- TITLE -->
+    <div class="ch-title">DELIVERY CHALLAN</div>
+
+    <!-- INFO GRID -->
+    <div class="ch-info-grid">
+      <div>
+        <div class="ch-info-row"><span>Challan No:</span><span><b>{{ challan.challan_no }}</b></span></div>
+        <div class="ch-info-row"><span>Date:</span><span>{{ challan.date }}</span></div>
+        <div class="ch-info-row"><span>Truck No:</span><span>{{ challan.truck_number }}</span></div>
+      </div>
+      <div>
+        {% if challan.driver %}<div class="ch-info-row"><span>Driver:</span><span>{{ challan.driver }}</span></div>{% endif %}
+        {% if challan.vehicle %}<div class="ch-info-row"><span>Vehicle:</span><span>{{ challan.vehicle }}</span></div>{% endif %}
+        <div class="ch-info-row"><span>Place of Supply:</span><span>Gujarat</span></div>
+      </div>
+    </div>
+
+    <!-- CUSTOMER -->
+    <div class="ch-customer">
+      <div class="ch-cust-title">Delivered To:</div>
+      <div style="font-weight: 900; font-size: 13px;">{{ challan.customer_name }}</div>
+      {% set cust = namespace() %}
+      {% for c in [] %}{% endfor %}
+    </div>
+
+    <!-- ITEMS TABLE -->
+    <table class="ch-table">
+      <thead>
+        <tr>
+          <th style="width: 40px;">S.No</th>
+          <th>Description of Goods</th>
+          <th style="width: 100px;">HSN/SAC</th>
+          <th style="width: 80px;">Qty</th>
+          <th style="width: 60px;">Unit</th>
+          <th style="width: 80px;">Rate (₹)</th>
+          <th style="width: 100px;">Amount (₹)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="center">1</td>
+          <td><b>{{ challan.material_name }}</b></td>
+          <td class="center">—</td>
+          <td class="num">{{ challan.quantity }}</td>
+          <td class="center">{{ challan.unit }}</td>
+          <td class="num">{{ "{:,.2f}".format(challan.rate) }}</td>
+          <td class="num"><b>{{ "{:,.2f}".format(challan.amount) }}</b></td>
+        </tr>
+        <tr class="total-row">
+          <td colspan="6" style="text-align: right;">TOTAL AMOUNT:</td>
+          <td class="num">₹ {{ "{:,.2f}".format(challan.amount) }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- AMOUNT IN WORDS -->
+    <div class="ch-amount-words">
+      <b>Amount in Words:</b> <span id="amountWords"></span>
+    </div>
+
+    {% if challan.notes %}
+    <div class="ch-amount-words">
+      <b>Notes:</b> {{ challan.notes }}
+    </div>
+    {% endif %}
+
+    <!-- TERMS -->
+    <div class="ch-amount-words" style="font-size: 9px;">
+      <b>Terms & Conditions:</b><br>
+      • Ye challan sirf delivery proof hai — tax invoice alag se issue hoga.<br>
+      • Goods once delivered will not be taken back.<br>
+      • Any dispute subject to jurisdiction only.
+    </div>
+
+    <!-- SIGNATURES -->
+    <div class="ch-sign-grid">
+      <div>Prepared By</div>
+      <div>Driver / Transporter</div>
+      <div>Receiver's Signature<br><span style="font-weight: 400; font-size: 9px;">(With Stamp & Date)</span></div>
+    </div>
+
+    <div class="ch-footer">
+      This is a computer-generated challan — {{ settings.company_name or 'Purav Carting' }}
+    </div>
+  </div>
+
+  <script src="/static/icons.js"></script>
+  <script>
+    // Amount to words (Indian)
+    function numberToWords(num) {
+      num = Math.round(num);
+      const ones = ["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine",
+                    "Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen",
+                    "Seventeen","Eighteen","Nineteen"];
+      const tens = ["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
+      function two(n) {
+        if (n < 20) return ones[n];
+        return tens[Math.floor(n/10)] + (n%10 ? " " + ones[n%10] : "");
+      }
+      function three(n) {
+        let s = "";
+        if (n > 99) { s += ones[Math.floor(n/100)] + " Hundred"; n %= 100; if (n > 0) s += " "; }
+        if (n > 0) s += two(n);
+        return s;
+      }
+      if (num === 0) return "Zero";
+      let str = "";
+      const crore = Math.floor(num / 10000000); num %= 10000000;
+      const lakh = Math.floor(num / 100000); num %= 100000;
+      const thousand = Math.floor(num / 1000); num %= 1000;
+      if (crore > 0) str += three(crore) + " Crore ";
+      if (lakh > 0) str += three(lakh) + " Lakh ";
+      if (thousand > 0) str += three(thousand) + " Thousand ";
+      if (num > 0) str += three(num);
+      return str.trim();
+    }
+    const amt = {{ challan.amount }};
+    document.getElementById("amountWords").innerText = "Rupees " + numberToWords(amt) + " Only";
+    document.addEventListener("DOMContentLoaded", () => { if (window.renderIcons) window.renderIcons(); });
+  </script>
+
+</body>
+</html>
