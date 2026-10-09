@@ -24,6 +24,7 @@ DEFAULT_PURAV_CARTING = {
     "challans": [],
     "purchases": [],
     "payments": [],
+    "invoices": [],
     "settings": {
         "default_diesel_rate": 90,
         "default_labour_rate": 500,
@@ -33,7 +34,9 @@ DEFAULT_PURAV_CARTING = {
         "company_gst": "",
         "company_phone": "",
         "bill_prefix_challan": "PC/CH",
-        "bill_prefix_invoice": "PC/INV"
+        "bill_prefix_invoice": "PC/INV",
+        "challan_counter": 0,
+        "invoice_counter": 0
     }
 }
 
@@ -120,7 +123,7 @@ def delete_prompt(key):
     return False
 
 # ============================================
-# PURAV CARTING DATA
+# PURAV CARTING
 # ============================================
 
 def load_purav_carting():
@@ -131,7 +134,6 @@ def load_purav_carting():
     try:
         with open(PURAV_CARTING_FILE, "r") as f:
             data = json.load(f)
-            # Ensure all keys present
             for k, v in DEFAULT_PURAV_CARTING.items():
                 if k not in data:
                     data[k] = v
@@ -144,7 +146,6 @@ def save_purav_carting(data):
     with open(PURAV_CARTING_FILE, "w") as f:
         json.dump(data, f, indent=2)
 
-# ---------- GENERIC HELPERS ----------
 def get_collection(name):
     return load_purav_carting().get(name, [])
 
@@ -174,7 +175,7 @@ def delete_item(name, item_id):
     data[name] = [it for it in data.get(name, []) if it["id"] != item_id]
     save_purav_carting(data)
 
-# ---------- SPECIFIC SHORTCUTS ----------
+# ---------- SHORTCUTS ----------
 def get_trucks(): return get_collection("trucks")
 def get_truck(tid): return get_item("trucks", tid)
 def add_truck(d): add_item("trucks", d)
@@ -225,7 +226,15 @@ def delete_purchase(pid): delete_item("purchases", pid)
 
 def get_payments(): return get_collection("payments")
 def add_payment(d): add_item("payments", d)
+def delete_payment(pid): delete_item("payments", pid)
 
+def get_invoices(): return get_collection("invoices")
+def get_invoice(iid): return get_item("invoices", iid)
+def add_invoice(d): add_item("invoices", d)
+def update_invoice(iid, d): return update_item("invoices", iid, d)
+def delete_invoice(iid): delete_item("invoices", iid)
+
+# ---------- SETTINGS ----------
 def get_settings():
     return load_purav_carting().get("settings", DEFAULT_PURAV_CARTING["settings"])
 
@@ -233,3 +242,26 @@ def save_settings(settings):
     data = load_purav_carting()
     data["settings"] = settings
     save_purav_carting(data)
+
+# ---------- COUNTERS ----------
+def next_challan_no():
+    data = load_purav_carting()
+    settings = data.get("settings", DEFAULT_PURAV_CARTING["settings"])
+    counter = settings.get("challan_counter", 0) + 1
+    settings["challan_counter"] = counter
+    data["settings"] = settings
+    save_purav_carting(data)
+    prefix = settings.get("bill_prefix_challan", "PC/CH")
+    year = "2025-26"
+    return f"{prefix}/{year}/{counter:04d}"
+
+def next_invoice_no():
+    data = load_purav_carting()
+    settings = data.get("settings", DEFAULT_PURAV_CARTING["settings"])
+    counter = settings.get("invoice_counter", 0) + 1
+    settings["invoice_counter"] = counter
+    data["settings"] = settings
+    save_purav_carting(data)
+    prefix = settings.get("bill_prefix_invoice", "PC/INV")
+    year = "2025-26"
+    return f"{prefix}/{year}/{counter:04d}"
