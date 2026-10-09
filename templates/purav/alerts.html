@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alerts — Purav Carting</title>
+<link rel="icon" type="image/png" href="/static/favicon.png">
+<link rel="stylesheet" href="/static/style.css">
+<style>
+  .pc-nav { background: linear-gradient(135deg, #1e3a8a 0%, #ea580c 100%); padding: 0 20px; display: flex; align-items: center; gap: 4px; overflow-x: auto; box-shadow: 0 4px 20px rgba(30,58,138,0.3); position: sticky; top: 70px; z-index: 90; white-space: nowrap; }
+  .pc-nav a { color: rgba(255,255,255,0.85); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; border-bottom: 3px solid transparent; }
+  .pc-nav a:hover, .pc-nav a.active { color: white; background: rgba(255,255,255,0.1); }
+  .pc-nav a.active { border-bottom-color: white; }
+  .pc-nav a [data-icon] { width: 15px; height: 15px; }
+
+  .page-head { padding: 30px 40px 20px; border-bottom: 1px solid var(--border); margin-bottom: 30px; }
+  .page-head h1 { font-size: 28px; font-weight: 900; color: var(--text); letter-spacing: -1px; display: flex; align-items: center; gap: 12px; }
+  .page-head h1 [data-icon] { width: 32px; height: 32px; color: #1e3a8a; }
+
+  .alert-list { margin: 0 40px 40px; }
+  .alert-card { display: flex; align-items: flex-start; gap: 15px; padding: 20px; border-radius: 14px; margin-bottom: 12px; border-left: 4px solid; transition: all 0.3s; }
+  .alert-card.warn { background: rgba(251,191,36,0.08); border-left-color: #f59e0b; }
+  .alert-card.danger { background: rgba(239,68,68,0.08); border-left-color: #ef4444; }
+  .alert-card:hover { transform: translateX(5px); }
+  .alert-card .ac-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .alert-card.warn .ac-icon { background: rgba(251,191,36,0.2); color: #f59e0b; }
+  .alert-card.danger .ac-icon { background: rgba(239,68,68,0.2); color: #ef4444; }
+  .alert-card .ac-icon [data-icon] { width: 20px; height: 20px; }
+  .alert-card .ac-content { flex: 1; }
+  .alert-card .ac-cat { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; font-weight: 800; margin-bottom: 4px; }
+  .alert-card.warn .ac-cat { color: #f59e0b; }
+  .alert-card.danger .ac-cat { color: #ef4444; }
+  .alert-card .ac-msg { font-size: 15px; font-weight: 600; color: var(--text); }
+
+  .empty-state { text-align: center; padding: 80px 20px; background: var(--card); border: 2px dashed var(--border); border-radius: 16px; margin: 0 40px; }
+  .empty-state [data-icon] { width: 60px; height: 60px; color: #10b981; opacity: 0.5; margin-bottom: 20px; }
+  .empty-state h3 { color: var(--text); font-size: 20px; margin-bottom: 10px; }
+  .empty-state p { color: var(--text-dim); font-size: 14px; }
+
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin: 0 40px 25px; }
+  .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; text-align: center; }
+  .stat-card .label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; font-weight: 800; margin-bottom: 8px; }
+  .stat-card .value { font-size: 28px; font-weight: 900; color: var(--text); }
+  .stat-card.danger .value { color: #ef4444; }
+  .stat-card.warn .value { color: #f59e0b; }
+  .stat-card.success .value { color: #10b981; }
+
+  @media (max-width: 700px) {
+    .page-head, .alert-list, .stats-row, .empty-state { padding-left: 20px; padding-right: 20px; margin-left: 20px; margin-right: 20px; }
+  }
+</style>
+</head>
+<body>
+
+  <header>
+    <a href="/" class="logo"><img src="/static/logo-horizontal.png" alt="GD Pulse"></a>
+    <nav class="nav-links"><a href="/purav/carting" class="active">Purav Carting</a></nav>
+    <div class="header-right">
+      <button class="theme-toggle" onclick="toggleTheme(event)"></button>
+      <a href="#" onclick="confirmLogout(event)" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
+    </div>
+  </header>
+
+  <nav class="pc-nav">
+    <a href="/purav/carting"><span data-icon="grid"></span> Dashboard</a>
+    <a href="/purav/carting/alerts" class="active"><span data-icon="bell"></span> Alerts</a>
+    <a href="/purav/carting/reports"><span data-icon="analytics"></span> Reports</a>
+    <a href="/purav/carting/settings"><span data-icon="settings"></span> Settings</a>
+  </nav>
+
+  <div class="page-head">
+    <h1><span data-icon="bell"></span> Alerts & Reminders</h1>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card danger">
+      <div class="label">Critical</div>
+      <div class="value">{{ alerts|selectattr('type','equalto','danger')|list|length }}</div>
+    </div>
+    <div class="stat-card warn">
+      <div class="label">Warnings</div>
+      <div class="value">{{ alerts|selectattr('type','equalto','warn')|list|length }}</div>
+    </div>
+    <div class="stat-card success">
+      <div class="label">Total</div>
+      <div class="value">{{ alerts|length }}</div>
+    </div>
+  </div>
+
+  {% if alerts %}
+    <div class="alert-list">
+      {% for a in alerts %}
+      <div class="alert-card {{ a.type }}">
+        <div class="ac-icon">
+          <span data-icon="{% if a.type == 'danger' %}warning{% else %}bell{% endif %}"></span>
+        </div>
+        <div class="ac-content">
+          <div class="ac-cat">{{ a.category }}</div>
+          <div class="ac-msg">{{ a.msg }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <span data-icon="check"></span>
+      <h3>No Alerts 🎉</h3>
+      <p>Sab kuch theek hai — koi pending alert nahi.</p>
+    </div>
+  {% endif %}
+
+  <footer><p>© 2025 GD Pulse — Purav Carting</p></footer>
+
+  <script src="/static/icons.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => { if (window.renderIcons) window.renderIcons(); });
+  </script>
+
+</body>
+</html>
