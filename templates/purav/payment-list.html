@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payment List — Purav Carting</title>
+<link rel="icon" type="image/png" href="/static/favicon.png">
+<link rel="stylesheet" href="/static/style.css">
+<style>
+  .pc-nav { background: linear-gradient(135deg, #1e3a8a 0%, #ea580c 100%); padding: 0 20px; display: flex; align-items: center; gap: 4px; overflow-x: auto; box-shadow: 0 4px 20px rgba(30,58,138,0.3); position: sticky; top: 70px; z-index: 90; white-space: nowrap; }
+  .pc-nav a { color: rgba(255,255,255,0.85); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; border-bottom: 3px solid transparent; }
+  .pc-nav a:hover, .pc-nav a.active { color: white; background: rgba(255,255,255,0.1); }
+  .pc-nav a.active { border-bottom-color: white; }
+  .pc-nav a [data-icon] { width: 15px; height: 15px; }
+
+  .page-head { padding: 30px 40px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; border-bottom: 1px solid var(--border); margin-bottom: 30px; }
+  .page-head h1 { font-size: 28px; font-weight: 900; color: var(--text); letter-spacing: -1px; display: flex; align-items: center; gap: 12px; }
+  .page-head h1 [data-icon] { width: 32px; height: 32px; color: #1e3a8a; }
+
+  .btn-pc { background: linear-gradient(135deg, #1e3a8a, #ea580c); color: white; border: none; padding: 12px 24px; border-radius: 30px; font-weight: 800; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; box-shadow: 0 8px 20px rgba(30,58,138,0.3); }
+  .btn-pc [data-icon] { width: 16px; height: 16px; }
+
+  .alert-box { padding: 14px 20px; border-radius: 12px; margin: 0 40px 20px; font-size: 14px; font-weight: 600; }
+  .alert-box.success { background: rgba(16,185,129,0.1); color: #10b981; border-left: 4px solid #10b981; }
+
+  .filter-bar { margin: 0 40px 25px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end; }
+  .filter-bar > div { flex: 1; min-width: 160px; }
+  .filter-bar label { display: block; font-size: 11px; color: var(--text-dim); font-weight: 800; text-transform: uppercase; margin-bottom: 6px; }
+  .filter-bar select, .filter-bar input { width: 100%; padding: 11px 14px; margin: 0; border: 1.5px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-size: 13px; outline: none; }
+  .filter-bar .btn-apply { background: linear-gradient(135deg, #1e3a8a, #ea580c); color: white; border: none; padding: 11px 24px; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; flex: none; }
+
+  .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin: 0 40px 25px; }
+  .summary-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; }
+  .summary-card .sc-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; font-weight: 800; margin-bottom: 6px; }
+  .summary-card .sc-value { font-size: 22px; font-weight: 900; color: #10b981; letter-spacing: -0.5px; }
+
+  .pay-table { margin: 0 40px 40px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+  .pay-table table { width: 100%; border-collapse: collapse; }
+  .pay-table th, .pay-table td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .pay-table th { background: rgba(16,185,129,0.08); font-weight: 800; color: var(--text); font-size: 10px; text-transform: uppercase; }
+  .pay-table tr:last-child td { border-bottom: none; }
+  .pay-table tr:hover td { background: rgba(16,185,129,0.03); }
+  .pay-table td.num { text-align: right; font-weight: 700; color: #10b981; }
+  .badge-mode { padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 800; background: rgba(30,58,138,0.15); color: #1e3a8a; }
+
+  .btn-sm { padding: 5px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--text-dim); text-decoration: none; display: inline-flex; align-items: center; gap: 3px; }
+  .btn-sm.danger:hover { background: #ef4444; color: white; border-color: #ef4444; }
+  .btn-sm [data-icon] { width: 10px; height: 10px; }
+
+  .empty-state { text-align: center; padding: 60px 20px; background: var(--card); border: 2px dashed var(--border); border-radius: 16px; margin: 0 40px; }
+  .empty-state [data-icon] { width: 50px; height: 50px; color: #10b981; opacity: 0.4; margin-bottom: 15px; }
+
+  @media (max-width: 700px) {
+    .page-head, .filter-bar, .summary-grid, .pay-table, .alert-box { margin-left: 20px; margin-right: 20px; padding-left: 20px; padding-right: 20px; }
+    .pay-table { overflow-x: auto; }
+    .empty-state { margin: 0 20px; }
+  }
+</style>
+</head>
+<body>
+
+  <header>
+    <a href="/" class="logo"><img src="/static/logo-horizontal.png" alt="GD Pulse"></a>
+    <nav class="nav-links"><a href="/purav/carting" class="active">Purav Carting</a></nav>
+    <div class="header-right">
+      <button class="theme-toggle" onclick="toggleTheme(event)"></button>
+      <a href="#" onclick="confirmLogout(event)" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
+    </div>
+  </header>
+
+  <nav class="pc-nav">
+    <a href="/purav/carting"><span data-icon="grid"></span> Dashboard</a>
+    <a href="/purav/carting/invoice"><span data-icon="gst"></span> Invoice</a>
+    <a href="/purav/carting/payment"><span data-icon="gst"></span> New Payment</a>
+    <a href="/purav/carting/payment/list" class="active"><span data-icon="analytics"></span> Payment List</a>
+    <a href="/purav/carting/ledger"><span data-icon="analytics"></span> Ledger</a>
+  </nav>
+
+  <div class="page-head">
+    <h1><span data-icon="analytics"></span> Payment List</h1>
+    <a href="/purav/carting/payment" class="btn-pc"><span data-icon="plus"></span> New Payment</a>
+  </div>
+
+  {% if request.args.get('success') == 'added' %}<div class="alert-box success">Payment save ho gaya!</div>{% endif %}
+  {% if request.args.get('success') == 'deleted' %}<div class="alert-box success">Payment delete ho gaya!</div>{% endif %}
+
+  <form method="GET" class="filter-bar">
+    <div><label>Month</label><input type="month" name="month" value="{{ month_filter }}"></div>
+    <div>
+      <label>Customer</label>
+      <select name="customer">
+        <option value="all">All Customers</option>
+        {% for c in customers %}<option value="{{ c.id }}" {% if customer_filter == c.id %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn-apply">Apply Filter</button>
+  </form>
+
+  <div class="summary-grid">
+    <div class="summary-card"><div class="sc-label">Total Payments</div><div class="sc-value">{{ totals.count }}</div></div>
+    <div class="summary-card"><div class="sc-label">Total Received</div><div class="sc-value">₹{{ "{:,.0f}".format(totals.amount) }}</div></div>
+  </div>
+
+  {% if payments %}
+    <div class="pay-table">
+      <table>
+        <thead>
+          <tr><th>Date</th><th>Customer</th><th>Mode</th><th>Reference</th><th>Bank</th><th>Amount</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          {% for p in payments %}
+          <tr>
+            <td><b>{{ p.date }}</b></td>
+            <td>{{ p.customer_name }}</td>
+            <td><span class="badge-mode">{{ p.mode }}</span></td>
+            <td>{{ p.ref_no or '—' }}</td>
+            <td>{{ p.bank or '—' }}</td>
+            <td class="num">+ ₹{{ "{:,.2f}".format(p.amount) }}</td>
+            <td>
+              <a href="#" class="btn-sm danger" onclick="confirmDeletePay('{{ p.id }}');return false;"><span data-icon="trash"></span></a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <span data-icon="gst"></span>
+      <h3>Koi payment nahi</h3>
+      <p>Payment entry add karo.</p>
+      <a href="/purav/carting/payment" class="btn-pc"><span data-icon="plus"></span> New Payment</a>
+    </div>
+  {% endif %}
+
+  <footer><p>© 2025 GD Pulse — Purav Carting</p></footer>
+
+  <script src="/static/icons.js"></script>
+  <script>
+    function confirmDeletePay(id) {
+      showConfirm("Delete Payment?", "Ye payment entry delete karni hai?", "Yes, Delete", () => {
+        window.location.href = "/purav/carting/payment/delete/" + id;
+      });
+    }
+    document.addEventListener("DOMContentLoaded", () => { if (window.renderIcons) window.renderIcons(); });
+  </script>
+
+</body>
+</html>
