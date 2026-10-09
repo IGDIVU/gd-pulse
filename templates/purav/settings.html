@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings — Purav Carting</title>
+<link rel="icon" type="image/png" href="/static/favicon.png">
+<link rel="stylesheet" href="/static/style.css">
+<style>
+  .pc-nav { background: linear-gradient(135deg, #1e3a8a 0%, #ea580c 100%); padding: 0 20px; display: flex; align-items: center; gap: 4px; overflow-x: auto; box-shadow: 0 4px 20px rgba(30,58,138,0.3); position: sticky; top: 70px; z-index: 90; white-space: nowrap; }
+  .pc-nav a { color: rgba(255,255,255,0.85); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; border-bottom: 3px solid transparent; }
+  .pc-nav a:hover, .pc-nav a.active { color: white; background: rgba(255,255,255,0.1); }
+  .pc-nav a.active { border-bottom-color: white; }
+  .pc-nav a [data-icon] { width: 15px; height: 15px; }
+
+  .page-head { padding: 30px 40px 20px; border-bottom: 1px solid var(--border); margin-bottom: 30px; }
+  .page-head h1 { font-size: 28px; font-weight: 900; color: var(--text); letter-spacing: -1px; display: flex; align-items: center; gap: 12px; }
+  .page-head h1 [data-icon] { width: 32px; height: 32px; color: #1e3a8a; }
+
+  .alert-box { padding: 14px 20px; border-radius: 12px; margin: 0 40px 20px; font-size: 14px; font-weight: 600; }
+  .alert-box.success { background: rgba(16,185,129,0.1); color: #10b981; border-left: 4px solid #10b981; }
+
+  .wrap { max-width: 900px; margin: 0 auto 40px; padding: 0 40px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 30px; margin-bottom: 20px; }
+  .card h2 { font-size: 18px; font-weight: 800; color: var(--text); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+  .card h2 [data-icon] { width: 22px; height: 22px; color: #1e3a8a; }
+
+  .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+  .form-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-bottom: 18px; }
+
+  label { display: block; font-size: 12px; color: var(--text-dim); font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  input, select, textarea { width: 100%; padding: 12px 14px; margin: 0; border: 1.5px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-size: 14px; outline: none; font-family: inherit; }
+  input:focus, select:focus, textarea:focus { border-color: #1e3a8a; box-shadow: 0 0 0 3px rgba(30,58,138,0.1); }
+  textarea { resize: vertical; }
+
+  .save-btn { width: 100%; padding: 15px; border-radius: 12px; font-weight: 800; font-size: 16px; cursor: pointer; border: none; background: linear-gradient(135deg, #1e3a8a, #ea580c); color: white; box-shadow: 0 8px 20px rgba(30,58,138,0.3); margin-top: 10px; transition: all 0.25s; }
+  .save-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(30,58,138,0.45); }
+
+  @media (max-width: 700px) {
+    .page-head, .wrap, .alert-box { padding-left: 20px; padding-right: 20px; margin-left: 20px; margin-right: 20px; }
+    .form-grid-2, .form-grid-3 { grid-template-columns: 1fr; }
+    .card { padding: 22px; }
+  }
+</style>
+</head>
+<body>
+
+  <header>
+    <a href="/" class="logo"><img src="/static/logo-horizontal.png" alt="GD Pulse"></a>
+    <nav class="nav-links"><a href="/purav/carting" class="active">Purav Carting</a></nav>
+    <div class="header-right">
+      <button class="theme-toggle" onclick="toggleTheme(event)"></button>
+      <a href="#" onclick="confirmLogout(event)" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
+    </div>
+  </header>
+
+  <nav class="pc-nav">
+    <a href="/purav/carting"><span data-icon="grid"></span> Dashboard</a>
+    <a href="/purav/carting/alerts"><span data-icon="bell"></span> Alerts</a>
+    <a href="/purav/carting/reports"><span data-icon="analytics"></span> Reports</a>
+    <a href="/purav/carting/settings" class="active"><span data-icon="settings"></span> Settings</a>
+  </nav>
+
+  <div class="page-head">
+    <h1><span data-icon="settings"></span> Settings</h1>
+  </div>
+
+  {% if request.args.get('success') == 'saved' %}
+    <div class="alert-box success">Settings save ho gayi!</div>
+  {% endif %}
+
+  <div class="wrap">
+    <form method="POST">
+      <!-- COMPANY INFO -->
+      <div class="card">
+        <h2><span data-icon="retail"></span> Company Information</h2>
+        <div class="form-grid-2">
+          <div><label>Company Name</label><input type="text" name="company_name" value="{{ settings.company_name }}"></div>
+          <div><label>GSTIN</label><input type="text" name="company_gst" value="{{ settings.company_gst }}"></div>
+        </div>
+        <div class="form-grid-2">
+          <div><label>Phone</label><input type="text" name="company_phone" value="{{ settings.company_phone }}"></div>
+          <div><label>Email</label><input type="email" name="company_email" value="{{ settings.company_email }}"></div>
+        </div>
+        <label>Address</label>
+        <textarea name="company_address" rows="3">{{ settings.company_address }}</textarea>
+      </div>
+
+      <!-- BANK DETAILS -->
+      <div class="card">
+        <h2><span data-icon="retail"></span> Bank Details</h2>
+        <div class="form-grid-3">
+          <div><label>Bank Name</label><input type="text" name="bank_name" value="{{ settings.bank_name }}"></div>
+          <div><label>Account No</label><input type="text" name="bank_account" value="{{ settings.bank_account }}"></div>
+          <div><label>IFSC Code</label><input type="text" name="bank_ifsc" value="{{ settings.bank_ifsc }}"></div>
+        </div>
+      </div>
+
+      <!-- BILL PREFIXES -->
+      <div class="card">
+        <h2><span data-icon="prompts"></span> Bill Prefixes</h2>
+        <div class="form-grid-2">
+          <div><label>Challan Prefix</label><input type="text" name="bill_prefix_challan" value="{{ settings.bill_prefix_challan }}"></div>
+          <div><label>Invoice Prefix</label><input type="text" name="bill_prefix_invoice" value="{{ settings.bill_prefix_invoice }}"></div>
+        </div>
+        <div style="font-size:12px;color:var(--text-dim);margin-top:8px;">Example: <b>{{ settings.bill_prefix_challan }}/2025-26/0001</b></div>
+      </div>
+
+      <!-- DEFAULT RATES -->
+      <div class="card">
+        <h2><span data-icon="gst"></span> Default Rates</h2>
+        <div class="form-grid-3">
+          <div><label>Diesel Rate (₹/L)</label><input type="number" name="default_diesel_rate" value="{{ settings.default_diesel_rate }}" step="0.01"></div>
+          <div><label>Labour Rate (₹/Trip)</label><input type="number" name="default_labour_rate" value="{{ settings.default_labour_rate }}" step="0.01"></div>
+          <div><label>Driver Rate (₹/Day)</label><input type="number" name="default_driver_rate" value="{{ settings.default_driver_rate }}" step="0.01"></div>
+        </div>
+      </div>
+
+      <!-- TERMS -->
+      <div class="card">
+        <h2><span data-icon="text"></span> Terms & Conditions</h2>
+        <textarea name="terms" rows="4">{{ settings.terms }}</textarea>
+        <div style="font-size:12px;color:var(--text-dim);margin-top:8px;">Ye invoice/challan print me dikhega.</div>
+      </div>
+
+      <button type="submit" class="save-btn">Save All Settings</button>
+    </form>
+  </div>
+
+  <footer><p>© 2025 GD Pulse — Purav Carting</p></footer>
+
+  <script src="/static/icons.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => { if (window.renderIcons) window.renderIcons(); });
+  </script>
+
+</body>
+</html>
