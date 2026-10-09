@@ -124,11 +124,13 @@ def purav_carting():
     trucks = database.get_trucks()
     entries = database.get_entries()
     challans = database.get_challans()
+    purchases = database.get_purchases()
     today = datetime.now().strftime("%Y-%m-%d")
     month = datetime.now().strftime("%Y-%m")
 
     today_entries = [e for e in entries if e.get("date") == today]
     month_entries = [e for e in entries if e.get("date", "").startswith(month)]
+    month_purchases = [p for p in purchases if p.get("date", "").startswith(month)]
 
     stats = {
         "today_trips": sum(e.get("trips", 0) for e in today_entries),
@@ -139,6 +141,7 @@ def purav_carting():
         "month_sale": sum(e.get("sale", 0) for e in month_entries),
         "month_cost": sum(e.get("total_cost", 0) for e in month_entries),
         "month_profit": sum(e.get("profit", 0) for e in month_entries),
+        "month_purchase": sum(p.get("amount", 0) for p in month_purchases),
         "pending_challans": len([c for c in challans if not c.get("invoiced")]),
     }
 
@@ -199,7 +202,7 @@ def purav_trucks_add():
     if g: return g
     number = request.form.get("number", "").strip().upper()
     if not number: return redirect(url_for("purav_trucks") + "?error=missing")
-    truck = {
+    database.add_truck({
         "id": str(uuid.uuid4())[:8], "number": number,
         "model": request.form.get("model", "").strip(),
         "owner": request.form.get("owner", "Self").strip(),
@@ -209,15 +212,14 @@ def purav_trucks_add():
         "status": request.form.get("status", "Active").strip(),
         "notes": request.form.get("notes", "").strip(),
         "created_at": datetime.now().isoformat()
-    }
-    database.add_truck(truck)
+    })
     return redirect(url_for("purav_trucks") + "?success=added")
 
 @app.route("/purav/carting/trucks/edit/<tid>", methods=["POST"])
 def purav_trucks_edit(tid):
     g = purav_guard()
     if g: return g
-    truck = {
+    database.update_truck(tid, {
         "number": request.form.get("number", "").strip().upper(),
         "model": request.form.get("model", "").strip(),
         "owner": request.form.get("owner", "Self").strip(),
@@ -226,8 +228,7 @@ def purav_trucks_edit(tid):
         "permit_expiry": request.form.get("permit_expiry", ""),
         "status": request.form.get("status", "Active").strip(),
         "notes": request.form.get("notes", "").strip(),
-    }
-    database.update_truck(tid, truck)
+    })
     return redirect(url_for("purav_trucks") + "?success=updated")
 
 @app.route("/purav/carting/trucks/delete/<tid>")
@@ -260,7 +261,7 @@ def purav_customers_add():
     if g: return g
     name = request.form.get("name", "").strip()
     if not name: return redirect(url_for("purav_customers") + "?error=missing")
-    customer = {
+    database.add_customer({
         "id": str(uuid.uuid4())[:8], "name": name,
         "phone": request.form.get("phone", "").strip(),
         "email": request.form.get("email", "").strip(),
@@ -272,15 +273,14 @@ def purav_customers_add():
         "opening_balance": float(request.form.get("opening_balance", 0) or 0),
         "notes": request.form.get("notes", "").strip(),
         "created_at": datetime.now().isoformat()
-    }
-    database.add_customer(customer)
+    })
     return redirect(url_for("purav_customers") + "?success=added")
 
 @app.route("/purav/carting/customers/edit/<cid>", methods=["POST"])
 def purav_customers_edit(cid):
     g = purav_guard()
     if g: return g
-    customer = {
+    database.update_customer(cid, {
         "name": request.form.get("name", "").strip(),
         "phone": request.form.get("phone", "").strip(),
         "email": request.form.get("email", "").strip(),
@@ -291,8 +291,7 @@ def purav_customers_edit(cid):
         "type": request.form.get("type", "Regular").strip(),
         "opening_balance": float(request.form.get("opening_balance", 0) or 0),
         "notes": request.form.get("notes", "").strip(),
-    }
-    database.update_customer(cid, customer)
+    })
     return redirect(url_for("purav_customers") + "?success=updated")
 
 @app.route("/purav/carting/customers/delete/<cid>")
@@ -303,7 +302,7 @@ def purav_customers_delete(cid):
     return redirect(url_for("purav_customers") + "?success=deleted")
 
 # ============================================
-# SUPPLIER / STAFF / MATERIAL (shortcuts)
+# SUPPLIER / STAFF / MATERIAL
 # ============================================
 
 @app.route("/purav/carting/suppliers")
@@ -486,7 +485,7 @@ def purav_entry_add():
     except ValueError:
         return redirect(url_for("purav_entry") + "?error=invalid")
     total_cost = diesel + labour + driver + maintenance + other
-    entry = {
+    database.add_entry({
         "id": str(uuid.uuid4())[:8],
         "date": request.form.get("date", datetime.now().strftime("%Y-%m-%d")),
         "truck_id": request.form.get("truck_id", ""),
@@ -495,8 +494,7 @@ def purav_entry_add():
         "total_cost": total_cost, "profit": sale - total_cost,
         "notes": request.form.get("notes", "").strip(),
         "created_at": datetime.now().isoformat()
-    }
-    database.add_entry(entry)
+    })
     return redirect(url_for("purav_entry") + "?success=added")
 
 @app.route("/purav/carting/entry/edit/<eid>", methods=["POST"])
@@ -539,12 +537,10 @@ def purav_entry_delete(eid):
 def purav_challan():
     g = purav_guard()
     if g: return g
-    customers = database.get_customers()
-    trucks = database.get_trucks()
-    materials = database.get_materials()
     return render_template("purav/challan.html", user=current_user(), role=current_role(),
-                          name=current_name(), customers=customers, trucks=trucks,
-                          materials=materials, today=datetime.now().strftime("%Y-%m-%d"))
+                          name=current_name(), customers=database.get_customers(),
+                          trucks=database.get_trucks(), materials=database.get_materials(),
+                          today=datetime.now().strftime("%Y-%m-%d"))
 
 @app.route("/purav/carting/challan/add", methods=["POST"])
 def purav_challan_add():
@@ -555,21 +551,16 @@ def purav_challan_add():
     material_id = request.form.get("material_id", "").strip()
     if not customer_id or not truck_id or not material_id:
         return redirect(url_for("purav_challan") + "?error=missing")
-
     customer = database.get_customer(customer_id) or {}
     truck = database.get_truck(truck_id) or {}
     material = database.get_material(material_id) or {}
-
     try:
         qty = float(request.form.get("quantity", 0) or 0)
         rate = float(request.form.get("rate", 0) or 0)
     except ValueError:
         return redirect(url_for("purav_challan") + "?error=invalid")
-
-    amount = qty * rate
     challan_no = database.next_challan_no()
-
-    challan = {
+    database.add_challan({
         "id": str(uuid.uuid4())[:8],
         "challan_no": challan_no,
         "date": request.form.get("date", datetime.now().strftime("%Y-%m-%d")),
@@ -580,17 +571,13 @@ def purav_challan_add():
         "material_id": material_id,
         "material_name": material.get("name", ""),
         "unit": material.get("unit", "Ton"),
-        "quantity": qty,
-        "rate": rate,
-        "amount": amount,
+        "quantity": qty, "rate": rate, "amount": qty * rate,
         "driver": request.form.get("driver", "").strip(),
         "vehicle": request.form.get("vehicle", "").strip() or truck.get("number", ""),
         "notes": request.form.get("notes", "").strip(),
-        "invoiced": False,
-        "invoice_id": None,
+        "invoiced": False, "invoice_id": None,
         "created_at": datetime.now().isoformat()
-    }
-    database.add_challan(challan)
+    })
     return redirect(url_for("purav_challan_list") + "?success=added")
 
 @app.route("/purav/carting/challan/list")
@@ -609,7 +596,6 @@ def purav_challan_list():
         if status_filter == "invoiced" and not c.get("invoiced"): continue
         if month_filter and not c.get("date", "").startswith(month_filter): continue
         filtered.append(c)
-
     filtered.sort(key=lambda x: (x.get("date", ""), x.get("created_at", "")), reverse=True)
 
     totals = {
@@ -618,7 +604,6 @@ def purav_challan_list():
         "pending_count": len([c for c in filtered if not c.get("invoiced")]),
         "pending_amount": sum(c.get("amount", 0) for c in filtered if not c.get("invoiced")),
     }
-
     return render_template("purav/challan-list.html", user=current_user(), role=current_role(),
                           name=current_name(), challans=filtered, totals=totals,
                           customers=database.get_customers(),
@@ -641,9 +626,94 @@ def purav_challan_print(cid):
     if g: return g
     challan = database.get_challan(cid)
     if not challan: return redirect(url_for("purav_challan_list"))
-    settings = database.get_settings()
     return render_template("purav/challan-print.html", user=current_user(), role=current_role(),
-                          name=current_name(), challan=challan, settings=settings)
+                          name=current_name(), challan=challan, settings=database.get_settings())
+
+# ============================================
+# PURCHASE
+# ============================================
+
+@app.route("/purav/carting/purchase")
+def purav_purchase():
+    g = purav_guard()
+    if g: return g
+    return render_template("purav/purchase.html", user=current_user(), role=current_role(),
+                          name=current_name(), suppliers=database.get_suppliers(),
+                          materials=database.get_materials(),
+                          today=datetime.now().strftime("%Y-%m-%d"))
+
+@app.route("/purav/carting/purchase/add", methods=["POST"])
+def purav_purchase_add():
+    g = purav_guard()
+    if g: return g
+    supplier_id = request.form.get("supplier_id", "").strip()
+    material_id = request.form.get("material_id", "").strip()
+    if not supplier_id or not material_id:
+        return redirect(url_for("purav_purchase") + "?error=missing")
+    supplier = database.get_supplier(supplier_id) or {}
+    material = database.get_material(material_id) or {}
+    try:
+        qty = float(request.form.get("quantity", 0) or 0)
+        rate = float(request.form.get("rate", 0) or 0)
+    except ValueError:
+        return redirect(url_for("purav_purchase") + "?error=invalid")
+    database.add_purchase({
+        "id": str(uuid.uuid4())[:8],
+        "bill_no": request.form.get("bill_no", "").strip(),
+        "date": request.form.get("date", datetime.now().strftime("%Y-%m-%d")),
+        "supplier_id": supplier_id,
+        "supplier_name": supplier.get("name", ""),
+        "material_id": material_id,
+        "material_name": material.get("name", ""),
+        "unit": material.get("unit", "Ton"),
+        "quantity": qty, "rate": rate, "amount": qty * rate,
+        "vehicle": request.form.get("vehicle", "").strip(),
+        "driver": request.form.get("driver", "").strip(),
+        "payment_status": request.form.get("payment_status", "Pending").strip(),
+        "notes": request.form.get("notes", "").strip(),
+        "created_at": datetime.now().isoformat()
+    })
+    return redirect(url_for("purav_purchase_list") + "?success=added")
+
+@app.route("/purav/carting/purchase/list")
+def purav_purchase_list():
+    g = purav_guard()
+    if g: return g
+    purchases = database.get_purchases()
+    supplier_filter = request.args.get("supplier", "all")
+    month_filter = request.args.get("month", "")
+
+    filtered = []
+    for p in purchases:
+        if supplier_filter != "all" and p.get("supplier_id") != supplier_filter: continue
+        if month_filter and not p.get("date", "").startswith(month_filter): continue
+        filtered.append(p)
+    filtered.sort(key=lambda x: (x.get("date", ""), x.get("created_at", "")), reverse=True)
+
+    totals = {
+        "count": len(filtered),
+        "amount": sum(p.get("amount", 0) for p in filtered),
+        "paid": sum(p.get("amount", 0) for p in filtered if p.get("payment_status") == "Paid"),
+        "pending": sum(p.get("amount", 0) for p in filtered if p.get("payment_status") != "Paid"),
+    }
+    return render_template("purav/purchase-list.html", user=current_user(), role=current_role(),
+                          name=current_name(), purchases=filtered, totals=totals,
+                          suppliers=database.get_suppliers(),
+                          supplier_filter=supplier_filter, month_filter=month_filter)
+
+@app.route("/purav/carting/purchase/delete/<pid>")
+def purav_purchase_delete(pid):
+    g = purav_guard()
+    if g: return g
+    database.delete_purchase(pid)
+    return redirect(url_for("purav_purchase_list") + "?success=deleted")
+
+@app.route("/purav/carting/purchase/mark-paid/<pid>")
+def purav_purchase_mark_paid(pid):
+    g = purav_guard()
+    if g: return g
+    database.update_purchase(pid, {"payment_status": "Paid"})
+    return redirect(url_for("purav_purchase_list") + "?success=paid")
 
 # ============================================
 # LEDGER
@@ -656,19 +726,15 @@ def purav_ledger():
     trucks = database.get_trucks()
     entries = database.get_entries()
     truck_map = {t["id"]: t for t in trucks}
-
     truck_filter = request.args.get("truck", "all")
     month_filter = request.args.get("month", datetime.now().strftime("%Y-%m"))
-
     filtered = []
     for e in entries:
         if month_filter and not e.get("date", "").startswith(month_filter): continue
         if truck_filter != "all" and e.get("truck_id") != truck_filter: continue
         e["truck_number"] = truck_map.get(e.get("truck_id", ""), {}).get("number", "—")
         filtered.append(e)
-
     filtered.sort(key=lambda x: x.get("date", ""))
-
     totals = {
         "trips": sum(e.get("trips", 0) for e in filtered),
         "sale": sum(e.get("sale", 0) for e in filtered),
@@ -680,7 +746,6 @@ def purav_ledger():
         "total_cost": sum(e.get("total_cost", 0) for e in filtered),
         "profit": sum(e.get("profit", 0) for e in filtered),
     }
-
     return render_template("purav/ledger.html", user=current_user(), role=current_role(),
                           name=current_name(), trucks=trucks, entries=filtered,
                           totals=totals, truck_filter=truck_filter, month_filter=month_filter)
@@ -692,10 +757,9 @@ def purav_ledger():
 @app.route("/admin")
 def admin():
     if not require_admin(): return redirect(url_for("login"))
-    users = database.load_users()
-    prompts = database.load_prompts()
     return render_template("admin.html", user=current_user(), role=current_role(),
-                          name=current_name(), all_users=users, all_prompts=prompts)
+                          name=current_name(), all_users=database.load_users(),
+                          all_prompts=database.load_prompts())
 
 @app.route("/admin/add-user", methods=["POST"])
 def admin_add_user():
@@ -766,9 +830,8 @@ def admin_delete_all_prompts():
 @app.route("/owner")
 def owner():
     if not require_owner(): return redirect(url_for("login"))
-    users = database.load_users()
     return render_template("owner.html", user=current_user(), role=current_role(),
-                          name=current_name(), all_users=users)
+                          name=current_name(), all_users=database.load_users())
 
 @app.route("/owner/add-user", methods=["POST"])
 def owner_add_user():
