@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tax Invoice — Purav Carting</title>
+<link rel="icon" type="image/png" href="/static/favicon.png">
+<link rel="stylesheet" href="/static/style.css">
+<style>
+  .pc-nav { background: linear-gradient(135deg, #1e3a8a 0%, #ea580c 100%); padding: 0 20px; display: flex; align-items: center; gap: 4px; overflow-x: auto; box-shadow: 0 4px 20px rgba(30,58,138,0.3); position: sticky; top: 70px; z-index: 90; white-space: nowrap; }
+  .pc-nav a { color: rgba(255,255,255,0.85); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; border-bottom: 3px solid transparent; }
+  .pc-nav a:hover, .pc-nav a.active { color: white; background: rgba(255,255,255,0.1); }
+  .pc-nav a.active { border-bottom-color: white; }
+  .pc-nav a [data-icon] { width: 15px; height: 15px; }
+
+  .page-head { padding: 30px 40px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; border-bottom: 1px solid var(--border); margin-bottom: 30px; }
+  .page-head h1 { font-size: 28px; font-weight: 900; color: var(--text); letter-spacing: -1px; display: flex; align-items: center; gap: 12px; }
+  .page-head h1 [data-icon] { width: 32px; height: 32px; color: #1e3a8a; }
+
+  .btn-pc { background: linear-gradient(135deg, #1e3a8a, #ea580c); color: white; border: none; padding: 12px 24px; border-radius: 30px; font-weight: 800; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; box-shadow: 0 8px 20px rgba(30,58,138,0.3); }
+  .btn-pc [data-icon] { width: 16px; height: 16px; }
+
+  .alert-box { padding: 14px 20px; border-radius: 12px; margin: 0 40px 20px; font-size: 14px; font-weight: 600; }
+  .alert-box.error { background: rgba(239,68,68,0.1); color: #ef4444; border-left: 4px solid #ef4444; }
+
+  .wrap { max-width: 1000px; margin: 0 auto 40px; padding: 0 40px; }
+  .card { background: var(--card); border: 2px solid #1e3a8a; border-radius: 18px; padding: 32px; box-shadow: 0 15px 40px rgba(30,58,138,0.15); margin-bottom: 25px; }
+  .card h2 { font-size: 20px; font-weight: 800; color: var(--text); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+  .card h2 [data-icon] { width: 22px; height: 22px; color: #1e3a8a; }
+
+  .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+  .form-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-bottom: 18px; }
+  label { display: block; font-size: 12px; color: var(--text-dim); font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  input, select, textarea { width: 100%; padding: 12px 14px; margin: 0; border: 1.5px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-size: 14px; outline: none; }
+  input:focus, select:focus { border-color: #1e3a8a; }
+
+  .challan-list { max-height: 500px; overflow-y: auto; margin-top: 15px; }
+  .challan-item { display: flex; align-items: center; gap: 15px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px; transition: all 0.25s; cursor: pointer; }
+  .challan-item:hover { border-color: #1e3a8a; background: rgba(30,58,138,0.04); }
+  .challan-item.selected { border-color: #1e3a8a; background: rgba(30,58,138,0.08); }
+  .challan-item input[type="checkbox"] { width: auto; margin: 0; transform: scale(1.3); }
+  .challan-item .ci-info { flex: 1; }
+  .challan-item .ci-no { font-weight: 800; color: var(--text); font-size: 13px; }
+  .challan-item .ci-detail { font-size: 11px; color: var(--text-dim); margin-top: 3px; }
+  .challan-item .ci-amt { font-weight: 900; color: #1e3a8a; font-size: 15px; }
+
+  .total-preview { background: linear-gradient(135deg, rgba(30,58,138,0.08), rgba(234,88,12,0.08)); border: 2px dashed #1e3a8a; border-radius: 14px; padding: 20px; margin-top: 20px; }
+  .total-preview .tp-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; }
+  .total-preview .tp-row.big { border-top: 2px solid rgba(30,58,138,0.3); margin-top: 10px; padding-top: 14px; font-size: 20px; font-weight: 900; }
+  .total-preview .tp-row.big .val { color: #1e3a8a; }
+
+  .form-actions { display: flex; gap: 12px; margin-top: 24px; }
+  .form-actions button, .form-actions a { flex: 1; padding: 15px; border-radius: 12px; font-weight: 800; font-size: 15px; cursor: pointer; border: none; text-align: center; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+  .form-actions .btn-cancel { background: var(--bg); color: var(--text); border: 1.5px solid var(--border); }
+  .form-actions .btn-save { background: linear-gradient(135deg, #1e3a8a, #ea580c); color: white; box-shadow: 0 8px 20px rgba(30,58,138,0.3); }
+  .empty-state { text-align: center; padding: 30px; color: var(--text-dim); font-size: 14px; }
+
+  @media (max-width: 700px) {
+    .page-head, .wrap, .alert-box { padding-left: 20px; padding-right: 20px; }
+    .form-grid-2, .form-grid-3 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+  <header>
+    <a href="/" class="logo"><img src="/static/logo-horizontal.png" alt="GD Pulse"></a>
+    <nav class="nav-links"><a href="/purav/carting" class="active">Purav Carting</a></nav>
+    <div class="header-right">
+      <button class="theme-toggle" onclick="toggleTheme(event)"></button>
+      <a href="#" onclick="confirmLogout(event)" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
+    </div>
+  </header>
+
+  <nav class="pc-nav">
+    <a href="/purav/carting"><span data-icon="grid"></span> Dashboard</a>
+    <a href="/purav/carting/trucks"><span data-icon="sand"></span> Trucks</a>
+    <a href="/purav/carting/customers"><span data-icon="users"></span> Customers</a>
+    <a href="/purav/carting/materials"><span data-icon="assets"></span> Materials</a>
+    <a href="/purav/carting/entry"><span data-icon="prompts"></span> Daily Entry</a>
+    <a href="/purav/carting/challan"><span data-icon="retail"></span> Challan</a>
+    <a href="/purav/carting/purchase"><span data-icon="download"></span> Purchase</a>
+    <a href="/purav/carting/invoice" class="active"><span data-icon="gst"></span> Invoice</a>
+    <a href="/purav/carting/payment"><span data-icon="gst"></span> Payment</a>
+  </nav>
+
+  <div class="page-head">
+    <h1><span data-icon="gst"></span> Generate Tax Invoice</h1>
+    <a href="/purav/carting/invoice/list" class="btn-pc"><span data-icon="grid"></span> All Invoices</a>
+  </div>
+
+  {% if request.args.get('error') == 'missing' %}<div class="alert-box error">Customer select karo aur kam se kam 1 challan chuno</div>{% endif %}
+
+  <div class="wrap">
+    <!-- STEP 1: Select customer -->
+    <div class="card">
+      <h2><span data-icon="users"></span> Step 1: Customer Select Karo</h2>
+      <form method="GET" action="/purav/carting/invoice">
+        <label>Customer</label>
+        <select name="customer" onchange="this.form.submit()">
+          <option value="">-- Select Customer --</option>
+          {% for c in customers %}
+          <option value="{{ c.id }}" {% if customer_id == c.id %}selected{% endif %}>{{ c.name }}{% if c.gstin %} ({{ c.gstin }}){% endif %}</option>
+          {% endfor %}
+        </select>
+      </form>
+    </div>
+
+    {% if customer_id %}
+    <!-- STEP 2: Select challans -->
+    <div class="card">
+      <h2><span data-icon="retail"></span> Step 2: Pending Challans Select Karo</h2>
+      <form method="POST" action="/purav/carting/invoice/generate" id="invoiceForm">
+        <input type="hidden" name="customer_id" value="{{ customer_id }}">
+
+        <div class="form-grid-3">
+          <div><label>Invoice Date</label><input type="date" name="date" value="{{ today }}" required></div>
+          <div><label>Due Date</label><input type="date" name="due_date"></div>
+          <div>
+            <label>GST Rate (%)</label>
+            <select name="gst_rate" id="gstRate" onchange="calcTotals()">
+              <option value="0">0% (Exempted)</option>
+              <option value="5" selected>5% (CGST 2.5% + SGST 2.5%)</option>
+              <option value="12">12% (CGST 6% + SGST 6%)</option>
+              <option value="18">18% (CGST 9% + SGST 9%)</option>
+              <option value="28">28% (CGST 14% + SGST 14%)</option>
+            </select>
+          </div>
+        </div>
+
+        <label>Pending Challans</label>
+        {% if pending %}
+        <div class="challan-list">
+          {% for c in pending %}
+          <div class="challan-item" onclick="toggleChallan(this)">
+            <input type="checkbox" name="challan_ids" value="{{ c.id }}" data-amount="{{ c.amount }}" onchange="calcTotals()" onclick="event.stopPropagation()">
+            <div class="ci-info">
+              <div class="ci-no">{{ c.challan_no }}</div>
+              <div class="ci-detail">{{ c.date }} · {{ c.truck_number }} · {{ c.material_name }} · {{ c.quantity }} {{ c.unit }} × ₹{{ c.rate }}</div>
+            </div>
+            <div class="ci-amt">₹{{ "{:,.2f}".format(c.amount) }}</div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- TOTAL PREVIEW -->
+        <div class="total-preview">
+          <div class="tp-row"><span>Subtotal</span><span class="val" id="tpSub">₹0</span></div>
+          <div class="tp-row"><span>CGST</span><span class="val" id="tpCgst">₹0</span></div>
+          <div class="tp-row"><span>SGST</span><span class="val" id="tpSgst">₹0</span></div>
+          <div class="tp-row big"><span>Total</span><span class="val" id="tpTotal">₹0</span></div>
+        </div>
+
+        <label style="margin-top:20px;">Notes</label>
+        <input type="text" name="notes" placeholder="Optional">
+
+        <div class="form-actions">
+          <a href="/purav/carting/invoice" class="btn-cancel">Cancel</a>
+          <button type="submit" class="btn-save"><span data-icon="check"></span> Generate Invoice</button>
+        </div>
+        </form>
+        {% else %}
+        <div class="empty-state">
+          <p>Is customer ka koi pending challan nahi hai. 🎉</p>
+        </div>
+        {% endif %}
+      </form>
+    </div>
+    {% endif %}
+  </div>
+
+  <footer><p>© 2025 GD Pulse — Purav Carting</p></footer>
+
+  <script src="/static/icons.js"></script>
+  <script>
+    function toggleChallan(el) {
+      const cb = el.querySelector('input[type="checkbox"]');
+      cb.checked = !cb.checked;
+      el.classList.toggle('selected', cb.checked);
+      calcTotals();
+    }
+    function calcTotals() {
+      let sub = 0;
+      document.querySelectorAll('input[name="challan_ids"]:checked').forEach(cb => {
+        sub += parseFloat(cb.getAttribute('data-amount')) || 0;
+        cb.closest('.challan-item').classList.add('selected');
+      });
+      document.querySelectorAll('input[name="challan_ids"]:not(:checked)').forEach(cb => {
+        cb.closest('.challan-item').classList.remove('selected');
+      });
+      const gstRate = parseFloat(document.getElementById('gstRate').value) || 0;
+      const cgst = sub * (gstRate / 2) / 100;
+      const sgst = sub * (gstRate / 2) / 100;
+      const total = Math.round(sub + cgst + sgst);
+      document.getElementById('tpSub').innerText = '₹' + sub.toLocaleString('en-IN', {maximumFractionDigits: 2});
+      document.getElementById('tpCgst').innerText = '₹' + cgst.toLocaleString('en-IN', {maximumFractionDigits: 2});
+      document.getElementById('tpSgst').innerText = '₹' + sgst.toLocaleString('en-IN', {maximumFractionDigits: 2});
+      document.getElementById('tpTotal').innerText = '₹' + total.toLocaleString('en-IN');
+    }
+    document.addEventListener("DOMContentLoaded", () => { if (window.renderIcons) window.renderIcons(); calcTotals(); });
+  </script>
+
+</body>
+</html>
