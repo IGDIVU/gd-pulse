@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New Challan — Purav Carting</title>
+<link rel="icon" type="image/png" href="/static/favicon.png">
+<link rel="stylesheet" href="/static/style.css">
+<style>
+  .pc-nav { background: linear-gradient(135deg, #1e3a8a 0%, #ea580c 100%); padding: 0 20px; display: flex; align-items: center; gap: 4px; overflow-x: auto; box-shadow: 0 4px 20px rgba(30,58,138,0.3); position: sticky; top: 70px; z-index: 90; white-space: nowrap; }
+  .pc-nav a { color: rgba(255,255,255,0.85); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; border-bottom: 3px solid transparent; transition: all 0.25s; }
+  .pc-nav a:hover, .pc-nav a.active { color: white; background: rgba(255,255,255,0.1); }
+  .pc-nav a.active { border-bottom-color: white; }
+  .pc-nav a [data-icon] { width: 15px; height: 15px; }
+
+  .page-head { padding: 30px 40px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; border-bottom: 1px solid var(--border); margin-bottom: 30px; }
+  .page-head h1 { font-size: 28px; font-weight: 900; color: var(--text); letter-spacing: -1px; display: flex; align-items: center; gap: 12px; }
+  .page-head h1 [data-icon] { width: 32px; height: 32px; color: #1e3a8a; }
+
+  .btn-pc { background: linear-gradient(135deg, #1e3a8a, #ea580c); color: white; border: none; padding: 12px 24px; border-radius: 30px; font-weight: 800; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s; box-shadow: 0 8px 20px rgba(30,58,138,0.3); text-decoration: none; }
+  .btn-pc:hover { transform: translateY(-3px); }
+  .btn-pc [data-icon] { width: 16px; height: 16px; }
+
+  .alert-box { padding: 14px 20px; border-radius: 12px; margin: 0 40px 20px; font-size: 14px; font-weight: 600; }
+  .alert-box.error { background: rgba(239,68,68,0.1); color: #ef4444; border-left: 4px solid #ef4444; }
+
+  .challan-form { max-width: 900px; margin: 0 auto 40px; padding: 0 40px; }
+  .form-card { background: var(--card); border: 2px solid #1e3a8a; border-radius: 18px; padding: 32px; box-shadow: 0 15px 40px rgba(30,58,138,0.15); }
+  .form-card h2 { font-size: 20px; font-weight: 800; color: var(--text); margin-bottom: 22px; display: flex; align-items: center; gap: 10px; }
+  .form-card h2 [data-icon] { width: 22px; height: 22px; color: #1e3a8a; }
+
+  .form-section-title { font-size: 12px; font-weight: 800; color: #1e3a8a; text-transform: uppercase; letter-spacing: 1.5px; margin: 22px 0 14px; padding-bottom: 8px; border-bottom: 2px solid rgba(30,58,138,0.15); }
+
+  .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+  .form-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-bottom: 18px; }
+
+  .form-card label { display: block; font-size: 12px; color: var(--text-dim); font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .form-card input, .form-card select, .form-card textarea { width: 100%; padding: 12px 14px; margin: 0; border: 1.5px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-size: 14px; outline: none; transition: all 0.25s; }
+  .form-card input:focus, .form-card select:focus, .form-card textarea:focus { border-color: #1e3a8a; box-shadow: 0 0 0 3px rgba(30,58,138,0.1); }
+
+  .amount-preview { background: linear-gradient(135deg, rgba(30,58,138,0.08), rgba(234,88,12,0.08)); border: 2px dashed #1e3a8a; border-radius: 14px; padding: 20px; margin-top: 20px; text-align: center; }
+  .amount-preview .lbl { font-size: 12px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; font-weight: 800; margin-bottom: 8px; }
+  .amount-preview .amt { font-size: 36px; font-weight: 900; color: #1e3a8a; letter-spacing: -1.5px; }
+
+  .form-actions { display: flex; gap: 12px; margin-top: 24px; }
+  .form-actions button, .form-actions a { flex: 1; padding: 15px; border-radius: 12px; font-weight: 800; font-size: 15px; cursor: pointer; border: none; text-align: center; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.25s; }
+  .form-actions .btn-cancel { background: var(--bg); color: var(--text); border: 1.5px solid var(--border); }
+  .form-actions .btn-save { background: linear-gradient(135deg, #1e3a8a, #ea580c); color: white; box-shadow: 0 8px 20px rgba(30,58,138,0.3); }
+  .form-actions .btn-save:hover { transform: translateY(-2px); }
+
+  @media (max-width: 700px) {
+    .page-head, .challan-form, .alert-box { padding-left: 20px; padding-right: 20px; }
+    .form-grid-2, .form-grid-3 { grid-template-columns: 1fr; }
+    .form-card { padding: 22px; }
+  }
+</style>
+</head>
+<body>
+
+  <header>
+    <a href="/" class="logo"><img src="/static/logo-horizontal.png" alt="GD Pulse"></a>
+    <nav class="nav-links"><a href="/purav/carting" class="active">Purav Carting</a></nav>
+    <div class="header-right">
+      <button class="theme-toggle" onclick="toggleTheme(event)"></button>
+      <a href="#" onclick="confirmLogout(event)" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
+    </div>
+  </header>
+
+  <nav class="pc-nav">
+    <a href="/purav/carting"><span data-icon="grid"></span> Dashboard</a>
+    <a href="/purav/carting/trucks"><span data-icon="sand"></span> Trucks</a>
+    <a href="/purav/carting/customers"><span data-icon="users"></span> Customers</a>
+    <a href="/purav/carting/materials"><span data-icon="assets"></span> Materials</a>
+    <a href="/purav/carting/entry"><span data-icon="prompts"></span> Daily Entry</a>
+    <a href="/purav/carting/challan" class="active"><span data-icon="retail"></span> New Challan</a>
+    <a href="/purav/carting/challan/list"><span data-icon="analytics"></span> Challan List</a>
+    <a href="/purav/carting/ledger"><span data-icon="analytics"></span> Ledger</a>
+  </nav>
+
+  <div class="page-head">
+    <h1><span data-icon="retail"></span> New Challan</h1>
+    <a href="/purav/carting/challan/list" class="btn-pc"><span data-icon="grid"></span> View All Challans</a>
+  </div>
+
+  {% if request.args.get('error') == 'missing' %}
+    <div class="alert-box error">Customer, Truck, aur Material — teeno select karna zaroori hai!</div>
+  {% elif request.args.get('error') == 'invalid' %}
+    <div class="alert-box error">Quantity ya Rate galat hai</div>
+  {% endif %}
+
+  <div class="challan-form">
+    <div class="form-card">
+      <h2><span data-icon="retail"></span> Challan Details</h2>
+      <form method="POST" action="/purav/carting/challan/add" id="challanForm">
+        <div class="form-grid-2">
+          <div>
+            <label>Date *</label>
+            <input type="date" name="date" value="{{ today }}" required>
+          </div>
+          <div>
+            <label>Customer *</label>
+            <select name="customer_id" id="c_customer" required>
+              <option value="">-- Select Customer --</option>
+              {% for c in customers %}
+              <option value="{{ c.id }}" data-gstin="{{ c.gstin or '' }}" data-phone="{{ c.phone or '' }}">{{ c.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="form-section-title">Truck & Material</div>
+
+        <div class="form-grid-2">
+          <div>
+            <label>Truck *</label>
+            <select name="truck_id" id="c_truck" required>
+              <option value="">-- Select Truck --</option>
+              {% for t in trucks %}
+              <option value="{{ t.id }}" data-number="{{ t.number }}">{{ t.number }} {% if t.model %}({{ t.model }}){% endif %}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label>Driver Name</label>
+            <input type="text" name="driver" id="c_driver" placeholder="Optional">
+          </div>
+        </div>
+
+        <div class="form-grid-3">
+          <div>
+            <label>Material *</label>
+            <select name="material_id" id="c_material" required>
+              <option value="">-- Select Material --</option>
+              {% for m in materials %}
+              <option value="{{ m.id }}" data-rate="{{ m.default_rate }}" data-unit="{{ m.unit }}">{{ m.name }} ({{ m.unit }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label>Quantity *</label>
+            <input type="number" name="quantity" id="c_qty" value="0" step="0.01" min="0" required oninput="calcAmount()">
+          </div>
+          <div>
+            <label>Rate (₹) *</label>
+            <input type="number" name="rate" id="c_rate" value="0" step="0.01" min="0" required oninput="calcAmount()">
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div>
+            <label>Vehicle No (auto-fill from truck)</label>
+            <input type="text" name="vehicle" id="c_vehicle" placeholder="Optional">
+          </div>
+          <div>
+            <label>Notes</label>
+            <input type="text" name="notes" id="c_notes" placeholder="Optional">
+          </div>
+        </div>
+
+        <!-- AMOUNT PREVIEW -->
+        <div class="amount-preview">
+          <div class="lbl">Total Amount</div>
+          <div class="amt" id="amountPreview">₹0</div>
+        </div>
+
+        <div class="form-actions">
+          <a href="/purav/carting" class="btn-cancel">Cancel</a>
+          <button type="submit" class="btn-save"><span data-icon="check"></span> Save Challan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer><p>© 2025 GD Pulse — Purav Carting</p></footer>
+
+  <script src="/static/icons.js"></script>
+  <script>
+    // Auto-fill rate when material selected
+    document.getElementById("c_material").addEventListener("change", function() {
+      const opt = this.options[this.selectedIndex];
+      const rate = opt.getAttribute("data-rate");
+      if (rate && rate !== "0" && rate !== "0.0") {
+        document.getElementById("c_rate").value = rate;
+      }
+      calcAmount();
+    });
+
+    // Auto-fill vehicle when truck selected
+    document.getElementById("c_truck").addEventListener("change", function() {
+      const opt = this.options[this.selectedIndex];
+      const num = opt.getAttribute("data-number");
+      if (num) {
+        document.getElementById("c_vehicle").value = num;
+      }
+    });
+
+    function calcAmount() {
+      const qty = parseFloat(document.getElementById("c_qty").value) || 0;
+      const rate = parseFloat(document.getElementById("c_rate").value) || 0;
+      const total = qty * rate;
+      document.getElementById("amountPreview").innerText = "₹" + total.toLocaleString("en-IN", {maximumFractionDigits: 2});
+    }
+
+    document.addEventListener("DOMContentLoaded", () => { if (window.renderIcons) window.renderIcons(); calcAmount(); });
+  </script>
+
+</body>
+</html>
