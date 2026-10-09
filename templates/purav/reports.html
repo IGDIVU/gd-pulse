@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reports — Purav Carting</title>
+<link rel="icon" type="image/png" href="/static/favicon.png">
+<link rel="stylesheet" href="/static/style.css">
+<style>
+  .pc-nav { background: linear-gradient(135deg, #1e3a8a 0%, #ea580c 100%); padding: 0 20px; display: flex; align-items: center; gap: 4px; overflow-x: auto; box-shadow: 0 4px 20px rgba(30,58,138,0.3); position: sticky; top: 70px; z-index: 90; white-space: nowrap; }
+  .pc-nav a { color: rgba(255,255,255,0.85); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; border-bottom: 3px solid transparent; }
+  .pc-nav a:hover, .pc-nav a.active { color: white; background: rgba(255,255,255,0.1); }
+  .pc-nav a.active { border-bottom-color: white; }
+  .pc-nav a [data-icon] { width: 15px; height: 15px; }
+
+  .page-head { padding: 30px 40px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; border-bottom: 1px solid var(--border); margin-bottom: 30px; }
+  .page-head h1 { font-size: 28px; font-weight: 900; color: var(--text); letter-spacing: -1px; display: flex; align-items: center; gap: 12px; }
+  .page-head h1 [data-icon] { width: 32px; height: 32px; color: #1e3a8a; }
+
+  .btn-pc { background: linear-gradient(135deg, #1e3a8a, #ea580c); color: white; border: none; padding: 12px 24px; border-radius: 30px; font-weight: 800; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; box-shadow: 0 8px 20px rgba(30,58,138,0.3); }
+  .btn-pc [data-icon] { width: 16px; height: 16px; }
+
+  .filter-bar { margin: 0 40px 25px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end; }
+  .filter-bar > div { flex: 1; min-width: 160px; }
+  .filter-bar label { display: block; font-size: 11px; color: var(--text-dim); font-weight: 800; text-transform: uppercase; margin-bottom: 6px; }
+  .filter-bar input { width: 100%; padding: 11px 14px; margin: 0; border: 1.5px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-size: 13px; outline: none; }
+  .filter-bar .btn-apply { background: linear-gradient(135deg, #1e3a8a, #ea580c); color: white; border: none; padding: 11px 24px; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; flex: none; }
+
+  .report-section { margin: 0 40px 30px; }
+  .report-section h2 { font-size: 18px; font-weight: 800; color: var(--text); margin-bottom: 18px; display: flex; align-items: center; gap: 10px; }
+  .report-section h2 [data-icon] { width: 20px; height: 20px; color: #1e3a8a; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+  .kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; position: relative; overflow: hidden; transition: all 0.35s; }
+  .kpi-card::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, #1e3a8a, #ea580c); transform: scaleX(0); transform-origin: left; transition: transform 0.4s; }
+  .kpi-card:hover::before { transform: scaleX(1); }
+  .kpi-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(30,58,138,0.12); }
+  .kpi-card .kpi-label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 800; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .kpi-card .kpi-label [data-icon] { width: 14px; height: 14px; color: #1e3a8a; }
+  .kpi-card .kpi-value { font-size: 28px; font-weight: 900; color: var(--text); letter-spacing: -1px; }
+  .kpi-card.profit .kpi-value { color: #10b981; }
+  .kpi-card.cost .kpi-value { color: #ef4444; }
+  .kpi-card.warn .kpi-value { color: #f59e0b; }
+
+  .outstanding-table { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; margin-top: 15px; }
+  .outstanding-table table { width: 100%; border-collapse: collapse; }
+  .outstanding-table th, .outstanding-table td { padding: 14px 18px; text-align: left; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .outstanding-table th { background: rgba(234,88,12,0.08); font-weight: 800; font-size: 11px; text-transform: uppercase; }
+  .outstanding-table tr:last-child td { border-bottom: none; }
+  .outstanding-table td.num { text-align: right; font-weight: 900; color: #ea580c; font-size: 15px; }
+
+  .empty-msg { text-align: center; padding: 30px; color: var(--text-dim); font-size: 13px; }
+
+  @media (max-width: 700px) {
+    .page-head, .filter-bar, .report-section { margin-left: 20px; margin-right: 20px; padding-left: 20px; padding-right: 20px; }
+    .outstanding-table { overflow-x: auto; }
+  }
+</style>
+</head>
+<body>
+
+  <header>
+    <a href="/" class="logo"><img src="/static/logo-horizontal.png" alt="GD Pulse"></a>
+    <nav class="nav-links"><a href="/purav/carting" class="active">Purav Carting</a></nav>
+    <div class="header-right">
+      <button class="theme-toggle" onclick="toggleTheme(event)"></button>
+      <a href="#" onclick="confirmLogout(event)" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
+    </div>
+  </header>
+
+  <nav class="pc-nav">
+    <a href="/purav/carting"><span data-icon="grid"></span> Dashboard</a>
+    <a href="/purav/carting/alerts"><span data-icon="bell"></span> Alerts</a>
+    <a href="/purav/carting/reports" class="active"><span data-icon="analytics"></span> Reports</a>
+    <a href="/purav/carting/settings"><span data-icon="settings"></span> Settings</a>
+  </nav>
+
+  <div class="page-head">
+    <h1><span data-icon="analytics"></span> Reports & Analytics</h1>
+    <button class="btn-pc" onclick="window.print()"><span data-icon="download"></span> Print / PDF</button>
+  </div>
+
+  <form method="GET" class="filter-bar">
+    <div><label>Month</label><input type="month" name="month" value="{{ report.month }}"></div>
+    <button type="submit" class="btn-apply">Show Report</button>
+  </form>
+
+  <!-- MONTHLY P&L -->
+  <div class="report-section">
+    <h2><span data-icon="analytics"></span> Monthly Summary — {{ report.month }}</h2>
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label"><span data-icon="sand"></span> Total Trips</div>
+        <div class="kpi-value">{{ report.trips }}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label"><span data-icon="retail"></span> Total Sales</div>
+        <div class="kpi-value">₹{{ "{:,.0f}".format(report.sales) }}</div>
+      </div>
+      <div class="kpi-card cost">
+        <div class="kpi-label"><span data-icon="download"></span> Total Cost</div>
+        <div class="kpi-value">₹{{ "{:,.0f}".format(report.cost) }}</div>
+      </div>
+      <div class="kpi-card profit">
+        <div class="kpi-label"><span data-icon="analytics"></span> Net Profit</div>
+        <div class="kpi-value">₹{{ "{:,.0f}".format(report.profit) }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PURCHASE & PAYMENT -->
+  <div class="report-section">
+    <h2><span data-icon="download"></span> Purchase & Payment</h2>
+    <div class="kpi-grid">
+      <div class="kpi-card cost">
+        <div class="kpi-label"><span data-icon="download"></span> Total Purchase</div>
+        <div class="kpi-value">₹{{ "{:,.0f}".format(report.purchase) }}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label"><span data-icon="gst"></span> Total Invoiced</div>
+        <div class="kpi-value">₹{{ "{:,.0f}".format(report.invoiced) }}</div>
+      </div>
+      <div class="kpi-card profit">
+        <div class="kpi-label"><span data-icon="gst"></span> Payment Received</div>
+        <div class="kpi-value">₹{{ "{:,.0f}".format(report.received) }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OUTSTANDING -->
+  <div class="report-section">
+    <h2><span data-icon="users"></span> Outstanding — Customers</h2>
+    {% if outstanding %}
+      <div class="outstanding-table">
+        <table>
+          <thead>
+            <tr><th>Customer</th><th>Phone</th><th>GSTIN</th><th>Outstanding</th></tr>
+          </thead>
+          <tbody>
+            {% for o in outstanding|sort(attribute='balance', reverse=true) %}
+            <tr>
+              <td><b>{{ o.customer.name }}</b></td>
+              <td>{{ o.customer.phone or '—' }}</td>
+              <td>{{ o.customer.gstin or '—' }}</td>
+              <td class="num">₹{{ "{:,.0f}".format(o.balance) }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-msg">Koi outstanding nahi 🎉 — sab payments clear</div>
+    {% endif %}
+  </div>
+
+  <footer><p>© 2025 GD Pulse — Purav Carting</p></footer>
+
+  <script src="/static/icons.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => { if (window.renderIcons) window.renderIcons(); });
+  </script>
+
+</body>
+</html>
