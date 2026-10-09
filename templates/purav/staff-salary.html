@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Staff Salary — Purav Carting</title>
+<link rel="icon" type="image/png" href="/static/favicon.png">
+<link rel="stylesheet" href="/static/style.css">
+<style>
+  .pc-nav { background: linear-gradient(135deg, #1e3a8a 0%, #ea580c 100%); padding: 0 20px; display: flex; align-items: center; gap: 4px; overflow-x: auto; box-shadow: 0 4px 20px rgba(30,58,138,0.3); position: sticky; top: 70px; z-index: 90; white-space: nowrap; }
+  .pc-nav a { color: rgba(255,255,255,0.85); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; border-bottom: 3px solid transparent; }
+  .pc-nav a:hover, .pc-nav a.active { color: white; background: rgba(255,255,255,0.1); }
+  .pc-nav a.active { border-bottom-color: white; }
+  .pc-nav a [data-icon] { width: 15px; height: 15px; }
+
+  .page-head { padding: 30px 40px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; border-bottom: 1px solid var(--border); margin-bottom: 30px; }
+  .page-head h1 { font-size: 28px; font-weight: 900; color: var(--text); letter-spacing: -1px; display: flex; align-items: center; gap: 12px; }
+  .page-head h1 [data-icon] { width: 32px; height: 32px; color: #1e3a8a; }
+
+  .btn-pc { background: linear-gradient(135deg, #1e3a8a, #ea580c); color: white; border: none; padding: 12px 24px; border-radius: 30px; font-weight: 800; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; box-shadow: 0 8px 20px rgba(30,58,138,0.3); }
+  .btn-pc [data-icon] { width: 16px; height: 16px; }
+
+  .alert-box { padding: 14px 20px; border-radius: 12px; margin: 0 40px 20px; font-size: 14px; font-weight: 600; }
+  .alert-box.success { background: rgba(16,185,129,0.1); color: #10b981; border-left: 4px solid #10b981; }
+
+  .form-card { margin: 0 40px 25px; background: var(--card); border: 2px solid #1e3a8a; border-radius: 16px; padding: 28px; }
+  .form-card h2 { font-size: 18px; font-weight: 800; margin-bottom: 18px; color: var(--text); display: flex; align-items: center; gap: 10px; }
+  .form-card h2 [data-icon] { width: 22px; height: 22px; color: #1e3a8a; }
+
+  .form-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 15px; }
+  .form-card label { display: block; font-size: 12px; color: var(--text-dim); font-weight: 700; margin-bottom: 6px; text-transform: uppercase; }
+  .form-card input, .form-card select, .form-card textarea { width: 100%; padding: 11px 14px; margin: 0; border: 1.5px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-size: 14px; outline: none; }
+  .form-card input:focus, .form-card select:focus { border-color: #1e3a8a; }
+
+  .btn-save { width: 100%; padding: 14px; border-radius: 10px; font-weight: 800; font-size: 15px; cursor: pointer; border: none; background: linear-gradient(135deg, #1e3a8a, #ea580c); color: white; box-shadow: 0 8px 20px rgba(30,58,138,0.3); margin-top: 10px; }
+
+  .data-table { margin: 0 40px 40px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+  .data-table table { width: 100%; border-collapse: collapse; }
+  .data-table th, .data-table td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .data-table th { background: rgba(30,58,138,0.08); font-weight: 800; font-size: 10px; text-transform: uppercase; }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table td.num { text-align: right; font-weight: 700; color: #10b981; }
+
+  .btn-sm { padding: 5px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--text-dim); text-decoration: none; display: inline-flex; }
+  .btn-sm.danger:hover { background: #ef4444; color: white; border-color: #ef4444; }
+  .btn-sm [data-icon] { width: 10px; height: 10px; }
+
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--text-dim); }
+
+  @media (max-width: 700px) {
+    .page-head, .form-card, .data-table, .alert-box { margin-left: 20px; margin-right: 20px; padding-left: 20px; padding-right: 20px; }
+    .form-grid-3 { grid-template-columns: 1fr; }
+    .data-table { overflow-x: auto; }
+  }
+</style>
+</head>
+<body>
+
+  <header>
+    <a href="/" class="logo"><img src="/static/logo-horizontal.png" alt="GD Pulse"></a>
+    <nav class="nav-links"><a href="/purav/carting" class="active">Purav Carting</a></nav>
+    <div class="header-right">
+      <button class="theme-toggle" onclick="toggleTheme(event)"></button>
+      <a href="#" onclick="confirmLogout(event)" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
+    </div>
+  </header>
+
+  <nav class="pc-nav">
+    <a href="/purav/carting"><span data-icon="grid"></span> Dashboard</a>
+    <a href="/purav/carting/staff"><span data-icon="users"></span> Staff</a>
+    <a href="/purav/carting/staff-salary" class="active"><span data-icon="gst"></span> Salary</a>
+    <a href="/purav/carting/staff-advance"><span data-icon="gst"></span> Advance</a>
+  </nav>
+
+  <div class="page-head">
+    <h1><span data-icon="gst"></span> Staff Salary</h1>
+  </div>
+
+  {% if request.args.get('success') == 'added' %}<div class="alert-box success">Salary payment save ho gaya!</div>{% endif %}
+  {% if request.args.get('success') == 'deleted' %}<div class="alert-box success">Delete ho gaya!</div>{% endif %}
+
+  <div class="form-card">
+    <h2><span data-icon="plus"></span> New Salary Payment</h2>
+    <form method="POST" action="/purav/carting/staff-salary/add">
+      <div class="form-grid-3">
+        <div>
+          <label>Staff *</label>
+          <select name="staff_id" required>
+            <option value="">-- Select --</option>
+            {% for s in staff %}<option value="{{ s.id }}">{{ s.name }} ({{ s.role }})</option>{% endfor %}
+          </select>
+        </div>
+        <div><label>Date</label><input type="date" name="date" value="{{ today }}" required></div>
+        <div><label>Month</label><input type="month" name="month"></div>
+      </div>
+      <div class="form-grid-3">
+        <div><label>Days Worked</label><input type="number" name="days" value="0" step="0.5" min="0"></div>
+        <div><label>Amount (₹) *</label><input type="number" name="amount" value="0" step="0.01" min="0" required></div>
+        <div><label>Notes</label><input type="text" name="notes" placeholder="Optional"></div>
+      </div>
+      <button type="submit" class="btn-save"><span data-icon="check"></span> Save Salary Payment</button>
+    </form>
+  </div>
+
+  <h3 style="margin: 0 40px 15px; font-weight: 800;">Recent Payments</h3>
+  {% if payments %}
+    <div class="data-table">
+      <table>
+        <thead>
+          <tr><th>Date</th><th>Staff</th><th>Role</th><th>Days</th><th>Month</th><th>Amount</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          {% for p in payments|sort(attribute='date', reverse=True) %}
+          <tr>
+            <td><b>{{ p.date }}</b></td>
+            <td>{{ p.staff_name }}</td>
+            <td>{{ p.role }}</td>
+            <td class="num">{{ p.days }}</td>
+            <td>{{ p.month }}</td>
+            <td class="num">₹{{ "{:,.0f}".format(p.amount) }}</td>
+            <td>
+              <a href="#" class="btn-sm danger" onclick="confirmDel('{{ p.id }}');return false;"><span data-icon="trash"></span></a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state">Koi salary payment nahi</div>
+  {% endif %}
+
+  <footer><p>© 2025 GD Pulse — Purav Carting</p></footer>
+
+  <script src="/static/icons.js"></script>
+  <script>
+    function confirmDel(id) {
+      showConfirm("Delete Payment?", "Ye salary entry delete karni hai?", "Yes, Delete", () => {
+        window.location.href = "/purav/carting/staff-salary/delete/" + id;
+      });
+    }
+    document.addEventListener("DOMContentLoaded", () => { if (window.renderIcons) window.renderIcons(); });
+  </script>
+
+</body>
+</html>
