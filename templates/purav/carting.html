@@ -12,118 +12,46 @@
     --pc-accent: #ea580c;
     --pc-gradient: linear-gradient(135deg, #1e3a8a, #ea580c);
   }
-  .pc-nav {
-    background: linear-gradient(135deg, #1e3a8a 0%, #ea580c 100%);
-    padding: 0 20px; display: flex; align-items: center; gap: 4px;
-    overflow-x: auto; box-shadow: 0 4px 20px rgba(30,58,138,0.3);
-    position: sticky; top: 70px; z-index: 90;
-    white-space: nowrap; scrollbar-width: thin;
-  }
+  .pc-nav { background: linear-gradient(135deg, #1e3a8a 0%, #ea580c 100%); padding: 0 20px; display: flex; align-items: center; gap: 4px; overflow-x: auto; box-shadow: 0 4px 20px rgba(30,58,138,0.3); position: sticky; top: 70px; z-index: 90; white-space: nowrap; scrollbar-width: thin; }
   .pc-nav::-webkit-scrollbar { height: 4px; }
   .pc-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
-  .pc-nav a {
-    color: rgba(255,255,255,0.85); text-decoration: none;
-    padding: 14px 16px; font-size: 13px; font-weight: 600;
-    display: inline-flex; align-items: center; gap: 6px;
-    border-bottom: 3px solid transparent;
-    transition: all 0.25s; white-space: nowrap;
-  }
+  .pc-nav a { color: rgba(255,255,255,0.85); text-decoration: none; padding: 14px 14px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; border-bottom: 3px solid transparent; transition: all 0.25s; white-space: nowrap; }
   .pc-nav a:hover { color: white; background: rgba(255,255,255,0.1); }
   .pc-nav a.active { color: white; border-bottom-color: white; background: rgba(255,255,255,0.08); }
-  .pc-nav a [data-icon] { width: 15px; height: 15px; }
+  .pc-nav a [data-icon] { width: 14px; height: 14px; }
 
-  .pc-hero {
-    background: linear-gradient(135deg, rgba(30,58,138,0.08) 0%, rgba(234,88,12,0.08) 100%);
-    padding: 40px 40px 32px; border-bottom: 1px solid var(--border);
-    position: relative; overflow: hidden;
-  }
-  .pc-hero::before {
-    content: ""; position: absolute; top: -50%; right: 10%;
-    width: 300px; height: 300px;
-    background: radial-gradient(circle, rgba(234,88,12,0.15), transparent 70%);
-    border-radius: 50%;
-  }
-  .pc-hero-content {
-    position: relative; z-index: 1;
-    display: flex; justify-content: space-between;
-    align-items: center; flex-wrap: wrap; gap: 20px;
-  }
-  .pc-hero h1 {
-    font-size: 32px; font-weight: 900; color: var(--text);
-    margin-bottom: 6px; letter-spacing: -1px;
-    display: flex; align-items: center; gap: 12px;
-  }
-  .pc-hero h1 .pc-logo {
-    width: 50px; height: 50px; border-radius: 14px;
-    background: var(--pc-gradient);
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 8px 20px rgba(30,58,138,0.3);
-  }
+  .pc-hero { background: linear-gradient(135deg, rgba(30,58,138,0.08) 0%, rgba(234,88,12,0.08) 100%); padding: 40px 40px 32px; border-bottom: 1px solid var(--border); position: relative; overflow: hidden; }
+  .pc-hero::before { content: ""; position: absolute; top: -50%; right: 10%; width: 300px; height: 300px; background: radial-gradient(circle, rgba(234,88,12,0.15), transparent 70%); border-radius: 50%; }
+  .pc-hero-content { position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
+  .pc-hero h1 { font-size: 32px; font-weight: 900; color: var(--text); margin-bottom: 6px; letter-spacing: -1px; display: flex; align-items: center; gap: 12px; }
+  .pc-hero h1 .pc-logo { width: 50px; height: 50px; border-radius: 14px; background: var(--pc-gradient); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(30,58,138,0.3); }
   .pc-hero h1 .pc-logo [data-icon] { width: 26px; height: 26px; color: white; }
   .pc-hero .sub { color: var(--text-dim); font-size: 14px; margin-left: 62px; }
-  .pc-switcher {
-    background: var(--card); border: 2px solid var(--border);
-    padding: 10px 18px; border-radius: 12px;
-    font-size: 13px; font-weight: 700; color: var(--text);
-    text-decoration: none;
-    display: inline-flex; align-items: center; gap: 8px;
-    transition: all 0.3s;
-  }
+  .pc-hero-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .pc-switcher { background: var(--card); border: 2px solid var(--border); padding: 10px 18px; border-radius: 12px; font-size: 13px; font-weight: 700; color: var(--text); text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s; }
   .pc-switcher:hover { border-color: var(--pc-accent); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(234,88,12,0.2); }
+  .pc-switcher.test-btn { background: linear-gradient(135deg, #f59e0b, #ea580c); color: white; border: none; }
+  .pc-switcher.test-btn:hover { box-shadow: 0 10px 25px rgba(245,158,11,0.4); }
 
   .pc-quick { padding: 30px 40px; }
-  .pc-quick-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px;
-  }
-  .pc-quick-btn {
-    background: var(--card); border: 2px solid var(--border);
-    padding: 18px; border-radius: 14px;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 8px; cursor: pointer;
-    transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    text-decoration: none; color: inherit; text-align: center;
-  }
-  .pc-quick-btn:hover {
-    border-color: var(--pc-accent); transform: translateY(-4px);
-    box-shadow: 0 12px 28px rgba(234,88,12,0.15);
-  }
-  .pc-quick-btn .qc-icon {
-    width: 44px; height: 44px; border-radius: 12px;
-    background: linear-gradient(135deg, rgba(30,58,138,0.1), rgba(234,88,12,0.1));
-    display: flex; align-items: center; justify-content: center;
-    color: var(--pc-primary); transition: all 0.35s;
-  }
+  .pc-quick-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; }
+  .pc-quick-btn { background: var(--card); border: 2px solid var(--border); padding: 18px; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-decoration: none; color: inherit; text-align: center; }
+  .pc-quick-btn:hover { border-color: var(--pc-accent); transform: translateY(-4px); box-shadow: 0 12px 28px rgba(234,88,12,0.15); }
+  .pc-quick-btn .qc-icon { width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, rgba(30,58,138,0.1), rgba(234,88,12,0.1)); display: flex; align-items: center; justify-content: center; color: var(--pc-primary); transition: all 0.35s; }
   .pc-quick-btn:hover .qc-icon { background: var(--pc-gradient); color: white; transform: scale(1.1) rotate(-5deg); }
   .pc-quick-btn .qc-icon [data-icon] { width: 22px; height: 22px; }
   .pc-quick-btn .qc-label { font-size: 13px; font-weight: 700; color: var(--text); }
 
   .pc-section { padding: 0 40px 40px; }
-  .pc-section-title {
-    font-size: 18px; font-weight: 800; color: var(--text);
-    margin-bottom: 20px; display: flex; align-items: center; gap: 10px; letter-spacing: -0.3px;
-  }
+  .pc-section-title { font-size: 18px; font-weight: 800; color: var(--text); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; letter-spacing: -0.3px; }
   .pc-section-title .dot { width: 6px; height: 24px; background: var(--pc-gradient); border-radius: 4px; }
 
-  .pc-stats-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;
-  }
-  .pc-stat {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 16px; padding: 20px;
-    transition: all 0.35s; position: relative; overflow: hidden;
-  }
-  .pc-stat::before {
-    content: ""; position: absolute; top: 0; left: 0;
-    width: 100%; height: 4px; background: var(--pc-gradient);
-    transform: scaleX(0); transform-origin: left; transition: transform 0.4s;
-  }
+  .pc-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
+  .pc-stat { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; transition: all 0.35s; position: relative; overflow: hidden; }
+  .pc-stat::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: var(--pc-gradient); transform: scaleX(0); transform-origin: left; transition: transform 0.4s; }
   .pc-stat:hover::before { transform: scaleX(1); }
   .pc-stat:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(30,58,138,0.12); }
-  .pc-stat .label {
-    font-size: 11px; font-weight: 700; color: var(--text-dim);
-    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;
-    display: flex; align-items: center; gap: 6px;
-  }
+  .pc-stat .label { font-size: 11px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
   .pc-stat .label [data-icon] { width: 14px; height: 14px; color: var(--pc-primary); }
   .pc-stat .value { font-size: 26px; font-weight: 900; color: var(--text); letter-spacing: -1px; line-height: 1; }
 
@@ -131,33 +59,20 @@
   @media (max-width: 900px) { .pc-two-col { grid-template-columns: 1fr; } }
 
   .pc-box { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
-  .pc-box h3 {
-    font-size: 16px; font-weight: 800; color: var(--text); margin-bottom: 18px;
-    display: flex; align-items: center; gap: 8px;
-  }
+  .pc-box h3 { font-size: 16px; font-weight: 800; color: var(--text); margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
   .pc-box h3 [data-icon] { width: 18px; height: 18px; color: var(--pc-primary); }
 
-  .pc-list-item {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 12px 0; border-bottom: 1px dashed var(--border); font-size: 13px;
-  }
+  .pc-list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px dashed var(--border); font-size: 13px; }
   .pc-list-item:last-child { border-bottom: none; }
   .pc-list-item .li-left { color: var(--text-dim); font-weight: 500; }
   .pc-list-item .li-right { color: var(--text); font-weight: 700; }
   .pc-list-item .li-right.pos { color: #10b981; }
 
-  .pc-alert-item {
-    display: flex; align-items: flex-start; gap: 12px;
-    padding: 10px 12px; border-radius: 10px; margin-bottom: 8px;
-    border-left: 3px solid; font-size: 13px;
-  }
+  .pc-alert-item { display: flex; align-items: flex-start; gap: 12px; padding: 10px 12px; border-radius: 10px; margin-bottom: 8px; border-left: 3px solid; font-size: 13px; }
   .pc-alert-item.warn { background: rgba(251,191,36,0.08); border-left-color: #f59e0b; }
   .pc-alert-item.danger { background: rgba(239,68,68,0.08); border-left-color: #ef4444; }
 
-  .pc-empty {
-    text-align: center; padding: 30px 20px;
-    color: var(--text-dim); font-size: 13px;
-  }
+  .pc-empty { text-align: center; padding: 30px 20px; color: var(--text-dim); font-size: 13px; }
   .pc-empty [data-icon] { width: 40px; height: 40px; opacity: 0.3; margin-bottom: 10px; color: var(--pc-primary); }
 
   @media (max-width: 700px) {
@@ -183,6 +98,7 @@
     </div>
   </header>
 
+  <!-- FULL NAV -->
   <nav class="pc-nav">
     <a href="/purav/carting" class="active"><span data-icon="grid"></span> Dashboard</a>
     <a href="/purav/carting/trucks"><span data-icon="sand"></span> Trucks</a>
@@ -190,49 +106,70 @@
     <a href="/purav/carting/suppliers"><span data-icon="retail"></span> Suppliers</a>
     <a href="/purav/carting/materials"><span data-icon="assets"></span> Materials</a>
     <a href="/purav/carting/staff"><span data-icon="users"></span> Staff</a>
-    <div class="nav-sep" style="width:1px;height:24px;background:rgba(255,255,255,0.2);margin:0 4px;align-self:center;"></div>
-    <a href="/purav/carting/entry"><span data-icon="prompts"></span> Daily Entry</a>
+    <div style="width:1px;height:24px;background:rgba(255,255,255,0.2);margin:0 4px;align-self:center;"></div>
+    <a href="/purav/carting/entry"><span data-icon="retail"></span> Sale Entry</a>
+    <a href="/purav/carting/challan"><span data-icon="retail"></span> Challan</a>
+    <a href="/purav/carting/purchase"><span data-icon="download"></span> Purchase</a>
+    <a href="/purav/carting/invoice"><span data-icon="gst"></span> Invoice</a>
+    <a href="/purav/carting/payment"><span data-icon="gst"></span> Payment</a>
+    <a href="/purav/carting/trip"><span data-icon="sand"></span> Trip</a>
+    <div style="width:1px;height:24px;background:rgba(255,255,255,0.2);margin:0 4px;align-self:center;"></div>
+    <a href="/purav/carting/staff-salary"><span data-icon="gst"></span> Salary</a>
+    <a href="/purav/carting/staff-advance"><span data-icon="gst"></span> Advance</a>
     <a href="/purav/carting/ledger"><span data-icon="analytics"></span> Ledger</a>
-    <a href="#" onclick="alert('Challan module — coming soon!');return false;"><span data-icon="retail"></span> Challan</a>
-    <a href="#" onclick="alert('Purchase module — coming soon!');return false;"><span data-icon="download"></span> Purchase</a>
+    <a href="/purav/carting/reports"><span data-icon="analytics"></span> Reports</a>
+    <a href="/purav/carting/alerts"><span data-icon="bell"></span> Alerts</a>
+    <a href="/purav/carting/settings"><span data-icon="settings"></span> Settings</a>
   </nav>
 
+  <!-- HERO -->
   <div class="pc-hero">
     <div class="pc-hero-content">
       <div>
         <h1><span class="pc-logo"><span data-icon="sand"></span></span> Purav Carting</h1>
         <div class="sub">Welcome, {{ name }} — Transport & Material Supply</div>
       </div>
-      <a href="/purav" class="pc-switcher"><span data-icon="grid" style="width:16px;height:16px;"></span> Switch Business</a>
+      <div class="pc-hero-actions">
+        <a href="/purav" class="pc-switcher"><span data-icon="grid" style="width:16px;height:16px;"></span> Switch Business</a>
+        <a href="/purav/carting/test-data" class="pc-switcher test-btn" onclick="return confirm('⚠️ Test data generate karna hai?\n\nSaara existing data DELETE ho jayega (trucks, customers, entries, challans, sab kuch).\n\nYe sirf testing ke liye hai. Confirm?');">
+          <span data-icon="sparkle" style="width:16px;height:16px;"></span> Generate Test Data
+        </a>
+      </div>
     </div>
   </div>
+
+  {% if request.args.get('success') == 'testdata' %}
+  <div style="margin: 20px 40px 0; padding: 16px 22px; background: rgba(16,185,129,0.1); border-left: 4px solid #10b981; border-radius: 12px; color: #10b981; font-weight: 700;">
+    Test data generate ho gaya! Saare modules check karo — Trucks, Customers, Challans, Invoices, etc.
+  </div>
+  {% endif %}
 
   <!-- QUICK ACTIONS -->
   <div class="pc-quick">
     <div class="pc-quick-grid">
       <a href="/purav/carting/entry" class="pc-quick-btn">
-        <div class="qc-icon"><span data-icon="prompts"></span></div>
-        <div class="qc-label">Daily Entry</div>
-      </a>
-      <a href="/purav/carting/trucks" class="pc-quick-btn">
-        <div class="qc-icon"><span data-icon="sand"></span></div>
-        <div class="qc-label">Trucks ({{ truck_count }})</div>
-      </a>
-      <a href="/purav/carting/customers" class="pc-quick-btn">
-        <div class="qc-icon"><span data-icon="users"></span></div>
-        <div class="qc-label">Customers</div>
-      </a>
-      <a href="/purav/carting/ledger" class="pc-quick-btn">
-        <div class="qc-icon"><span data-icon="analytics"></span></div>
-        <div class="qc-label">Ledger</div>
-      </a>
-      <a href="/purav/carting/suppliers" class="pc-quick-btn">
         <div class="qc-icon"><span data-icon="retail"></span></div>
-        <div class="qc-label">Suppliers</div>
+        <div class="qc-label">Sale Entry</div>
       </a>
-      <a href="/purav/carting/staff" class="pc-quick-btn">
-        <div class="qc-icon"><span data-icon="users"></span></div>
-        <div class="qc-label">Staff</div>
+      <a href="/purav/carting/challan" class="pc-quick-btn">
+        <div class="qc-icon"><span data-icon="retail"></span></div>
+        <div class="qc-label">New Challan</div>
+      </a>
+      <a href="/purav/carting/purchase" class="pc-quick-btn">
+        <div class="qc-icon"><span data-icon="download"></span></div>
+        <div class="qc-label">New Purchase</div>
+      </a>
+      <a href="/purav/carting/invoice" class="pc-quick-btn">
+        <div class="qc-icon"><span data-icon="gst"></span></div>
+        <div class="qc-label">Tax Invoice</div>
+      </a>
+      <a href="/purav/carting/payment" class="pc-quick-btn">
+        <div class="qc-icon"><span data-icon="gst"></span></div>
+        <div class="qc-label">New Payment</div>
+      </a>
+      <a href="/purav/carting/trip" class="pc-quick-btn">
+        <div class="qc-icon"><span data-icon="sand"></span></div>
+        <div class="qc-label">New Trip</div>
       </a>
     </div>
   </div>
@@ -279,6 +216,29 @@
       <div class="pc-stat">
         <div class="label"><span data-icon="analytics"></span> Net Profit</div>
         <div class="value" style="color:#10b981;">₹{{ "{:,.0f}".format(stats.month_profit) }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MONTH FINANCIAL -->
+  <div class="pc-section">
+    <h2 class="pc-section-title"><span class="dot"></span>This Month Financial</h2>
+    <div class="pc-stats-grid">
+      <div class="pc-stat">
+        <div class="label"><span data-icon="download"></span> Purchase</div>
+        <div class="value" style="color:#ef4444;">₹{{ "{:,.0f}".format(stats.month_purchase) }}</div>
+      </div>
+      <div class="pc-stat">
+        <div class="label"><span data-icon="gst"></span> Payment Received</div>
+        <div class="value" style="color:#10b981;">₹{{ "{:,.0f}".format(stats.month_payment) }}</div>
+      </div>
+      <div class="pc-stat">
+        <div class="label"><span data-icon="prompts"></span> Pending Challans</div>
+        <div class="value" style="color:#f59e0b;">{{ stats.pending_challans }}</div>
+      </div>
+      <div class="pc-stat">
+        <div class="label"><span data-icon="sand"></span> Total Trucks</div>
+        <div class="value">{{ truck_count }}</div>
       </div>
     </div>
   </div>
@@ -336,7 +296,7 @@
       {% else %}
         <div class="pc-empty">
           <span data-icon="prompts"></span>
-          <p>Abhi koi entry nahi. Daily Entry karo.</p>
+          <p>Abhi koi entry nahi. Sale Entry karo ya Test Data generate karo.</p>
         </div>
       {% endif %}
     </div>
