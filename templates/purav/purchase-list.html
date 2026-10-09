@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Purchase List — Purav Carting</title>
+<link rel="icon" type="image/png" href="/static/favicon.png">
+<link rel="stylesheet" href="/static/style.css">
+<style>
+  .pc-nav { background: linear-gradient(135deg, #1e3a8a 0%, #ea580c 100%); padding: 0 20px; display: flex; align-items: center; gap: 4px; overflow-x: auto; box-shadow: 0 4px 20px rgba(30,58,138,0.3); position: sticky; top: 70px; z-index: 90; white-space: nowrap; }
+  .pc-nav a { color: rgba(255,255,255,0.85); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; border-bottom: 3px solid transparent; }
+  .pc-nav a:hover, .pc-nav a.active { color: white; background: rgba(255,255,255,0.1); }
+  .pc-nav a.active { border-bottom-color: white; }
+  .pc-nav a [data-icon] { width: 15px; height: 15px; }
+
+  .page-head { padding: 30px 40px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; border-bottom: 1px solid var(--border); margin-bottom: 30px; }
+  .page-head h1 { font-size: 28px; font-weight: 900; color: var(--text); letter-spacing: -1px; display: flex; align-items: center; gap: 12px; }
+  .page-head h1 [data-icon] { width: 32px; height: 32px; color: #1e3a8a; }
+
+  .btn-pc { background: linear-gradient(135deg, #1e3a8a, #ea580c); color: white; border: none; padding: 12px 24px; border-radius: 30px; font-weight: 800; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; box-shadow: 0 8px 20px rgba(30,58,138,0.3); }
+  .btn-pc [data-icon] { width: 16px; height: 16px; }
+
+  .alert-box { padding: 14px 20px; border-radius: 12px; margin: 0 40px 20px; font-size: 14px; font-weight: 600; }
+  .alert-box.success { background: rgba(16,185,129,0.1); color: #10b981; border-left: 4px solid #10b981; }
+
+  .filter-bar { margin: 0 40px 25px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end; }
+  .filter-bar > div { flex: 1; min-width: 160px; }
+  .filter-bar label { display: block; font-size: 11px; color: var(--text-dim); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .filter-bar select, .filter-bar input { width: 100%; padding: 11px 14px; margin: 0; border: 1.5px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-size: 13px; outline: none; }
+  .filter-bar select:focus, .filter-bar input:focus { border-color: #1e3a8a; }
+  .filter-bar .btn-apply { background: linear-gradient(135deg, #1e3a8a, #ea580c); color: white; border: none; padding: 11px 24px; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; flex: none; }
+
+  .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin: 0 40px 25px; }
+  .summary-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; position: relative; overflow: hidden; }
+  .summary-card::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: linear-gradient(90deg, #1e3a8a, #ea580c); transform: scaleX(0); transform-origin: left; transition: transform 0.4s; }
+  .summary-card:hover::before { transform: scaleX(1); }
+  .summary-card .sc-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; font-weight: 800; margin-bottom: 6px; }
+  .summary-card .sc-value { font-size: 22px; font-weight: 900; color: var(--text); letter-spacing: -0.5px; }
+  .summary-card.warn .sc-value { color: #f59e0b; }
+  .summary-card.paid .sc-value { color: #10b981; }
+
+  .purchase-table { margin: 0 40px 40px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+  .purchase-table table { width: 100%; border-collapse: collapse; }
+  .purchase-table th, .purchase-table td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .purchase-table th { background: rgba(30,58,138,0.08); font-weight: 800; color: var(--text); font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .purchase-table tr:last-child td { border-bottom: none; }
+  .purchase-table tr:hover td { background: rgba(30,58,138,0.03); }
+  .purchase-table td.num { text-align: right; font-weight: 700; }
+
+  .badge-status { padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+  .badge-status.Pending { background: rgba(251,191,36,0.15); color: #f59e0b; }
+  .badge-status.Paid { background: rgba(16,185,129,0.15); color: #10b981; }
+  .badge-status.Partial { background: rgba(139,92,246,0.15); color: #8b5cf6; }
+
+  .btn-sm { padding: 5px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--text-dim); text-decoration: none; display: inline-flex; align-items: center; gap: 3px; transition: all 0.25s; }
+  .btn-sm:hover { background: var(--primary); color: white; border-color: var(--primary); }
+  .btn-sm.paid:hover { background: #10b981; border-color: #10b981; }
+  .btn-sm.danger:hover { background: #ef4444; border-color: #ef4444; }
+  .btn-sm [data-icon] { width: 10px; height: 10px; }
+  .tbl-actions { display: flex; gap: 5px; }
+
+  .empty-state { text-align: center; padding: 60px 20px; background: var(--card); border: 2px dashed var(--border); border-radius: 16px; margin: 0 40px; }
+  .empty-state [data-icon] { width: 50px; height: 50px; color: #1e3a8a; opacity: 0.4; margin-bottom: 15px; }
+  .empty-state h3 { color: var(--text); margin-bottom: 8px; }
+
+  @media (max-width: 700px) {
+    .page-head, .filter-bar, .summary-grid, .purchase-table, .alert-box { margin-left: 20px; margin-right: 20px; padding-left: 20px; padding-right: 20px; }
+    .purchase-table { overflow-x: auto; }
+    .empty-state { margin: 0 20px; }
+    .filter-bar > div { min-width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+  <header>
+    <a href="/" class="logo"><img src="/static/logo-horizontal.png" alt="GD Pulse"></a>
+    <nav class="nav-links"><a href="/purav/carting" class="active">Purav Carting</a></nav>
+    <div class="header-right">
+      <button class="theme-toggle" onclick="toggleTheme(event)"></button>
+      <a href="#" onclick="confirmLogout(event)" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
+    </div>
+  </header>
+
+  <nav class="pc-nav">
+    <a href="/purav/carting"><span data-icon="grid"></span> Dashboard</a>
+    <a href="/purav/carting/trucks"><span data-icon="sand"></span> Trucks</a>
+    <a href="/purav/carting/customers"><span data-icon="users"></span> Customers</a>
+    <a href="/purav/carting/suppliers"><span data-icon="retail"></span> Suppliers</a>
+    <a href="/purav/carting/materials"><span data-icon="assets"></span> Materials</a>
+    <a href="/purav/carting/entry"><span data-icon="prompts"></span> Daily Entry</a>
+    <a href="/purav/carting/challan"><span data-icon="retail"></span> Challan</a>
+    <a href="/purav/carting/purchase/list" class="active"><span data-icon="download"></span> Purchase</a>
+    <a href="/purav/carting/ledger"><span data-icon="analytics"></span> Ledger</a>
+  </nav>
+
+  <div class="page-head">
+    <h1><span data-icon="analytics"></span> Purchase List</h1>
+    <a href="/purav/carting/purchase" class="btn-pc"><span data-icon="plus"></span> New Purchase</a>
+  </div>
+
+  {% if request.args.get('success') == 'added' %}<div class="alert-box success">Purchase save ho gaya!</div>{% endif %}
+  {% if request.args.get('success') == 'deleted' %}<div class="alert-box success">Purchase delete ho gaya!</div>{% endif %}
+  {% if request.args.get('success') == 'paid' %}<div class="alert-box success">Payment mark ho gaya Paid!</div>{% endif %}
+
+  <form method="GET" class="filter-bar">
+    <div><label>Month</label><input type="month" name="month" value="{{ month_filter }}"></div>
+    <div>
+      <label>Supplier</label>
+      <select name="supplier">
+        <option value="all" {% if supplier_filter == 'all' %}selected{% endif %}>All Suppliers</option>
+        {% for s in suppliers %}<option value="{{ s.id }}" {% if supplier_filter == s.id %}selected{% endif %}>{{ s.name }}</option>{% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn-apply">Apply Filter</button>
+  </form>
+
+  <div class="summary-grid">
+    <div class="summary-card"><div class="sc-label">Total Purchases</div><div class="sc-value">{{ totals.count }}</div></div>
+    <div class="summary-card"><div class="sc-label">Total Amount</div><div class="sc-value">₹{{ "{:,.0f}".format(totals.amount) }}</div></div>
+    <div class="summary-card paid"><div class="sc-label">Paid</div><div class="sc-value">₹{{ "{:,.0f}".format(totals.paid) }}</div></div>
+    <div class="summary-card warn"><div class="sc-label">Pending</div><div class="sc-value">₹{{ "{:,.0f}".format(totals.pending) }}</div></div>
+  </div>
+
+  {% if purchases %}
+    <div class="purchase-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Bill No</th>
+            <th>Supplier</th>
+            <th>Material</th>
+            <th>Qty</th>
+            <th>Rate</th>
+            <th>Amount</th>
+            <th>Vehicle</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in purchases %}
+          <tr>
+            <td><b>{{ p.date }}</b></td>
+            <td>{{ p.bill_no or '—' }}</td>
+            <td>{{ p.supplier_name }}</td>
+            <td>{{ p.material_name }}</td>
+            <td class="num">{{ p.quantity }} {{ p.unit }}</td>
+            <td class="num">₹{{ "{:,.2f}".format(p.rate) }}</td>
+            <td class="num"><b>₹{{ "{:,.2f}".format(p.amount) }}</b></td>
+            <td>{{ p.vehicle or '—' }}</td>
+            <td><span class="badge-status {{ p.payment_status }}">{{ p.payment_status }}</span></td>
+            <td>
+              <div class="tbl-actions">
+                {% if p.payment_status != 'Paid' %}
+                <a href="#" class="btn-sm paid" onclick="confirmMarkPaid('{{ p.id }}');return false;"><span data-icon="check"></span> Paid</a>
+                {% endif %}
+                <a href="#" class="btn-sm danger" onclick="confirmDeletePurchase('{{ p.id }}');return false;"><span data-icon="trash"></span></a>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <span data-icon="download"></span>
+      <h3>Koi purchase nahi</h3>
+      <p>New Purchase add karo — gods se material kharida.</p>
+      <a href="/purav/carting/purchase" class="btn-pc"><span data-icon="plus"></span> New Purchase</a>
+    </div>
+  {% endif %}
+
+  <footer><p>© 2025 GD Pulse — Purav Carting</p></footer>
+
+  <script src="/static/icons.js"></script>
+  <script>
+    function confirmDeletePurchase(id) {
+      showConfirm("Delete Purchase?", "Ye purchase entry delete karni hai?", "Yes, Delete", () => {
+        window.location.href = "/purav/carting/purchase/delete/" + id;
+      });
+    }
+    function confirmMarkPaid(id) {
+      showConfirm("Mark Paid?", "Ye purchase paid mark ho jayegi.", "Yes, Mark Paid", () => {
+        window.location.href = "/purav/carting/purchase/mark-paid/" + id;
+      });
+    }
+    document.addEventListener("DOMContentLoaded", () => { if (window.renderIcons) window.renderIcons(); });
+  </script>
+
+</body>
+</html>
