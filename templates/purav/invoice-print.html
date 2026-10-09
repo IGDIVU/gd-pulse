@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ invoice.invoice_no }} — Purav Carting</title>
+<link rel="icon" type="image/png" href="/static/favicon.png">
+<link rel="stylesheet" href="/static/style.css">
+<style>
+  body { background: #e5e7eb; padding: 20px; }
+  .toolbar { max-width: 210mm; margin: 0 auto 15px; display: flex; gap: 10px; justify-content: flex-end; }
+  .toolbar button, .toolbar a { padding: 10px 20px; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; border: none; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #1e3a8a, #ea580c); color: white; box-shadow: 0 8px 20px rgba(30,58,138,0.3); transition: all 0.25s; }
+  .toolbar button:hover, .toolbar a:hover { transform: translateY(-2px); }
+  .toolbar .btn-back { background: var(--card); color: var(--text); border: 1.5px solid var(--border); box-shadow: none; }
+
+  .a4 { background: white; color: #000; width: 210mm; min-height: 297mm; margin: 0 auto; padding: 10mm 12mm; box-shadow: 0 10px 40px rgba(0,0,0,0.2); font-family: 'Arial', sans-serif; font-size: 10px; line-height: 1.35; box-sizing: border-box; position: relative; }
+  .a4 * { box-sizing: border-box; }
+
+  .inv-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 8px; }
+  .inv-header .cname { font-size: 22px; font-weight: 900; letter-spacing: 1px; }
+  .inv-header .csub { font-size: 9px; margin-top: 2px; }
+  .inv-title { text-align: center; font-size: 14px; font-weight: 900; border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 3px 0; margin: 6px 0; letter-spacing: 2px; }
+
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid #000; margin-bottom: 6px; font-size: 9px; }
+  .info-grid > div { padding: 5px; }
+  .info-grid > div:first-child { border-right: 1px solid #000; }
+  .info-row { display: flex; justify-content: space-between; padding: 1px 0; }
+  .info-row span:first-child { font-weight: 700; }
+
+  .billed { border: 1px solid #000; padding: 5px; margin-bottom: 6px; font-size: 9px; }
+  .billed .bt { font-weight: 900; font-size: 10px; margin-bottom: 3px; text-transform: uppercase; }
+
+  .items { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
+  .items th, .items td { border: 1px solid #000; padding: 3px 5px; font-size: 9px; text-align: left; }
+  .items th { background: #f0f0f0; font-weight: 800; text-align: center; }
+  .items td.num { text-align: right; font-weight: 700; }
+  .items td.center { text-align: center; }
+  .items tr.total-row td { background: #f0f0f0; font-weight: 900; font-size: 10px; }
+
+  .tax-summary { width: 100%; border-collapse: collapse; margin-top: 4px; }
+  .tax-summary td { border: 1px solid #000; padding: 3px 6px; font-size: 9px; }
+  .tax-summary td.num { text-align: right; font-weight: 700; }
+  .tax-summary tr.gross td { background: #e8e8e8; font-weight: 900; font-size: 11px; }
+
+  .words { border: 1px solid #000; border-top: none; padding: 4px 6px; font-size: 9px; font-weight: 700; }
+
+  .footer-grid { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid #000; border-top: none; font-size: 8.5px; }
+  .footer-grid > div { padding: 5px; border-right: 1px solid #000; }
+  .footer-grid > div:last-child { border-right: none; }
+
+  .sign { text-align: right; padding: 20px 5px 5px; font-size: 9px; font-weight: 700; }
+
+  @media print {
+    @page { size: A4; margin: 0; }
+    body { background: white; padding: 0; }
+    .toolbar { display: none; }
+    .a4 { box-shadow: none; margin: 0; }
+  }
+  @media (max-width: 800px) {
+    body { padding: 5px; }
+    .a4 { width: 100%; min-height: auto; padding: 15px; }
+    .cname { font-size: 16px !important; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="toolbar">
+    <a href="/purav/carting/invoice/list" class="btn-back">← Back</a>
+    <button onclick="window.print()">🖨️ Print / Save PDF</button>
+  </div>
+
+  <div class="a4">
+    <div class="inv-header">
+      <div class="cname">{{ settings.company_name or 'PURAV CARTING' }}</div>
+      <div class="csub">
+        {% if settings.company_address %}{{ settings.company_address }}<br>{% endif %}
+        {% if settings.company_gst %}<b>GSTIN:</b> {{ settings.company_gst }} &nbsp; {% endif %}
+        {% if settings.company_phone %}<b>Mob:</b> {{ settings.company_phone }}{% endif %}
+      </div>
+    </div>
+
+    <div class="inv-title">TAX INVOICE</div>
+
+    <div class="info-grid">
+      <div>
+        <div class="info-row"><span>Invoice No:</span><span><b>{{ invoice.invoice_no }}</b></span></div>
+        <div class="info-row"><span>Date:</span><span>{{ invoice.date }}</span></div>
+        {% if invoice.due_date %}<div class="info-row"><span>Due Date:</span><span>{{ invoice.due_date }}</span></div>{% endif %}
+      </div>
+      <div>
+        <div class="info-row"><span>Place of Supply:</span><span>{{ invoice.customer_state or 'Gujarat' }}</span></div>
+        <div class="info-row"><span>Challans:</span><span>{{ invoice.challans|length }}</span></div>
+        <div class="info-row"><span>Payment Term:</span><span>Credit</span></div>
+      </div>
+    </div>
+
+    <div class="billed">
+      <div class="bt">Billed To:</div>
+      <div style="font-weight:900;font-size:12px;">{{ invoice.customer_name }}</div>
+      {% if invoice.customer_address %}<div>{{ invoice.customer_address }}</div>{% endif %}
+      {% if invoice.customer_state %}<div><b>State:</b> {{ invoice.customer_state }}</div>{% endif %}
+      {% if invoice.customer_gstin %}<div><b>GSTIN:</b> {{ invoice.customer_gstin }}</div>{% endif %}
+      {% if invoice.customer_pan %}<div><b>PAN:</b> {{ invoice.customer_pan }}</div>{% endif %}
+    </div>
+
+    <table class="items">
+      <thead>
+        <tr>
+          <th style="width:30px;">Sno</th>
+          <th>Description of Goods</th>
+          <th style="width:80px;">HSN/SAC</th>
+          <th style="width:70px;">Qty</th>
+          <th style="width:50px;">Unit</th>
+          <th style="width:60px;">Rate</th>
+          <th style="width:80px;">Amount ₹</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in challans %}
+        <tr>
+          <td class="center">{{ loop.index }}</td>
+          <td><b>{{ c.material_name }}</b><br><span style="font-size:8px;color:#666;">Challan: {{ c.challan_no }} · {{ c.date }}</span></td>
+          <td class="center">—</td>
+          <td class="num">{{ c.quantity }}</td>
+          <td class="center">{{ c.unit }}</td>
+          <td class="num">{{ "{:,.2f}".format(c.rate) }}</td>
+          <td class="num">{{ "{:,.2f}".format(c.amount) }}</td>
+        </tr>
+        {% endfor %}
+        <tr class="total-row">
+          <td colspan="6" style="text-align:right;">Subtotal:</td>
+          <td class="num">{{ "{:,.2f}".format(invoice.subtotal) }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table class="tax-summary">
+      <tr><td style="width:60%;">CGST @ {{ (invoice.gst_rate/2)|round(2) }}%</td><td class="num">{{ "{:,.2f}".format(invoice.cgst) }}</td></tr>
+      <tr><td>SGST @ {{ (invoice.gst_rate/2)|round(2) }}%</td><td class="num">{{ "{:,.2f}".format(invoice.sgst) }}</td></tr>
+      <tr><td>Round Off</td><td class="num">{{ "{:,.2f}".format(invoice.round_off) }}</td></tr>
+      <tr class="gross"><td>GRAND TOTAL</td><td class="num">₹ {{ "{:,.2f}".format(invoice.total) }}</td></tr>
+    </table>
+
+    <div class="words">
+      <b>Amount in Words:</b> Rupees <span id="amtWords"></span> Only
+    </div>
+
+    <div class="footer-grid">
+      <div>
+        <div><b>Bank Details:</b></div>
+        <div><b>Bank:</b> {{ settings.bank_name or '—' }}</div>
+        <div><b>A/C No:</b> {{ settings.bank_account or '—' }}</div>
+        <div><b>IFSC:</b> {{ settings.bank_ifsc or '—' }}</div>
+      </div>
+      <div>
+        <div><b>Terms & Conditions:</b></div>
+        <div>• {{ settings.terms or 'Goods once sold will not be taken back.' }}</div>
+        <div>• Payment within due date, otherwise interest charged.</div>
+        <div>• Subject to jurisdiction only.</div>
+        <div class="sign">For {{ settings.company_name or 'Purav Carting' }}<br><br><br>Authorised Signatory</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/icons.js"></script>
+  <script>
+    function numberToWords(num) {
+      num = Math.round(num);
+      const ones = ["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
+      const tens = ["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
+      function two(n) { if (n < 20) return ones[n]; return tens[Math.floor(n/10)] + (n%10 ? " " + ones[n%10] : ""); }
+      function three(n) { let s = ""; if (n > 99) { s += ones[Math.floor(n/100)] + " Hundred"; n %= 100; if (n > 0) s += " "; } if (n > 0) s += two(n); return s; }
+      if (num === 0) return "Zero";
+      let str = "";
+      const cr = Math.floor(num / 10000000); num %= 10000000;
+      const la = Math.floor(num / 100000); num %= 100000;
+      const th = Math.floor(num / 1000); num %= 1000;
+      if (cr > 0) str += three(cr) + " Crore ";
+      if (la > 0) str += three(la) + " Lakh ";
+      if (th > 0) str += three(th) + " Thousand ";
+      if (num > 0) str += three(num);
+      return str.trim();
+    }
+    document.getElementById("amtWords").innerText = numberToWords({{ invoice.total }});
+    document.addEventListener("DOMContentLoaded", () => { if (window.renderIcons) window.renderIcons(); });
+  </script>
+
+</body>
+</html>
