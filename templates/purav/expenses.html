@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expenses — Purav Carting</title>
+<link rel="icon" type="image/png" href="/static/favicon.png">
+<link rel="stylesheet" href="/static/style.css">
+<style>
+  .pc-nav { background: linear-gradient(135deg, #1e3a8a 0%, #ea580c 100%); padding: 0 20px; display: flex; align-items: center; gap: 4px; overflow-x: auto; box-shadow: 0 4px 20px rgba(30,58,138,0.3); position: sticky; top: 70px; z-index: 90; white-space: nowrap; }
+  .pc-nav a { color: rgba(255,255,255,0.85); text-decoration: none; padding: 14px 12px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; border-bottom: 3px solid transparent; }
+  .pc-nav a:hover, .pc-nav a.active { color: white; background: rgba(255,255,255,0.1); }
+  .pc-nav a.active { border-bottom-color: white; }
+  .pc-nav a [data-icon] { width: 14px; height: 14px; }
+
+  .page-head { padding: 30px 40px 20px; border-bottom: 1px solid var(--border); margin-bottom: 30px; }
+  .page-head h1 { font-size: 28px; font-weight: 900; color: var(--text); letter-spacing: -1px; display: flex; align-items: center; gap: 12px; font-family: 'Book Antiqua', serif; }
+  .page-head h1 [data-icon] { width: 32px; height: 32px; color: #1e3a8a; }
+
+  .filter-bar { margin: 0 40px 25px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end; }
+  .filter-bar > div { flex: 1; min-width: 160px; }
+  .filter-bar label { display: block; font-size: 11px; color: var(--text-dim); font-weight: 800; text-transform: uppercase; margin-bottom: 6px; }
+  .filter-bar select, .filter-bar input { width: 100%; padding: 11px 14px; margin: 0; border: 1.5px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-size: 13px; outline: none; }
+  .filter-bar .btn-apply { background: linear-gradient(135deg, #1e3a8a, #ea580c); color: white; border: none; padding: 11px 24px; border-radius: 10px; font-weight: 800; cursor: pointer; }
+
+  .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin: 0 40px 25px; }
+  .summary-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; }
+  .summary-card .sc-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; font-weight: 800; margin-bottom: 6px; }
+  .summary-card .sc-value { font-size: 20px; font-weight: 900; color: var(--text); }
+  .summary-card.diesel .sc-value { color: #ef4444; }
+  .summary-card.labour .sc-value { color: #f59e0b; }
+  .summary-card.maint .sc-value { color: #8b5cf6; }
+
+  .data-table { margin: 0 40px 40px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+  .data-table table { width: 100%; border-collapse: collapse; }
+  .data-table th, .data-table td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .data-table th { background: rgba(30,58,138,0.08); font-weight: 800; font-size: 10px; text-transform: uppercase; }
+  .data-table tr:hover td { background: rgba(30,58,138,0.03); }
+  .data-table td.num { text-align: right; font-weight: 700; color: #ef4444; }
+
+  .badge { padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 800; }
+  .badge.Diesel { background: rgba(239,68,68,0.15); color: #ef4444; }
+  .badge.Labour { background: rgba(245,158,11,0.15); color: #f59e0b; }
+  .badge.Driver { background: rgba(59,130,246,0.15); color: #3b82f6; }
+  .badge.Maintenance { background: rgba(139,92,246,0.15); color: #8b5cf6; }
+  .badge.Other { background: rgba(107,114,128,0.15); color: #6b7280; }
+
+  .empty-state { text-align: center; padding: 60px 20px; background: var(--card); border: 2px dashed var(--border); border-radius: 16px; margin: 0 40px; }
+  .empty-state [data-icon] { width: 50px; height: 50px; color: #1e3a8a; opacity: 0.4; margin-bottom: 15px; }
+  .empty-state h3 { color: var(--text); margin-bottom: 8px; }
+
+  @media (max-width: 700px) {
+    .page-head, .filter-bar, .summary-grid, .data-table, .empty-state { padding-left: 20px; padding-right: 20px; margin-left: 20px; margin-right: 20px; }
+    .data-table { overflow-x: auto; }
+  }
+</style>
+</head>
+<body>
+
+  <header>
+    <a href="/" class="logo"><img src="/static/logo-horizontal.png" alt="GD Pulse"></a>
+    <nav class="nav-links"><a href="/purav/carting" class="active">Purav Carting</a></nav>
+    <div class="header-right">
+      <button class="theme-toggle" onclick="toggleTheme(event)"></button>
+      <a href="#" onclick="confirmLogout(event)" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
+    </div>
+  </header>
+
+  <nav class="pc-nav">
+    <a href="/purav/carting"><span data-icon="grid"></span> Dashboard</a>
+    <a href="/purav/carting/expenses" class="active"><span data-icon="download"></span> Expenses</a>
+    <a href="/purav/carting/challan"><span data-icon="retail"></span> Challan</a>
+    <a href="/purav/carting/trip"><span data-icon="sand"></span> Trip</a>
+    <a href="/purav/carting/purchase"><span data-icon="download"></span> Purchase</a>
+  </nav>
+
+  <div class="page-head">
+    <h1><span data-icon="download"></span> Expenses (Auto-fetched)</h1>
+  </div>
+
+  <form method="GET" class="filter-bar">
+    <div><label>Month</label><input type="month" name="month" value="{{ month_filter }}"></div>
+    <div>
+      <label>Type</label>
+      <select name="type">
+        <option value="all">All Types</option>
+        <option value="Diesel" {% if type_filter == 'Diesel' %}selected{% endif %}>Diesel</option>
+        <option value="Labour" {% if type_filter == 'Labour' %}selected{% endif %}>Labour</option>
+        <option value="Driver" {% if type_filter == 'Driver' %}selected{% endif %}>Driver</option>
+        <option value="Maintenance" {% if type_filter == 'Maintenance' %}selected{% endif %}>Maintenance</option>
+        <option value="Other" {% if type_filter == 'Other' %}selected{% endif %}>Other</option>
+      </select>
+    </div>
+    <button type="submit" class="btn-apply">Apply Filter</button>
+  </form>
+
+  <div class="summary-grid">
+    <div class="summary-card"><div class="sc-label">Total</div><div class="sc-value">₹{{ "{:,.0f}".format(totals.amount) }}</div></div>
+    <div class="summary-card diesel"><div class="sc-label">Diesel</div><div class="sc-value">₹{{ "{:,.0f}".format(totals.diesel) }}</div></div>
+    <div class="summary-card labour"><div class="sc-label">Labour</div><div class="sc-value">₹{{ "{:,.0f}".format(totals.labour) }}</div></div>
+    <div class="summary-card"><div class="sc-label">Driver</div><div class="sc-value">₹{{ "{:,.0f}".format(totals.driver) }}</div></div>
+    <div class="summary-card maint"><div class="sc-label">Maintenance</div><div class="sc-value">₹{{ "{:,.0f}".format(totals.maintenance) }}</div></div>
+    <div class="summary-card"><div class="sc-label">Other</div><div class="sc-value">₹{{ "{:,.0f}".format(totals.other) }}</div></div>
+  </div>
+
+  {% if expenses %}
+    <div class="data-table">
+      <table>
+        <thead>
+          <tr><th>Date</th><th>Type</th><th>Amount</th><th>Source</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          {% for e in expenses %}
+          <tr>
+            <td><b>{{ e.date }}</b></td>
+            <td><span class="badge {{ e.type }}">{{ e.type }}</span></td>
+            <td class="num">₹{{ "{:,.0f}".format(e.amount) }}</td>
+            <td>{{ e.source|capitalize if e.source else '—' }}</td>
+            <td>{{ e.notes or '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <span data-icon="download"></span>
+      <h3>Koi expense nahi is month me</h3>
+      <p style="color:var(--text-dim);font-size:14px;">Challan ya Trip me costs add karne pe yahan auto-show honge.</p>
+    </div>
+  {% endif %}
+
+  <footer><p>© 2025 GD Pulse — Purav Carting</p></footer>
+
+  <script src="/static/icons.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", () => { if (window.renderIcons) window.renderIcons(); });</script>
+
+</body>
+</html>
