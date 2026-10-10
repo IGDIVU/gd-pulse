@@ -19,6 +19,7 @@ DEFAULT_PURAV_CARTING = {
     "entries": [], "challans": [], "purchases": [], "payments": [],
     "invoices": [], "item_invoices": [], "trips": [],
     "salary_payments": [], "advance_payments": [],
+    "expenses": [],
     "settings": {
         "default_diesel_rate": 90, "default_labour_rate": 500, "default_driver_rate": 500,
         "company_name": "PURAV CARTING", "company_address": "", "company_gst": "",
@@ -186,11 +187,13 @@ def delete_payment(pid): delete_item("payments", pid)
 def get_invoices(): return get_collection("invoices")
 def get_invoice(iid): return get_item("invoices", iid)
 def add_invoice(d): add_item("invoices", d)
+def update_invoice(iid, d): return update_item("invoices", iid, d)
 def delete_invoice(iid): delete_item("invoices", iid)
 
 def get_item_invoices(): return get_collection("item_invoices")
 def get_item_invoice(iid): return get_item("item_invoices", iid)
 def add_item_invoice(d): add_item("item_invoices", d)
+def update_item_invoice(iid, d): return update_item("item_invoices", iid, d)
 def delete_item_invoice(iid): delete_item("item_invoices", iid)
 
 def get_trips(): return get_collection("trips")
@@ -204,6 +207,12 @@ def delete_salary_payment(pid): delete_item("salary_payments", pid)
 def get_advance_payments(): return get_collection("advance_payments")
 def add_advance_payment(d): add_item("advance_payments", d)
 def delete_advance_payment(pid): delete_item("advance_payments", pid)
+
+def get_expenses(): return get_collection("expenses")
+def get_expense(eid): return get_item("expenses", eid)
+def add_expense(d): add_item("expenses", d)
+def update_expense(eid, d): return update_item("expenses", eid, d)
+def delete_expense(eid): delete_item("expenses", eid)
 
 def get_settings(): return load_purav_carting().get("settings", DEFAULT_PURAV_CARTING["settings"])
 
@@ -231,7 +240,7 @@ def next_item_invoice_no():
     settings["item_invoice_counter"] = counter; data["settings"] = settings; save_purav_carting(data)
     return f"{settings.get('bill_prefix_item_invoice', 'PC/ITM')}/2025-26/{counter:04d}"
 
-# CUSTOMER LEDGER
+# CUSTOMER LEDGER (with item invoices)
 def get_customer_ledger(customer_id):
     invoices = [i for i in get_invoices() if i.get("customer_id") == customer_id]
     item_invoices = [i for i in get_item_invoices() if i.get("customer_id") == customer_id]
