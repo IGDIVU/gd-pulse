@@ -15,67 +15,40 @@ DEFAULT_USERS = {
 }
 
 DEFAULT_PURAV_CARTING = {
-    "trucks": [],
-    "customers": [],
-    "suppliers": [],
-    "staff": [],
-    "materials": [],
-    "entries": [],
-    "challans": [],
-    "purchases": [],
-    "payments": [],
-    "invoices": [],
-    "trips": [],
-    "salary_payments": [],
-    "advance_payments": [],
+    "trucks": [], "customers": [], "suppliers": [], "staff": [], "materials": [],
+    "entries": [], "challans": [], "purchases": [], "payments": [],
+    "invoices": [], "item_invoices": [], "trips": [],
+    "salary_payments": [], "advance_payments": [],
     "settings": {
-        "default_diesel_rate": 90,
-        "default_labour_rate": 500,
-        "default_driver_rate": 500,
-        "company_name": "PURAV CARTING",
-        "company_address": "",
-        "company_gst": "",
-        "company_phone": "",
-        "company_email": "",
-        "bank_name": "",
-        "bank_account": "",
-        "bank_ifsc": "",
-        "bill_prefix_challan": "PC/CH",
-        "bill_prefix_invoice": "PC/INV",
+        "default_diesel_rate": 90, "default_labour_rate": 500, "default_driver_rate": 500,
+        "company_name": "PURAV CARTING", "company_address": "", "company_gst": "",
+        "company_phone": "", "company_email": "",
+        "bank_name": "", "bank_account": "", "bank_ifsc": "",
+        "bill_prefix_challan": "PC/CH", "bill_prefix_invoice": "PC/INV",
+        "bill_prefix_item_invoice": "PC/ITM",
         "terms": "Goods once sold will not be taken back.",
-        "challan_counter": 0,
-        "invoice_counter": 0
+        "challan_counter": 0, "invoice_counter": 0, "item_invoice_counter": 0
     }
 }
 
 def ensure_data_dir():
-    if not os.path.exists(DATA_DIR):
-        os.makedirs(DATA_DIR)
+    if not os.path.exists(DATA_DIR): os.makedirs(DATA_DIR)
 
-# ---------- USERS ----------
 def load_users():
     ensure_data_dir()
-    if not os.path.exists(USERS_FILE):
-        save_users(DEFAULT_USERS)
-        return DEFAULT_USERS
+    if not os.path.exists(USERS_FILE): save_users(DEFAULT_USERS); return DEFAULT_USERS
     try:
-        with open(USERS_FILE, "r") as f:
-            return json.load(f).get("users", DEFAULT_USERS)
-    except Exception:
-        return DEFAULT_USERS
+        with open(USERS_FILE, "r") as f: return json.load(f).get("users", DEFAULT_USERS)
+    except: return DEFAULT_USERS
 
 def save_users(users):
     ensure_data_dir()
-    with open(USERS_FILE, "w") as f:
-        json.dump({"users": users}, f, indent=2)
+    with open(USERS_FILE, "w") as f: json.dump({"users": users}, f, indent=2)
 
-def get_user(username):
-    return load_users().get(username)
+def get_user(u): return load_users().get(u)
 
 def add_user(username, password, role, name):
-    users = load_users()
-    users[username] = {"password": password, "role": role, "name": name}
-    save_users(users)
+    users = load_users(); users[username] = {"password": password, "role": role, "name": name}; save_users(users)
 
 def update_user(username, password=None, role=None, name=None):
     users = load_users()
@@ -83,102 +56,73 @@ def update_user(username, password=None, role=None, name=None):
     if password: users[username]["password"] = password
     if role: users[username]["role"] = role
     if name: users[username]["name"] = name
-    save_users(users)
-    return True
+    save_users(users); return True
 
 def delete_user(username):
     users = load_users()
     if username in users and username not in ("owner", "admin"):
-        del users[username]
-        save_users(users)
-        return True
+        del users[username]; save_users(users); return True
     return False
 
-# ---------- PROMPTS ----------
 def load_prompts():
     ensure_data_dir()
     if not os.path.exists(PROMPTS_FILE): return {}
     try:
-        with open(PROMPTS_FILE, "r") as f:
-            return json.load(f).get("prompts", {})
-    except Exception:
-        return {}
+        with open(PROMPTS_FILE, "r") as f: return json.load(f).get("prompts", {})
+    except: return {}
 
 def save_prompts(prompts):
     ensure_data_dir()
-    with open(PROMPTS_FILE, "w") as f:
-        json.dump({"prompts": prompts}, f, indent=2)
+    with open(PROMPTS_FILE, "w") as f: json.dump({"prompts": prompts}, f, indent=2)
 
 def add_prompt(key, data):
-    prompts = load_prompts()
-    prompts[key] = data
-    save_prompts(prompts)
+    prompts = load_prompts(); prompts[key] = data; save_prompts(prompts)
 
 def update_prompt(key, data):
     prompts = load_prompts()
-    if key in prompts:
-        prompts[key].update(data)
-        save_prompts(prompts)
-        return True
+    if key in prompts: prompts[key].update(data); save_prompts(prompts); return True
     return False
 
 def delete_prompt(key):
     prompts = load_prompts()
-    if key in prompts:
-        del prompts[key]
-        save_prompts(prompts)
-        return True
+    if key in prompts: del prompts[key]; save_prompts(prompts); return True
     return False
-
-# ============================================
-# PURAV CARTING
-# ============================================
 
 def load_purav_carting():
     ensure_data_dir()
     if not os.path.exists(PURAV_CARTING_FILE):
-        save_purav_carting(DEFAULT_PURAV_CARTING)
-        return DEFAULT_PURAV_CARTING
+        save_purav_carting(DEFAULT_PURAV_CARTING); return DEFAULT_PURAV_CARTING
     try:
         with open(PURAV_CARTING_FILE, "r") as f:
             data = json.load(f)
             for k, v in DEFAULT_PURAV_CARTING.items():
-                if k not in data:
-                    data[k] = v
+                if k not in data: data[k] = v
             for k, v in DEFAULT_PURAV_CARTING["settings"].items():
-                if k not in data["settings"]:
-                    data["settings"][k] = v
+                if k not in data["settings"]: data["settings"][k] = v
             return data
-    except Exception:
-        return DEFAULT_PURAV_CARTING
+    except: return DEFAULT_PURAV_CARTING
 
 def save_purav_carting(data):
     ensure_data_dir()
-    with open(PURAV_CARTING_FILE, "w") as f:
-        json.dump(data, f, indent=2)
+    with open(PURAV_CARTING_FILE, "w") as f: json.dump(data, f, indent=2)
 
-def get_collection(name):
-    return load_purav_carting().get(name, [])
+def get_collection(name): return load_purav_carting().get(name, [])
 
 def get_item(name, item_id):
     for it in get_collection(name):
-        if it["id"] == item_id:
-            return it
+        if it["id"] == item_id: return it
     return None
 
 def add_item(name, item_data):
     data = load_purav_carting()
     if name not in data: data[name] = []
-    data[name].append(item_data)
-    save_purav_carting(data)
+    data[name].append(item_data); save_purav_carting(data)
 
 def update_item(name, item_id, item_data):
     data = load_purav_carting()
     for i, it in enumerate(data.get(name, [])):
         if it["id"] == item_id:
-            data[name][i].update(item_data)
-            save_purav_carting(data)
-            return True
+            data[name][i].update(item_data); save_purav_carting(data); return True
     return False
 
 def delete_item(name, item_id):
@@ -186,7 +130,7 @@ def delete_item(name, item_id):
     data[name] = [it for it in data.get(name, []) if it["id"] != item_id]
     save_purav_carting(data)
 
-# ---------- SHORTCUTS ----------
+# SHORTCUTS
 def get_trucks(): return get_collection("trucks")
 def get_truck(tid): return get_item("trucks", tid)
 def add_truck(d): add_item("trucks", d)
@@ -236,21 +180,21 @@ def update_purchase(pid, d): return update_item("purchases", pid, d)
 def delete_purchase(pid): delete_item("purchases", pid)
 
 def get_payments(): return get_collection("payments")
-def get_payment(pid): return get_item("payments", pid)
 def add_payment(d): add_item("payments", d)
-def update_payment(pid, d): return update_item("payments", pid, d)
 def delete_payment(pid): delete_item("payments", pid)
 
 def get_invoices(): return get_collection("invoices")
 def get_invoice(iid): return get_item("invoices", iid)
 def add_invoice(d): add_item("invoices", d)
-def update_invoice(iid, d): return update_item("invoices", iid, d)
 def delete_invoice(iid): delete_item("invoices", iid)
 
+def get_item_invoices(): return get_collection("item_invoices")
+def get_item_invoice(iid): return get_item("item_invoices", iid)
+def add_item_invoice(d): add_item("item_invoices", d)
+def delete_item_invoice(iid): delete_item("item_invoices", iid)
+
 def get_trips(): return get_collection("trips")
-def get_trip(tid): return get_item("trips", tid)
 def add_trip(d): add_item("trips", d)
-def update_trip(tid, d): return update_item("trips", tid, d)
 def delete_trip(tid): delete_item("trips", tid)
 
 def get_salary_payments(): return get_collection("salary_payments")
@@ -261,40 +205,68 @@ def get_advance_payments(): return get_collection("advance_payments")
 def add_advance_payment(d): add_item("advance_payments", d)
 def delete_advance_payment(pid): delete_item("advance_payments", pid)
 
-# ---------- SETTINGS ----------
-def get_settings():
-    return load_purav_carting().get("settings", DEFAULT_PURAV_CARTING["settings"])
+def get_settings(): return load_purav_carting().get("settings", DEFAULT_PURAV_CARTING["settings"])
 
 def save_settings(settings):
-    data = load_purav_carting()
-    data["settings"] = settings
-    save_purav_carting(data)
+    data = load_purav_carting(); data["settings"] = settings; save_purav_carting(data)
 
-# ---------- COUNTERS ----------
 def next_challan_no():
     data = load_purav_carting()
     settings = data.get("settings", DEFAULT_PURAV_CARTING["settings"])
     counter = settings.get("challan_counter", 0) + 1
-    settings["challan_counter"] = counter
-    data["settings"] = settings
-    save_purav_carting(data)
+    settings["challan_counter"] = counter; data["settings"] = settings; save_purav_carting(data)
     return f"{settings.get('bill_prefix_challan', 'PC/CH')}/2025-26/{counter:04d}"
 
 def next_invoice_no():
     data = load_purav_carting()
     settings = data.get("settings", DEFAULT_PURAV_CARTING["settings"])
     counter = settings.get("invoice_counter", 0) + 1
-    settings["invoice_counter"] = counter
-    data["settings"] = settings
-    save_purav_carting(data)
+    settings["invoice_counter"] = counter; data["settings"] = settings; save_purav_carting(data)
     return f"{settings.get('bill_prefix_invoice', 'PC/INV')}/2025-26/{counter:04d}"
 
-# ============================================
-# ACCOUNTS (Customer Ledger / Outstanding)
-# ============================================
+def next_item_invoice_no():
+    data = load_purav_carting()
+    settings = data.get("settings", DEFAULT_PURAV_CARTING["settings"])
+    counter = settings.get("item_invoice_counter", 0) + 1
+    settings["item_invoice_counter"] = counter; data["settings"] = settings; save_purav_carting(data)
+    return f"{settings.get('bill_prefix_item_invoice', 'PC/ITM')}/2025-26/{counter:04d}"
 
+# CUSTOMER LEDGER
 def get_customer_ledger(customer_id):
-    """Return all transactions for a customer."""
+    invoices = [i for i in get_invoices() if i.get("customer_id") == customer_id]
+    item_invoices = [i for i in get_item_invoices() if i.get("customer_id") == customer_id]
+    payments = [p for p in get_payments() if p.get("customer_id") == customer_id]
+    ledger = []
+    for inv in invoices:
+        ledger.append({"date": inv.get("date", ""), "type": "Invoice", "ref": inv.get("invoice_no", ""),
+                       "debit": inv.get("total", 0), "credit": 0, "notes": inv.get("notes", "")})
+    for inv in item_invoices:
+        ledger.append({"date": inv.get("date", ""), "type": "Invoice", "ref": inv.get("invoice_no", ""),
+                       "debit": inv.get("total", 0), "credit": 0, "notes": inv.get("notes", "")})
+    for pay in payments:
+        ledger.append({"date": pay.get("date", ""), "type": "Payment",
+                       "ref": pay.get("mode", "") + " " + pay.get("ref_no", ""),
+                       "debit": 0, "credit": pay.get("amount", 0), "notes": pay.get("notes", "")})
+    customer = get_customer(customer_id) or {}
+    if customer.get("opening_balance", 0) != 0:
+        ledger.append({"date": customer.get("created_at", "")[:10], "type": "Opening", "ref": "Opening Balance",
+                       "debit": customer.get("opening_balance", 0), "credit": 0, "notes": ""})
+    ledger.sort(key=lambda x: x.get("date", ""))
+    running = 0
+    for l in ledger:
+        running += l["debit"] - l["credit"]
+        l["balance"] = running
+    return ledger, running
+
+def get_customer_outstanding(customer_id):
+    _, balance = get_customer_ledger(customer_id); return balance
+
+def get_all_outstanding():
+    out = []
+    for c in get_customers():
+        bal = get_customer_outstanding(c["id"])
+        if bal > 0: out.append({"customer": c, "balance": bal})
+    return outions for a customer."""
     challans = [c for c in get_challans() if c.get("customer_id") == customer_id and c.get("invoiced")]
     invoices = [i for i in get_invoices() if i.get("customer_id") == customer_id]
     payments = [p for p in get_payments() if p.get("customer_id") == customer_id]
