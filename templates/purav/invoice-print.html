@@ -31,11 +31,12 @@
   .billed .balance-tag { position: absolute; top: 6px; right: 6px; background: #ea580c; color: white; padding: 3px 10px; border-radius: 12px; font-size: 8px; font-weight: 900; }
 
   .items { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
-  .items th, .items td { border: 1px solid #000; padding: 4px 5px; font-size: 9px; text-align: left; }
+  .items th, .items td { border: 1px solid #000; padding: 4px 5px; font-size: 9px; text-align: left; vertical-align: top; }
   .items th { background: #f0f0f0; font-weight: 800; text-align: center; font-size: 8.5px; }
   .items td.num { text-align: right; font-weight: 700; }
   .items td.center { text-align: center; }
   .items tr.bf-row td, .items tr.cf-row td { background: #f5f5f5; font-weight: 900; font-size: 10px; }
+  .items .item-meta { font-size: 8px; color: #555; margin-top: 1px; display: block; }
 
   .tax-summary { width: 100%; border-collapse: collapse; margin-top: 4px; }
   .tax-summary td { border: 1px solid #000; padding: 4px 6px; font-size: 9.5px; }
@@ -204,28 +205,31 @@
         <th style="width:40px;">Per</th>
         <th style="width:55px;">Rate ₹</th>
         ${IS_GST ? '<th style="width:40px;">GST %</th>' : ''}
-        <th style="width:80px;">Vehicle</th>
         <th style="width:75px;">Amount ₹</th>
-        ${IS_GST ? '<th style="width:40px;">CGST</th><th style="width:40px;">SGST</th>' : ''}
+        ${IS_GST ? '<th style="width:45px;">CGST</th><th style="width:45px;">SGST</th>' : ''}
       </tr></thead><tbody>`;
 
       if (!isFirst) {
-        const cols = IS_GST ? 8 : 6;
+        const cols = IS_GST ? 6 : 4;
         pageHtml += `<tr class="bf-row"><td colspan="${cols}" style="text-align:left;"><b>TOTAL B/F :-</b></td><td class="num"><b>${money(bfAmount)}</b></td>${IS_GST ? '<td colspan="2"></td>' : ''}</tr>`;
       }
 
       pageItems.forEach((it) => {
         const amt = (it.qty || 0) * (it.rate || 0);
         runningTotal += amt;
-        const vd = it.vehicle_display || (it.vehicle_type && it.vehicle_number ? `${it.vehicle_type}-${it.vehicle_number}` : (it.vehicle_number || '—'));
+        const vd = it.vehicle_display || (it.vehicle_type && it.vehicle_number ? `${it.vehicle_type}-${it.vehicle_number}` : (it.vehicle_number || ''));
+        const metaParts = [];
+        if (vd) metaParts.push(vd);
+        if (it.challan_no) metaParts.push('Challan: ' + it.challan_no);
+        if (it.date) metaParts.push('Date: ' + it.date);
+        const metaHtml = metaParts.length ? `<span class="item-meta">${metaParts.join(' · ')}</span>` : '';
         pageHtml += `<tr>
           <td class="center">${sNoGlobal}</td>
-          <td>${it.desc}</td>
+          <td><b>${it.desc}</b>${metaHtml}</td>
           <td class="num">${(it.qty || 0).toFixed(3)}</td>
           <td class="center">${it.unit || 'Ton'}</td>
           <td class="num">${(it.rate || 0).toFixed(2)}</td>
           ${IS_GST ? `<td class="center">${(it.gst_pct || 0).toFixed(2)}</td>` : ''}
-          <td class="center" style="font-size:8.5px;">${vd}</td>
           <td class="num">${money(amt)}</td>
           ${IS_GST ? `<td class="center">${(it.cgst_amt || 0).toFixed(2)}</td><td class="center">${(it.sgst_amt || 0).toFixed(2)}</td>` : ''}
         </tr>`;
@@ -233,7 +237,7 @@
       });
 
       if (!isLast) {
-        const cols = IS_GST ? 8 : 6;
+        const cols = IS_GST ? 6 : 4;
         pageHtml += `<tr class="cf-row"><td colspan="${cols}" style="text-align:left;"><b>TOTAL C/F :-</b></td><td class="num"><b>${money(runningTotal)}</b></td>${IS_GST ? '<td colspan="2"></td>' : ''}</tr>`;
       }
       pageHtml += `</tbody></table>`;
