@@ -117,23 +117,24 @@
     <div class="info-banner error">Kam se kam 1 item add karo — Description, Qty, Rate zaroori hai.</div>
     {% endif %}
 
-    {% if not is_edit %}
-    <div class="card">
-      <h2><span data-icon="prompts"></span> Bill Type</h2>
-      <div class="bill-type-row">
-        <div class="bill-type-btn gst active" id="btnTax" onclick="setBillType('tax')">✅ Tax Invoice (GST)</div>
-        <div class="bill-type-btn" id="btnNonTax" onclick="setBillType('non-tax')">📄 Non-Tax Invoice</div>
+    <!-- ⚡ SINGLE FORM COVERING EVERYTHING -->
+    <form method="POST" id="invForm" action="{% if is_edit %}/purav/carting/invoice/edit/{{ edit_invoice.id }}{% else %}/purav/carting/invoice/add{% endif %}">
+
+      {% if not is_edit %}
+      <div class="card">
+        <h2><span data-icon="prompts"></span> Bill Type</h2>
+        <div class="bill-type-row">
+          <div class="bill-type-btn gst active" id="btnTax" onclick="setBillType('tax')">✅ Tax Invoice (GST)</div>
+          <div class="bill-type-btn" id="btnNonTax" onclick="setBillType('non-tax')">📄 Non-Tax Invoice</div>
+        </div>
+        <input type="hidden" id="billType" name="bill_type" value="tax">
       </div>
-      <input type="hidden" id="billType" name="bill_type" value="tax" form="invForm">
-    </div>
-    {% else %}
-    <input type="hidden" id="billType" name="bill_type" value="{{ edit_invoice.bill_type }}" form="invForm">
-    {% endif %}
+      {% else %}
+      <input type="hidden" id="billType" name="bill_type" value="{{ edit_invoice.bill_type }}">
+      {% endif %}
 
-    <div class="card">
-      <h2><span data-icon="gst"></span> Invoice Details</h2>
-      <form method="POST" id="invForm" action="{% if is_edit %}/purav/carting/invoice/edit/{{ edit_invoice.id }}{% else %}/purav/carting/invoice/add{% endif %}">
-
+      <div class="card">
+        <h2><span data-icon="gst"></span> Invoice Details</h2>
         <div class="form-grid-3">
           <div>
             <label>Customer *</label>
@@ -155,59 +156,62 @@
           <div><label>Items Per Page (Print)</label><input type="number" name="items_per_page" value="{% if is_edit %}{{ edit_invoice.items_per_page }}{% else %}19{% endif %}" min="5" max="30"></div>
           <div><label>Notes</label><input type="text" name="notes" value="{% if is_edit %}{{ edit_invoice.notes }}{% endif %}" placeholder="Optional"></div>
         </div>
-      </form>
-    </div>
-
-    <div id="customerInfoBox" style="display:none;">
-      <div class="cust-balance">
-        <div class="cb-item"><div class="cb-label">Party Balance</div><div class="cb-value" id="cbOutstanding">₹0</div></div>
-        <div class="cb-item"><div class="cb-label">Pending Challans</div><div class="cb-value" id="cbPendingCount">0</div></div>
-        <div class="cb-item"><div class="cb-label">GSTIN</div><div class="cb-value" style="font-size:14px;" id="cbGstin">—</div></div>
       </div>
-    </div>
 
-    <div class="card" id="pendingChallansCard" style="display:none;">
-      <h2><span data-icon="prompts"></span> Pending Challans</h2>
-      <div class="info-banner warn">In challans ko invoice me add karna chahoge toh checkbox tick karo.</div>
-      <div id="pendingChallansList"></div>
-    </div>
-
-    <div class="card">
-      <h2><span data-icon="tools"></span> Items</h2>
-      <table class="items-table">
-        <thead>
-          <tr>
-            <th style="width:30px;">S#</th>
-            <th style="min-width:220px;">Description + Vehicle</th>
-            <th style="width:70px;">Qty</th>
-            <th style="width:60px;">Unit</th>
-            <th style="width:80px;">Rate ₹</th>
-            <th style="width:70px;">GST %</th>
-            <th style="width:100px;">Amount ₹</th>
-            <th style="width:40px;"></th>
-          </tr>
-        </thead>
-        <tbody id="itemsBody"></tbody>
-      </table>
-      <button type="button" class="btn-add" onclick="addItemRow()"><span data-icon="plus" style="width:14px;height:14px;display:inline-flex;"></span> Add Item Row</button>
-    </div>
-
-    <div class="card">
-      <div class="totals-box">
-        <div class="row"><span>Subtotal</span><span class="val" id="tSub">₹0</span></div>
-        <div id="gstRows">
-          <div class="row"><span>CGST</span><span class="val" id="tCgst">₹0</span></div>
-          <div class="row"><span>SGST</span><span class="val" id="tSgst">₹0</span></div>
+      <div id="customerInfoBox" style="display:none;">
+        <div class="cust-balance">
+          <div class="cb-item"><div class="cb-label">Party Balance</div><div class="cb-value" id="cbOutstanding">₹0</div></div>
+          <div class="cb-item"><div class="cb-label">Pending Challans</div><div class="cb-value" id="cbPendingCount">0</div></div>
+          <div class="cb-item"><div class="cb-label">GSTIN</div><div class="cb-value" style="font-size:14px;" id="cbGstin">—</div></div>
         </div>
-        <div class="row big"><span>Grand Total</span><span class="val" id="tTotal">₹0</span></div>
       </div>
 
-      <div class="form-actions">
-        <a href="/purav/carting/invoice/list" class="btn-cancel">Cancel</a>
-        <button type="button" class="btn-temp" onclick="genTempInvoice()">⚡ Quick Test Invoice</button>
-        <button type="submit" class="btn-save" form="invForm"><span data-icon="check"></span> {% if is_edit %}Update Invoice{% else %}Generate Invoice{% endif %}</button>
+      <div class="card" id="pendingChallansCard" style="display:none;">
+        <h2><span data-icon="prompts"></span> Pending Challans</h2>
+        <div class="info-banner warn">In challans ko invoice me add karna chahoge toh checkbox tick karo.</div>
+        <div id="pendingChallansList"></div>
       </div>
-    </div>
+
+      <div class="card">
+        <h2><span data-icon="tools"></span> Items</h2>
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th style="width:30px;">S#</th>
+              <th style="min-width:220px;">Description + Vehicle</th>
+              <th style="width:70px;">Qty</th>
+              <th style="width:60px;">Unit</th>
+              <th style="width:80px;">Rate ₹</th>
+              <th style="width:70px;">GST %</th>
+              <th style="width:100px;">Amount ₹</th>
+              <th style="width:40px;"></th>
+            </tr>
+          </thead>
+          <tbody id="itemsBody"></tbody>
+        </table>
+        <button type="button" class="btn-add" onclick="addItemRow()"><span data-icon="plus" style="width:14px;height:14px;display:inline-flex;"></span> Add Item Row</button>
+      </div>
+
+      <div class="card">
+        <div class="totals-box">
+          <div class="row"><span>Subtotal</span><span class="val" id="tSub">₹0</span></div>
+          <div id="gstRows">
+            <div class="row"><span>CGST</span><span class="val" id="tCgst">₹0</span></div>
+            <div class="row"><span>SGST</span><span class="val" id="tSgst">₹0</span></div>
+          </div>
+          <div class="row big"><span>Grand Total</span><span class="val" id="tTotal">₹0</span></div>
+        </div>
+
+        <div class="form-actions">
+          <a href="/purav/carting/invoice/list" class="btn-cancel">Cancel</a>
+          <button type="button" class="btn-temp" onclick="genTempInvoice()">⚡ Quick Test Invoice</button>
+          <button type="submit" class="btn-save"><span data-icon="check"></span> {% if is_edit %}Update Invoice{% else %}Generate Invoice{% endif %}</button>
+        </div>
+      </div>
+
+    </form>
+    <!-- ⚡ FORM END -->
+
   </div>
 
   <div class="modal-overlay" id="newCustModal">
@@ -429,11 +433,9 @@
     }
 
     function genTempInvoice() {
-      // Auto-fill 25 items with random data for testing (3-page invoice)
       const sel = document.getElementById('customerSelect');
       if (!sel.value) { alert('Pehle customer select karo'); return; }
 
-      // Clear existing items
       document.getElementById('itemsBody').innerHTML = '';
       rowCount = 0;
 
