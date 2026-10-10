@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Party View — Purav Carting</title>
+<link rel="icon" type="image/png" href="/static/favicon.png">
+<link rel="stylesheet" href="/static/style.css">
+<style>
+  .pc-nav { background: linear-gradient(135deg, #1e3a8a 0%, #ea580c 100%); padding: 0 20px; display: flex; align-items: center; gap: 4px; overflow-x: auto; box-shadow: 0 4px 20px rgba(30,58,138,0.3); position: sticky; top: 70px; z-index: 90; white-space: nowrap; }
+  .pc-nav a { color: rgba(255,255,255,0.85); text-decoration: none; padding: 14px 12px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; border-bottom: 3px solid transparent; }
+  .pc-nav a:hover, .pc-nav a.active { color: white; background: rgba(255,255,255,0.1); }
+  .pc-nav a.active { border-bottom-color: white; }
+  .pc-nav a [data-icon] { width: 14px; height: 14px; }
+
+  .page-head { padding: 30px 40px 20px; border-bottom: 1px solid var(--border); margin-bottom: 30px; }
+  .page-head h1 { font-size: 28px; font-weight: 900; color: var(--text); letter-spacing: -1px; display: flex; align-items: center; gap: 12px; font-family: 'Book Antiqua', serif; }
+  .page-head h1 [data-icon] { width: 32px; height: 32px; color: #1e3a8a; }
+
+  .search-bar { padding: 0 40px 20px; }
+  .search-bar input { width: 100%; max-width: 400px; padding: 12px 18px; border: 1.5px solid var(--border); border-radius: 12px; background: var(--card); color: var(--text); font-size: 14px; outline: none; }
+  .search-bar input:focus { border-color: #1e3a8a; }
+
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin: 0 40px 25px; }
+  .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; }
+  .stat-card .label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; font-weight: 800; margin-bottom: 6px; }
+  .stat-card .value { font-size: 22px; font-weight: 900; color: var(--text); }
+  .stat-card.warn .value { color: #f59e0b; }
+  .stat-card.danger .value { color: #ef4444; }
+
+  .party-table { margin: 0 40px 40px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+  .party-table table { width: 100%; border-collapse: collapse; }
+  .party-table th, .party-table td { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .party-table th { background: rgba(30,58,138,0.08); font-weight: 800; font-size: 10px; text-transform: uppercase; }
+  .party-table tr:hover td { background: rgba(30,58,138,0.03); }
+  .party-table td.num { text-align: right; font-weight: 700; }
+  .party-table td.balance-pos { color: #ef4444; font-weight: 900; }
+  .party-table td.balance-zero { color: #10b981; font-weight: 700; }
+
+  .btn-sm { padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--text-dim); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+  .btn-sm:hover { background: #1e3a8a; color: white; border-color: #1e3a8a; }
+
+  .empty-state { text-align: center; padding: 60px 20px; background: var(--card); border: 2px dashed var(--border); border-radius: 16px; margin: 0 40px; }
+  .empty-state [data-icon] { width: 50px; height: 50px; color: #1e3a8a; opacity: 0.4; margin-bottom: 15px; }
+
+  @media (max-width: 700px) {
+    .page-head, .search-bar, .stats-row, .party-table, .empty-state { padding-left: 20px; padding-right: 20px; margin-left: 20px; margin-right: 20px; }
+    .party-table { overflow-x: auto; }
+  }
+</style>
+</head>
+<body>
+
+  <header>
+    <a href="/" class="logo"><img src="/static/logo-horizontal.png" alt="GD Pulse"></a>
+    <nav class="nav-links"><a href="/purav/carting" class="active">Purav Carting</a></nav>
+    <div class="header-right">
+      <button class="theme-toggle" onclick="toggleTheme(event)"></button>
+      <a href="#" onclick="confirmLogout(event)" class="avatar" title="{{ name }}">{{ name[0]|upper }}</a>
+    </div>
+  </header>
+
+  <nav class="pc-nav">
+    <a href="/purav/carting"><span data-icon="grid"></span> Dashboard</a>
+    <a href="/purav/carting/party-view" class="active"><span data-icon="users"></span> Party View</a>
+    <a href="/purav/carting/truck-view"><span data-icon="sand"></span> Truck View</a>
+    <a href="/purav/carting/payment-all"><span data-icon="gst"></span> Payment All</a>
+  </nav>
+
+  <div class="page-head">
+    <h1><span data-icon="users"></span> Party View — Full Ledger</h1>
+  </div>
+
+  {% set total_out = customers|map(attribute='outstanding')|sum %}
+  {% set total_debit = customers|map(attribute='total_debit')|sum %}
+  {% set total_credit = customers|map(attribute='total_credit')|sum %}
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="label">Total Parties</div><div class="value">{{ customers|length }}</div></div>
+    <div class="stat-card"><div class="label">Total Debit</div><div class="value">₹{{ "{:,.0f}".format(total_debit) }}</div></div>
+    <div class="stat-card"><div class="label">Total Credit</div><div class="value">₹{{ "{:,.0f}".format(total_credit) }}</div></div>
+    <div class="stat-card danger"><div class="label">Total Outstanding</div><div class="value">₹{{ "{:,.0f}".format(total_out) }}</div></div>
+  </div>
+
+  <div class="search-bar">
+    <input type="text" id="partySearch" placeholder="Search party by name, phone..." oninput="filterParty()">
+  </div>
+
+  {% if customers %}
+    <div class="party-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Party Name</th>
+            <th>Phone</th>
+            <th>GSTIN</th>
+            <th>Type</th>
+            <th style="text-align:right;">Total Debit</th>
+            <th style="text-align:right;">Total Credit</th>
+            <th style="text-align:right;">Balance</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="partyBody">
+          {% for c in customers %}
+          <tr data-search="{{ c.name|lower }} {{ c.phone or '' }} {{ c.gstin or '' }}">
+            <td><b>{{ c.name }}</b></td>
+            <td>{{ c.phone or '—' }}</td>
+            <td>{{ c.gstin or '—' }}</td>
+            <td>{{ c.type }}</td>
+            <td class="num">₹{{ "{:,.0f}".format(c.total_debit) }}</td>
+            <td class="num">₹{{ "{:,.0f}".format(c.total_credit) }}</td>
+            <td class="num {% if c.outstanding > 0 %}balance-pos{% else %}balance-zero{% endif %}">₹{{ "{:,.0f}".format(c.outstanding) }}</td>
+            <td>
+              <a href="/purav/carting/customers/{{ c.id }}" class="btn-sm">📊 View Ledger</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <span data-icon="users"></span>
+      <h3>Koi customer nahi</h3>
+      <p style="color:var(--text-dim);">Customers add karo.</p>
+    </div>
+  {% endif %}
+
+  <footer><p>© 2025 GD Pulse — Purav Carting</p></footer>
+
+  <script src="/static/icons.js"></script>
+  <script>
+    function filterParty() {
+      const q = document.getElementById('partySearch').value.toLowerCase().trim();
+      document.querySelectorAll('#partyBody tr').forEach(tr => {
+        const text = tr.getAttribute('data-search');
+        tr.style.display = (q === '' || text.includes(q)) ? '' : 'none';
+      });
+    }
+    document.addEventListener("DOMContentLoaded", () => { if (window.renderIcons) window.renderIcons(); });
+  </script>
+
+</body>
+</html>
