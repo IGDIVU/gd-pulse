@@ -1,19 +1,8 @@
-/* ============================================
-   PURAV CARTING — Auto Nav Injector
-   Ye file har Purav page pe nav auto-replace karti hai.
-   Agar page pe <nav class="pc-nav"> mile, toh usko
-   poore nav se replace kar deti hai. Active link
-   current URL se detect hota hai.
-   ============================================ */
-
 (function autoInjectPuravNav() {
   document.addEventListener("DOMContentLoaded", () => {
     const navEl = document.querySelector(".pc-nav");
     if (!navEl) return;
-
-    // Agar page pe pehle se data-purav-nav hai, skip
     if (navEl.getAttribute("data-injected") === "true") return;
-
     const currentPath = window.location.pathname;
 
     const items = [
@@ -26,11 +15,12 @@
       { sep: true },
       { href: "/purav/carting/entry", label: "Sale Entry", icon: "retail", match: ["/purav/carting/entry"] },
       { href: "/purav/carting/challan", label: "Challan", icon: "prompts", match: ["/purav/carting/challan"] },
-      { href: "/purav/carting/purchase", label: "Purchase", icon: "download", match: ["/purav/carting/purchase"] },
       { href: "/purav/carting/invoice", label: "Invoice", icon: "gst", match: ["/purav/carting/invoice"] },
       { href: "/purav/carting/payment", label: "Payment", icon: "gst", match: ["/purav/carting/payment"] },
       { href: "/purav/carting/trip", label: "Trip", icon: "sand", match: ["/purav/carting/trip"] },
+      { href: "/purav/carting/expenses", label: "Expenses", icon: "download", match: ["/purav/carting/expenses"] },
       { sep: true },
+      { href: "/purav/carting/purchase", label: "Purchase", icon: "download", match: ["/purav/carting/purchase"] },
       { href: "/purav/carting/staff-salary", label: "Salary", icon: "gst", match: ["/purav/carting/staff-salary"] },
       { href: "/purav/carting/staff-advance", label: "Advance", icon: "gst", match: ["/purav/carting/staff-advance"] },
       { href: "/purav/carting/ledger", label: "Ledger", icon: "analytics", match: ["/purav/carting/ledger"] },
@@ -39,17 +29,12 @@
       { href: "/purav/carting/settings", label: "Settings", icon: "settings", match: ["/purav/carting/settings"] },
     ];
 
-    // Determine active item — longest matching path wins
-    let activeHref = "";
-    let longestMatch = 0;
+    let activeHref = ""; let longestMatch = 0;
     items.forEach(it => {
       if (it.sep) return;
       it.match.forEach(m => {
         if (currentPath === m || currentPath.startsWith(m + "/")) {
-          if (m.length > longestMatch) {
-            longestMatch = m.length;
-            activeHref = it.href;
-          }
+          if (m.length > longestMatch) { longestMatch = m.length; activeHref = it.href; }
         }
       });
     });
@@ -65,12 +50,8 @@
     });
 
     navEl.innerHTML = html;
-
-    // Ensure nav is styled properly even if page CSS differs
     navEl.style.cssText = "background:linear-gradient(135deg,#1e3a8a 0%,#ea580c 100%);padding:0 20px;display:flex;align-items:center;gap:4px;overflow-x:auto;box-shadow:0 4px 20px rgba(30,58,138,0.3);position:sticky;top:70px;z-index:90;white-space:nowrap;scrollbar-width:thin;";
     navEl.setAttribute("data-injected", "true");
-
-    // Render SVG icons
     if (window.renderIcons) window.renderIcons();
   });
 })();
