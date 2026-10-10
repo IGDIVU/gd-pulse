@@ -184,7 +184,7 @@ def purav_carting():
                           truck_today=truck_today, alerts=alerts, truck_count=len(trucks))
 
 # ============================================
-# API: Get customer outstanding (for invoice form)
+# API ROUTES
 # ============================================
 
 @app.route("/purav/carting/api/customer/<cid>")
@@ -356,12 +356,14 @@ def purav_test_data():
                 "date": d,
                 "customer_id": cust["id"], "customer_name": cust["name"],
                 "truck_id": truck["id"], "truck_number": truck["number"],
-                "vehicle_type": vehicle_type, "vehicle_number": f"{vehicle_type}-{vehicle_num}",
+                "vehicle_type": vehicle_type, "vehicle_number": str(vehicle_num),
+                "vehicle_display": f"{vehicle_type}-{vehicle_num}",
                 "material_id": mat["id"], "material_name": mat["name"],
                 "unit": mat["unit"],
                 "quantity": qty, "rate": rate, "amount": qty * rate,
-                "driver": "", "vehicle": truck["number"],
+                "driver": "", "vehicle": f"{vehicle_type}-{vehicle_num}",
                 "notes": "", "invoiced": False, "invoice_id": None,
+                "diesel": 0, "labour": 0, "driver_cost": 0, "maintenance": 0, "other": 0,
                 "created_at": datetime.now().isoformat()
             })
 
@@ -801,7 +803,6 @@ def purav_challan_add():
     except ValueError:
         return redirect(url_for("purav_challan") + "?error=invalid")
 
-    # Vehicle type + number
     vehicle_type = request.form.get("vehicle_type", "").strip()
     vehicle_number = request.form.get("vehicle_number", "").strip()
     vehicle_display = ""
@@ -810,7 +811,6 @@ def purav_challan_add():
     elif vehicle_number:
         vehicle_display = vehicle_number
 
-    # Trip costs (auto-fetch to expenses)
     try:
         diesel = float(request.form.get("diesel", 0) or 0)
         labour = float(request.form.get("labour", 0) or 0)
@@ -843,7 +843,6 @@ def purav_challan_add():
         "created_at": datetime.now().isoformat()
     })
 
-    # Auto-add to expenses (Purchase me nahi jayega — double entry prevent)
     date_val = request.form.get("date", datetime.now().strftime("%Y-%m-%d"))
     if diesel > 0:
         database.add_expense({"id": str(uuid.uuid4())[:8], "date": date_val, "type": "Diesel",
@@ -903,7 +902,6 @@ def purav_challan_delete(cid):
     c = database.get_challan(cid)
     if c and c.get("invoiced"):
         return redirect(url_for("purav_challan_list") + "?error=invoiced")
-    # Delete linked expenses too
     for e in database.get_expenses():
         if e.get("source") == "challan" and e.get("source_id") == cid:
             database.delete_expense(e["id"])
@@ -1022,12 +1020,9 @@ def purav_invoice_add():
     if not customer_id:
         return redirect(url_for("purav_invoice") + "?error=missing")
     customer = database.get_customer(customer_id) or {}
-
-    # Bill type: tax or non-tax
     bill_type = request.form.get("bill_type", "tax").strip()
     gst_enabled = (bill_type == "tax")
 
-    # Collect items from form
     items = []
     descs = request.form.getlist("item_desc[]")
     qtys = request.form.getlist("item_qty[]")
@@ -1064,7 +1059,6 @@ def purav_invoice_add():
             "vehicle_type": vt, "vehicle_number": vn, "vehicle_display": vd
         })
 
-    # Add selected challans as items too
     challan_ids = request.form.getlist("challan_ids")
     for cid in challan_ids:
         c = database.get_challan(cid)
@@ -1113,7 +1107,6 @@ def purav_invoice_add():
         "notes": request.form.get("notes", "").strip(),
         "created_at": datetime.now().isoformat()
     })
-    # Mark challans as invoiced
     for cid in challan_ids:
         database.update_challan(cid, {"invoiced": True, "invoice_id": invoice_id})
     return redirect(url_for("purav_invoice_view", iid=invoice_id) + "?success=created")
@@ -1143,6 +1136,8 @@ def purav_invoice_view(iid):
     if g: return g
     inv = database.get_item_invoice(iid)
     if not inv: return redirect(url_for("purav_invoice_list"))
+    # Attach customer balance
+    inv["customer_balance"] = database.get_customer_outstanding(inv.get("customer_id", ""))
     return render_template("purav/invoice-print.html", user=current_user(), role=current_role(),
                           name=current_name(), invoice=inv, settings=database.get_settings())
 
@@ -1211,6 +1206,7 @@ def purav_invoice_edit(iid):
         })
         return redirect(url_for("purav_invoice_view", iid=iid) + "?success=updated")
 
+    inv["customer_balance"] = database.get_customer_outstanding(inv.get("customer_id", ""))
     return render_template("purav/invoice.html", user=current_user(), role=current_role(),
                           name=current_name(), customers=database.get_customers(),
                           materials=database.get_materials(),
@@ -1431,7 +1427,6 @@ def purav_trip_add():
         "notes": request.form.get("notes", "").strip(),
         "created_at": datetime.now().isoformat()
     })
-    # Auto-add to expenses
     date_val = request.form.get("date", datetime.now().strftime("%Y-%m-%d"))
     for exp_type, amt in [("Diesel", diesel), ("Labour", labour), ("Driver", driver),
                           ("Maintenance", maintenance), ("Other", other)]:
@@ -1469,12 +1464,127 @@ def purav_trip_list():
 def purav_trip_delete(tid):
     g = purav_guard()
     if g: return g
-    # Delete linked expenses
     for e in database.get_expenses():
         if e.get("source") == "trip" and e.get("source_id") == tid:
             database.delete_expense(e["id"])
     database.delete_trip(tid)
     return redirect(url_for("purav_trip_list") + "?success=deleted")
+
+# ============================================
+# EXPENSES
+# ============================================
+
+@app.route("/purav/carting/expenses")
+def purav_expenses():
+    g = purav_guard()
+    if g: return g
+    expenses = database.get_expenses()
+    month_filter = request.args.get("month", datetime.now().strftime("%Y-%m"))
+    type_filter = request.args.get("type", "all")
+    filtered = [e for e in expenses if e.get("date", "").startswith(month_filter)]
+    if type_filter != "all":
+        filtered = [e for e in filtered if e.get("type") == type_filter]
+    filtered.sort(key=lambda x: (x.get("date", ""), x.get("created_at", "")), reverse=True)
+    totals = {
+        "count": len(filtered),
+        "amount": sum(e.get("amount", 0) for e in filtered),
+        "diesel": sum(e.get("amount", 0) for e in filtered if e.get("type") == "Diesel"),
+        "labour": sum(e.get("amount", 0) for e in filtered if e.get("type") == "Labour"),
+        "driver": sum(e.get("amount", 0) for e in filtered if e.get("type") == "Driver"),
+        "maintenance": sum(e.get("amount", 0) for e in filtered if e.get("type") == "Maintenance"),
+        "other": sum(e.get("amount", 0) for e in filtered if e.get("type") == "Other"),
+    }
+    return render_template("purav/expenses.html", user=current_user(), role=current_role(),
+                          name=current_name(), expenses=filtered, totals=totals,
+                          month_filter=month_filter, type_filter=type_filter)
+
+# ============================================
+# PARTY VIEW / TRUCK VIEW / PAYMENT ALL
+# ============================================
+
+@app.route("/purav/carting/party-view")
+def purav_party_view():
+    g = purav_guard()
+    if g: return g
+    customers = database.get_customers()
+    for c in customers:
+        ledger, balance = database.get_customer_ledger(c["id"])
+        c["outstanding"] = balance
+        c["total_debit"] = sum(l["debit"] for l in ledger)
+        c["total_credit"] = sum(l["credit"] for l in ledger)
+        c["entry_count"] = len(ledger)
+    return render_template("purav/party-view.html", user=current_user(), role=current_role(),
+                          name=current_name(), customers=customers,
+                          today=datetime.now().strftime("%Y-%m-%d"))
+
+@app.route("/purav/carting/truck-view")
+def purav_truck_view():
+    g = purav_guard()
+    if g: return g
+    trucks = database.get_trucks()
+    entries = database.get_entries()
+    trips = database.get_trips()
+    purchases = database.get_purchases()
+
+    for t in trucks:
+        t_entries = [e for e in entries if e.get("truck_id") == t["id"]]
+        t_trips = [x for x in trips if x.get("truck_id") == t["id"]]
+        t["total_trips"] = sum(e.get("trips", 0) for e in t_entries)
+        t["total_sale"] = sum(e.get("sale", 0) for e in t_entries)
+        t["total_cost"] = sum(e.get("total_cost", 0) for e in t_entries)
+        t["total_profit"] = sum(e.get("profit", 0) for e in t_entries)
+        t["total_diesel"] = sum(e.get("diesel", 0) for e in t_entries) + sum(x.get("diesel", 0) for x in t_trips)
+        t["total_labour"] = sum(e.get("labour", 0) for e in t_entries) + sum(x.get("labour", 0) for x in t_trips)
+        t["total_driver"] = sum(e.get("driver", 0) for e in t_entries) + sum(x.get("driver", 0) for x in t_trips)
+        t["total_maintenance"] = sum(e.get("maintenance", 0) for e in t_entries) + sum(x.get("maintenance", 0) for x in t_trips)
+        t["total_other"] = sum(e.get("other", 0) for e in t_entries) + sum(x.get("other", 0) for x in t_trips)
+        t["total_purchase"] = sum(p.get("amount", 0) for p in purchases if p.get("vehicle", "").lower() == t["number"].lower())
+
+    return render_template("purav/truck-view.html", user=current_user(), role=current_role(),
+                          name=current_name(), trucks=trucks,
+                          today=datetime.now().strftime("%Y-%m-%d"))
+
+@app.route("/purav/carting/payment-all")
+def purav_payment_all():
+    g = purav_guard()
+    if g: return g
+
+    customer_list = []
+    for c in database.get_customers():
+        bal = database.get_customer_outstanding(c["id"])
+        if bal > 0:
+            customer_list.append({"name": c["name"], "phone": c.get("phone", ""), "balance": bal, "type": "Customer"})
+
+    supplier_list = []
+    purchases = database.get_purchases()
+    for s in database.get_suppliers():
+        s_purchases = [p for p in purchases if p.get("supplier_id") == s["id"]]
+        s_pending = sum(p.get("amount", 0) for p in s_purchases if p.get("payment_status") != "Paid")
+        if s_pending > 0:
+            supplier_list.append({"name": s["name"], "phone": s.get("phone", ""), "balance": s_pending, "type": "Supplier"})
+
+    staff_list = []
+    staff = database.get_staff()
+    advance_payments = database.get_advance_payments()
+    for s in staff:
+        s_advance = sum(p.get("amount", 0) for p in advance_payments if p.get("staff_id") == s["id"])
+        if s_advance > 0:
+            staff_list.append({"name": s["name"], "phone": s.get("phone", ""), "balance": s_advance, "type": "Staff", "role": s.get("role", "")})
+
+    all_items = customer_list + supplier_list + staff_list
+    all_items.sort(key=lambda x: x["balance"], reverse=True)
+
+    totals = {
+        "customer": sum(x["balance"] for x in customer_list),
+        "supplier": sum(x["balance"] for x in supplier_list),
+        "staff": sum(x["balance"] for x in staff_list),
+        "total": sum(x["balance"] for x in all_items),
+    }
+
+    return render_template("purav/payment-all.html", user=current_user(), role=current_role(),
+                          name=current_name(), items=all_items, totals=totals,
+                          customers=customer_list, suppliers=supplier_list, staff=staff_list,
+                          today=datetime.now().strftime("%Y-%m-%d"))
 
 # ============================================
 # ALERTS / REPORTS / SETTINGS / LEDGER
@@ -1588,35 +1698,7 @@ def purav_ledger():
                           totals=totals, truck_filter=truck_filter, month_filter=month_filter)
 
 # ============================================
-# EXPENSES
-# ============================================
-
-@app.route("/purav/carting/expenses")
-def purav_expenses():
-    g = purav_guard()
-    if g: return g
-    expenses = database.get_expenses()
-    month_filter = request.args.get("month", datetime.now().strftime("%Y-%m"))
-    type_filter = request.args.get("type", "all")
-    filtered = [e for e in expenses if e.get("date", "").startswith(month_filter)]
-    if type_filter != "all":
-        filtered = [e for e in filtered if e.get("type") == type_filter]
-    filtered.sort(key=lambda x: (x.get("date", ""), x.get("created_at", "")), reverse=True)
-    totals = {
-        "count": len(filtered),
-        "amount": sum(e.get("amount", 0) for e in filtered),
-        "diesel": sum(e.get("amount", 0) for e in filtered if e.get("type") == "Diesel"),
-        "labour": sum(e.get("amount", 0) for e in filtered if e.get("type") == "Labour"),
-        "driver": sum(e.get("amount", 0) for e in filtered if e.get("type") == "Driver"),
-        "maintenance": sum(e.get("amount", 0) for e in filtered if e.get("type") == "Maintenance"),
-        "other": sum(e.get("amount", 0) for e in filtered if e.get("type") == "Other"),
-    }
-    return render_template("purav/expenses.html", user=current_user(), role=current_role(),
-                          name=current_name(), expenses=filtered, totals=totals,
-                          month_filter=month_filter, type_filter=type_filter)
-
-# ============================================
-# ADMIN / OWNER / TOOLS (same as before)
+# ADMIN / OWNER
 # ============================================
 
 @app.route("/admin")
@@ -1730,6 +1812,10 @@ def owner_update_role():
         database.update_user(username, role=role)
     return redirect(url_for("owner") + "?tab=roles&success=updated")
 
+# ============================================
+# TOOLS
+# ============================================
+
 @app.route("/tools/invoice")
 def invoice_tool():
     if not require_staff(): return redirect(url_for("login"))
@@ -1777,8 +1863,7 @@ def qr_code_process():
         import qrcode
         text = request.form.get("text", "").strip()
         size = int(request.form.get("size", 300))
-        if not text: return "Kuch text daalo", 400
-        if size < 100 or size > 1000: size = 300
+        if not text: return "Kuch text daalo", 400        if size < 100 or size > 1000: size = 300
         qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_H, box_size=10, border=2)
         qr.add_data(text); qr.make(fit=True)
         img = qr.make_image(fill_color="#1a1a1a", back_color="white").convert("RGB")
