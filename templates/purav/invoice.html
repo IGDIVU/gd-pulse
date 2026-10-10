@@ -3,62 +3,88 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tax Invoice — Purav Carting</title>
+<title>Invoice — Purav Carting</title>
 <link rel="icon" type="image/png" href="/static/favicon.png">
 <link rel="stylesheet" href="/static/style.css">
 <style>
   .pc-nav { background: linear-gradient(135deg, #1e3a8a 0%, #ea580c 100%); padding: 0 20px; display: flex; align-items: center; gap: 4px; overflow-x: auto; box-shadow: 0 4px 20px rgba(30,58,138,0.3); position: sticky; top: 70px; z-index: 90; white-space: nowrap; }
-  .pc-nav a { color: rgba(255,255,255,0.85); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; border-bottom: 3px solid transparent; }
+  .pc-nav a { color: rgba(255,255,255,0.85); text-decoration: none; padding: 14px 12px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; border-bottom: 3px solid transparent; }
   .pc-nav a:hover, .pc-nav a.active { color: white; background: rgba(255,255,255,0.1); }
   .pc-nav a.active { border-bottom-color: white; }
-  .pc-nav a [data-icon] { width: 15px; height: 15px; }
+  .pc-nav a [data-icon] { width: 14px; height: 14px; }
 
   .page-head { padding: 30px 40px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; border-bottom: 1px solid var(--border); margin-bottom: 30px; }
-  .page-head h1 { font-size: 28px; font-weight: 900; color: var(--text); letter-spacing: -1px; display: flex; align-items: center; gap: 12px; }
+  .page-head h1 { font-size: 28px; font-weight: 900; color: var(--text); letter-spacing: -1px; display: flex; align-items: center; gap: 12px; font-family: 'Book Antiqua', 'Palatino Linotype', serif; }
   .page-head h1 [data-icon] { width: 32px; height: 32px; color: #1e3a8a; }
 
   .btn-pc { background: linear-gradient(135deg, #1e3a8a, #ea580c); color: white; border: none; padding: 12px 24px; border-radius: 30px; font-weight: 800; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; box-shadow: 0 8px 20px rgba(30,58,138,0.3); }
-  .btn-pc [data-icon] { width: 16px; height: 16px; }
 
-  .alert-box { padding: 14px 20px; border-radius: 12px; margin: 0 40px 20px; font-size: 14px; font-weight: 600; }
-  .alert-box.error { background: rgba(239,68,68,0.1); color: #ef4444; border-left: 4px solid #ef4444; }
-
-  .wrap { max-width: 1000px; margin: 0 auto 40px; padding: 0 40px; }
-  .card { background: var(--card); border: 2px solid #1e3a8a; border-radius: 18px; padding: 32px; box-shadow: 0 15px 40px rgba(30,58,138,0.15); margin-bottom: 25px; }
-  .card h2 { font-size: 20px; font-weight: 800; color: var(--text); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+  .form-wrap { max-width: 1200px; margin: 0 auto 40px; padding: 0 40px; }
+  .card { background: var(--card); border: 2px solid #1e3a8a; border-radius: 18px; padding: 30px; box-shadow: 0 15px 40px rgba(30,58,138,0.15); margin-bottom: 20px; }
+  .card h2 { font-size: 20px; font-weight: 800; margin-bottom: 22px; display: flex; align-items: center; gap: 10px; font-family: 'Book Antiqua', serif; }
   .card h2 [data-icon] { width: 22px; height: 22px; color: #1e3a8a; }
 
-  .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+  .form-section-title { font-size: 12px; font-weight: 800; color: #1e3a8a; text-transform: uppercase; letter-spacing: 1.5px; margin: 22px 0 14px; padding-bottom: 8px; border-bottom: 2px solid rgba(30,58,138,0.15); }
+
   .form-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-bottom: 18px; }
-  label { display: block; font-size: 12px; color: var(--text-dim); font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-  input, select, textarea { width: 100%; padding: 12px 14px; margin: 0; border: 1.5px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-size: 14px; outline: none; }
+  .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+  label { display: block; font-size: 12px; color: var(--text-dim); font-weight: 700; margin-bottom: 6px; text-transform: uppercase; }
+  input, select, textarea { width: 100%; padding: 11px 14px; margin: 0; border: 1.5px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-size: 14px; outline: none; font-family: inherit; }
   input:focus, select:focus { border-color: #1e3a8a; }
 
-  .challan-list { max-height: 500px; overflow-y: auto; margin-top: 15px; }
-  .challan-item { display: flex; align-items: center; gap: 15px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px; transition: all 0.25s; cursor: pointer; }
-  .challan-item:hover { border-color: #1e3a8a; background: rgba(30,58,138,0.04); }
-  .challan-item.selected { border-color: #1e3a8a; background: rgba(30,58,138,0.08); }
-  .challan-item input[type="checkbox"] { width: auto; margin: 0; transform: scale(1.3); }
-  .challan-item .ci-info { flex: 1; }
-  .challan-item .ci-no { font-weight: 800; color: var(--text); font-size: 13px; }
-  .challan-item .ci-detail { font-size: 11px; color: var(--text-dim); margin-top: 3px; }
-  .challan-item .ci-amt { font-weight: 900; color: #1e3a8a; font-size: 15px; }
+  /* Bill type selector */
+  .bill-type-row { display: flex; gap: 12px; margin-bottom: 20px; }
+  .bill-type-btn { flex: 1; padding: 14px 20px; border-radius: 12px; border: 2px solid var(--border); background: var(--card); cursor: pointer; text-align: center; transition: all 0.3s; font-weight: 800; }
+  .bill-type-btn.active { border-color: #1e3a8a; background: rgba(30,58,138,0.08); color: #1e3a8a; }
+  .bill-type-btn.active.gst { border-color: #10b981; background: rgba(16,185,129,0.08); color: #10b981; }
 
-  .total-preview { background: linear-gradient(135deg, rgba(30,58,138,0.08), rgba(234,88,12,0.08)); border: 2px dashed #1e3a8a; border-radius: 14px; padding: 20px; margin-top: 20px; }
-  .total-preview .tp-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; }
-  .total-preview .tp-row.big { border-top: 2px solid rgba(30,58,138,0.3); margin-top: 10px; padding-top: 14px; font-size: 20px; font-weight: 900; }
-  .total-preview .tp-row.big .val { color: #1e3a8a; }
+  /* Customer balance box */
+  .cust-balance { background: linear-gradient(135deg, rgba(251,191,36,0.1), rgba(234,88,12,0.1)); border: 2px solid #ea580c; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+  .cust-balance .cb-item { text-align: center; }
+  .cust-balance .cb-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; font-weight: 800; color: #ea580c; }
+  .cust-balance .cb-value { font-size: 20px; font-weight: 900; color: #ea580c; }
+
+  /* Items table */
+  .items-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  .items-table th, .items-table td { padding: 8px 6px; border: 1px solid var(--border); font-size: 12px; }
+  .items-table th { background: rgba(30,58,138,0.08); font-weight: 800; font-size: 10px; text-transform: uppercase; text-align: center; }
+  .items-table input, .items-table select { padding: 7px 8px; font-size: 12px; border-radius: 6px; }
+  .items-table .num { text-align: right; }
+  .items-table td.total { text-align: right; font-weight: 800; color: #1e3a8a; font-size: 13px; }
+
+  .btn-add { background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; }
+  .btn-del { background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+
+  .totals-box { background: linear-gradient(135deg, rgba(30,58,138,0.08), rgba(234,88,12,0.08)); border: 2px dashed #1e3a8a; border-radius: 14px; padding: 20px; margin-top: 20px; }
+  .totals-box .row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; }
+  .totals-box .row.big { border-top: 2px solid rgba(30,58,138,0.3); margin-top: 10px; padding-top: 14px; font-size: 22px; font-weight: 900; }
+  .totals-box .row.big .val { color: #1e3a8a; }
+  .totals-box .val { font-weight: 800; }
 
   .form-actions { display: flex; gap: 12px; margin-top: 24px; }
   .form-actions button, .form-actions a { flex: 1; padding: 15px; border-radius: 12px; font-weight: 800; font-size: 15px; cursor: pointer; border: none; text-align: center; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
   .form-actions .btn-cancel { background: var(--bg); color: var(--text); border: 1.5px solid var(--border); }
   .form-actions .btn-save { background: linear-gradient(135deg, #1e3a8a, #ea580c); color: white; box-shadow: 0 8px 20px rgba(30,58,138,0.3); }
-  .empty-state { text-align: center; padding: 30px; color: var(--text-dim); font-size: 14px; }
 
-  @media (max-width: 700px) {
-    .page-head, .wrap, .alert-box { padding-left: 20px; padding-right: 20px; }
-    .form-grid-2, .form-grid-3 { grid-template-columns: 1fr; }
+  /* Modal */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 9999; display: none; justify-content: center; align-items: center; padding: 20px; }
+  .modal-overlay.active { display: flex; }
+  .modal-box { background: var(--card); border-radius: 18px; padding: 28px; max-width: 480px; width: 100%; box-shadow: 0 25px 60px rgba(0,0,0,0.4); }
+  .modal-box h3 { font-size: 20px; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 18px; }
+  .modal-actions button { flex: 1; padding: 12px; border-radius: 10px; font-weight: 800; cursor: pointer; border: none; }
+  .modal-actions .btn-cancel { background: var(--bg); color: var(--text); border: 1.5px solid var(--border); }
+  .modal-actions .btn-save { background: linear-gradient(135deg, #1e3a8a, #ea580c); color: white; }
+
+  .info-banner { padding: 12px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; margin-bottom: 15px; }
+  .info-banner.warn { background: rgba(251,191,36,0.1); color: #f59e0b; border-left: 4px solid #f59e0b; }
+
+  @media (max-width: 900px) {
+    .form-grid-3, .form-grid-2 { grid-template-columns: 1fr; }
+    .items-table { display: block; overflow-x: auto; white-space: nowrap; }
+    .bill-type-row { flex-direction: column; }
   }
+  @media (max-width: 700px) { .page-head, .form-wrap { padding-left: 20px; padding-right: 20px; } }
 </style>
 </head>
 <body>
@@ -74,130 +100,367 @@
 
   <nav class="pc-nav">
     <a href="/purav/carting"><span data-icon="grid"></span> Dashboard</a>
-    <a href="/purav/carting/trucks"><span data-icon="sand"></span> Trucks</a>
-    <a href="/purav/carting/customers"><span data-icon="users"></span> Customers</a>
-    <a href="/purav/carting/materials"><span data-icon="assets"></span> Materials</a>
-    <a href="/purav/carting/entry"><span data-icon="prompts"></span> Daily Entry</a>
-    <a href="/purav/carting/challan"><span data-icon="retail"></span> Challan</a>
-    <a href="/purav/carting/purchase"><span data-icon="download"></span> Purchase</a>
-    <a href="/purav/carting/invoice" class="active"><span data-icon="gst"></span> Invoice</a>
+    <a href="/purav/carting/invoice" class="active"><span data-icon="gst"></span> New Invoice</a>
+    <a href="/purav/carting/invoice/list"><span data-icon="analytics"></span> All Invoices</a>
     <a href="/purav/carting/payment"><span data-icon="gst"></span> Payment</a>
   </nav>
 
   <div class="page-head">
-    <h1><span data-icon="gst"></span> Generate Tax Invoice</h1>
+    <h1><span data-icon="gst"></span> {% if is_edit %}Edit Invoice: {{ edit_invoice.invoice_no }}{% else %}New Invoice{% endif %}</h1>
     <a href="/purav/carting/invoice/list" class="btn-pc"><span data-icon="grid"></span> All Invoices</a>
   </div>
 
-  {% if request.args.get('error') == 'missing' %}<div class="alert-box error">Customer select karo aur kam se kam 1 challan chuno</div>{% endif %}
+  <div class="form-wrap">
 
-  <div class="wrap">
-    <!-- STEP 1: Select customer -->
+    <!-- BILL TYPE SELECTOR -->
+    {% if not is_edit %}
     <div class="card">
-      <h2><span data-icon="users"></span> Step 1: Customer Select Karo</h2>
-      <form method="GET" action="/purav/carting/invoice">
-        <label>Customer</label>
-        <select name="customer" onchange="this.form.submit()">
-          <option value="">-- Select Customer --</option>
-          {% for c in customers %}
-          <option value="{{ c.id }}" {% if customer_id == c.id %}selected{% endif %}>{{ c.name }}{% if c.gstin %} ({{ c.gstin }}){% endif %}</option>
-          {% endfor %}
-        </select>
-      </form>
+      <h2><span data-icon="prompts"></span> Bill Type</h2>
+      <div class="bill-type-row">
+        <div class="bill-type-btn gst active" id="btnTax" onclick="setBillType('tax')">
+          ✅ Tax Invoice (GST)
+        </div>
+        <div class="bill-type-btn" id="btnNonTax" onclick="setBillType('non-tax')">
+          📄 Non-Tax Invoice
+        </div>
+      </div>
+      <input type="hidden" id="billType" name="bill_type" value="tax" form="invForm">
     </div>
+    {% else %}
+    <input type="hidden" id="billType" name="bill_type" value="{{ edit_invoice.bill_type }}" form="invForm">
+    {% endif %}
 
-    {% if customer_id %}
-    <!-- STEP 2: Select challans -->
     <div class="card">
-      <h2><span data-icon="retail"></span> Step 2: Pending Challans Select Karo</h2>
-      <form method="POST" action="/purav/carting/invoice/generate" id="invoiceForm">
-        <input type="hidden" name="customer_id" value="{{ customer_id }}">
+      <h2><span data-icon="gst"></span> Invoice Details</h2>
+      <form method="POST" id="invForm" action="{% if is_edit %}/purav/carting/invoice/edit/{{ edit_invoice.id }}{% else %}/purav/carting/invoice/add{% endif %}">
 
         <div class="form-grid-3">
-          <div><label>Invoice Date</label><input type="date" name="date" value="{{ today }}" required></div>
-          <div><label>Due Date</label><input type="date" name="due_date"></div>
           <div>
-            <label>GST Rate (%)</label>
-            <select name="gst_rate" id="gstRate" onchange="calcTotals()">
-              <option value="0">0% (Exempted)</option>
-              <option value="5" selected>5% (CGST 2.5% + SGST 2.5%)</option>
-              <option value="12">12% (CGST 6% + SGST 6%)</option>
-              <option value="18">18% (CGST 9% + SGST 9%)</option>
-              <option value="28">28% (CGST 14% + SGST 14%)</option>
-            </select>
-          </div>
-        </div>
-
-        <label>Pending Challans</label>
-        {% if pending %}
-        <div class="challan-list">
-          {% for c in pending %}
-          <div class="challan-item" onclick="toggleChallan(this)">
-            <input type="checkbox" name="challan_ids" value="{{ c.id }}" data-amount="{{ c.amount }}" onchange="calcTotals()" onclick="event.stopPropagation()">
-            <div class="ci-info">
-              <div class="ci-no">{{ c.challan_no }}</div>
-              <div class="ci-detail">{{ c.date }} · {{ c.truck_number }} · {{ c.material_name }} · {{ c.quantity }} {{ c.unit }} × ₹{{ c.rate }}</div>
+            <label>Customer *</label>
+            <div style="display:flex;gap:6px;">
+              <select name="customer_id" id="customerSelect" required style="flex:1;" onchange="onCustomerChange()">
+                <option value="">-- Select Customer --</option>
+                {% for c in customers %}
+                <option value="{{ c.id }}" data-gstin="{{ c.gstin or '' }}" {% if is_edit and edit_invoice.customer_id == c.id %}selected{% endif %}>{{ c.name }}</option>
+                {% endfor %}
+              </select>
+              <button type="button" class="btn-add" style="margin:0;padding:0 14px;" onclick="openNewCustModal()" title="Naya Customer">+</button>
             </div>
-            <div class="ci-amt">₹{{ "{:,.2f}".format(c.amount) }}</div>
           </div>
-          {% endfor %}
+          <div><label>Invoice Date</label><input type="date" name="date" id="invDate" value="{% if is_edit %}{{ edit_invoice.date }}{% else %}{{ today }}{% endif %}" required></div>
+          <div><label>Due Date</label><input type="date" name="due_date" id="invDue" value="{% if is_edit %}{{ edit_invoice.due_date }}{% endif %}"></div>
         </div>
 
-        <!-- TOTAL PREVIEW -->
-        <div class="total-preview">
-          <div class="tp-row"><span>Subtotal</span><span class="val" id="tpSub">₹0</span></div>
-          <div class="tp-row"><span>CGST</span><span class="val" id="tpCgst">₹0</span></div>
-          <div class="tp-row"><span>SGST</span><span class="val" id="tpSgst">₹0</span></div>
-          <div class="tp-row big"><span>Total</span><span class="val" id="tpTotal">₹0</span></div>
+        <div class="form-grid-3">
+          <div><label>Items Per Page (Print)</label><input type="number" name="items_per_page" value="{% if is_edit %}{{ edit_invoice.items_per_page }}{% else %}19{% endif %}" min="5" max="30"></div>
+          <div><label>Notes</label><input type="text" name="notes" value="{% if is_edit %}{{ edit_invoice.notes }}{% endif %}" placeholder="Optional"></div>
         </div>
-
-        <label style="margin-top:20px;">Notes</label>
-        <input type="text" name="notes" placeholder="Optional">
-
-        <div class="form-actions">
-          <a href="/purav/carting/invoice" class="btn-cancel">Cancel</a>
-          <button type="submit" class="btn-save"><span data-icon="check"></span> Generate Invoice</button>
-        </div>
-        </form>
-        {% else %}
-        <div class="empty-state">
-          <p>Is customer ka koi pending challan nahi hai. 🎉</p>
-        </div>
-        {% endif %}
       </form>
     </div>
-    {% endif %}
+
+    <!-- CUSTOMER BALANCE -->
+    <div id="customerInfoBox" style="display:none;">
+      <div class="cust-balance">
+        <div class="cb-item">
+          <div class="cb-label">Party Balance</div>
+          <div class="cb-value" id="cbOutstanding">₹0</div>
+        </div>
+        <div class="cb-item">
+          <div class="cb-label">Pending Challans</div>
+          <div class="cb-value" id="cbPendingCount">0</div>
+        </div>
+        <div class="cb-item">
+          <div class="cb-label">GSTIN</div>
+          <div class="cb-value" style="font-size:14px;" id="cbGstin">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PENDING CHALLANS -->
+    <div class="card" id="pendingChallansCard" style="display:none;">
+      <h2><span data-icon="prompts"></span> Pending Challans</h2>
+      <div class="info-banner warn">In challans ko invoice me add karna chahoge toh checkbox tick karo.</div>
+      <div id="pendingChallansList"></div>
+    </div>
+
+    <!-- ITEMS -->
+    <div class="card">
+      <h2><span data-icon="tools"></span> Items</h2>
+      <table class="items-table">
+        <thead>
+          <tr>
+            <th style="width:30px;">S#</th>
+            <th style="min-width:180px;">Description</th>
+            <th style="width:70px;">Qty</th>
+            <th style="width:60px;">Unit</th>
+            <th style="width:80px;">Rate ₹</th>
+            <th style="width:70px;">GST %</th>
+            <th style="width:90px;">Vehicle Type</th>
+            <th style="width:90px;">Vehicle No</th>
+            <th style="width:100px;">Amount ₹</th>
+            <th style="width:40px;"></th>
+          </tr>
+        </thead>
+        <tbody id="itemsBody"></tbody>
+      </table>
+      <button type="button" class="btn-add" onclick="addItemRow()"><span data-icon="plus" style="width:14px;height:14px;display:inline-flex;"></span> Add Item Row</button>
+    </div>
+
+    <!-- TOTALS -->
+    <div class="card">
+      <div class="totals-box">
+        <div class="row"><span>Subtotal</span><span class="val" id="tSub">₹0</span></div>
+        <div id="gstRows">
+          <div class="row"><span>CGST</span><span class="val" id="tCgst">₹0</span></div>
+          <div class="row"><span>SGST</span><span class="val" id="tSgst">₹0</span></div>
+        </div>
+        <div class="row big"><span>Grand Total</span><span class="val" id="tTotal">₹0</span></div>
+      </div>
+
+      <div class="form-actions">
+        <a href="/purav/carting/invoice/list" class="btn-cancel">Cancel</a>
+        <button type="submit" class="btn-save" form="invForm"><span data-icon="check"></span> {% if is_edit %}Update Invoice{% else %}Generate Invoice{% endif %}</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEW CUSTOMER MODAL -->
+  <div class="modal-overlay" id="newCustModal">
+    <div class="modal-box">
+      <h3>➕ Naya Customer</h3>
+      <div class="form-grid-2" style="grid-template-columns:1fr;">
+        <div><label>Name *</label><input type="text" id="ncName" required></div>
+      </div>
+      <div class="form-grid-2">
+        <div><label>Phone</label><input type="text" id="ncPhone"></div>
+        <div><label>GSTIN</label><input type="text" id="ncGstin"></div>
+      </div>
+      <div class="form-grid-2">
+        <div><label>PAN</label><input type="text" id="ncPan"></div>
+        <div><label>State</label><input type="text" id="ncState" value="24-Gujarat"></div>
+      </div>
+      <div><label>Address</label><input type="text" id="ncAddress"></div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeNewCustModal()">Cancel</button>
+        <button class="btn-save" onclick="createNewCustomer()">Create & Select</button>
+      </div>
+    </div>
   </div>
 
   <footer><p>© 2025 GD Pulse — Purav Carting</p></footer>
 
   <script src="/static/icons.js"></script>
   <script>
-    function toggleChallan(el) {
-      const cb = el.querySelector('input[type="checkbox"]');
-      cb.checked = !cb.checked;
-      el.classList.toggle('selected', cb.checked);
+    const IS_EDIT = {{ 'true' if is_edit else 'false' }};
+    const EDIT_INVOICE = {% if is_edit %}{{ edit_invoice|tojson }}{% else %}null{% endif %};
+    let rowCount = 0;
+    let billType = IS_EDIT ? (EDIT_INVOICE.bill_type || 'tax') : 'tax';
+
+    function setBillType(type) {
+      billType = type;
+      document.getElementById('billType').value = type;
+      const btnTax = document.getElementById('btnTax');
+      const btnNonTax = document.getElementById('btnNonTax');
+      if (type === 'tax') {
+        btnTax.classList.add('active');
+        btnNonTax.classList.remove('active');
+        document.getElementById('gstRows').style.display = 'block';
+      } else {
+        btnTax.classList.remove('active');
+        btnNonTax.classList.add('active');
+        document.getElementById('gstRows').style.display = 'none';
+      }
+      // Disable GST inputs when non-tax
+      document.querySelectorAll('input[name="item_gst[]"]').forEach(inp => {
+        inp.disabled = (type === 'non-tax');
+        if (type === 'non-tax') inp.value = 0;
+      });
       calcTotals();
     }
-    function calcTotals() {
-      let sub = 0;
-      document.querySelectorAll('input[name="challan_ids"]:checked').forEach(cb => {
-        sub += parseFloat(cb.getAttribute('data-amount')) || 0;
-        cb.closest('.challan-item').classList.add('selected');
-      });
-      document.querySelectorAll('input[name="challan_ids"]:not(:checked)').forEach(cb => {
-        cb.closest('.challan-item').classList.remove('selected');
-      });
-      const gstRate = parseFloat(document.getElementById('gstRate').value) || 0;
-      const cgst = sub * (gstRate / 2) / 100;
-      const sgst = sub * (gstRate / 2) / 100;
-      const total = Math.round(sub + cgst + sgst);
-      document.getElementById('tpSub').innerText = '₹' + sub.toLocaleString('en-IN', {maximumFractionDigits: 2});
-      document.getElementById('tpCgst').innerText = '₹' + cgst.toLocaleString('en-IN', {maximumFractionDigits: 2});
-      document.getElementById('tpSgst').innerText = '₹' + sgst.toLocaleString('en-IN', {maximumFractionDigits: 2});
-      document.getElementById('tpTotal').innerText = '₹' + total.toLocaleString('en-IN');
+
+    function addItemRow(data) {
+      rowCount++;
+      const tbody = document.getElementById('itemsBody');
+      const tr = document.createElement('tr');
+      const d = data || {};
+      tr.innerHTML = `
+        <td style="text-align:center;font-weight:700;">${rowCount}</td>
+        <td><input type="text" name="item_desc[]" placeholder="Item description" value="${d.desc || ''}"></td>
+        <td><input type="number" name="item_qty[]" step="0.01" value="${d.qty || ''}" oninput="calcTotals()" style="text-align:right;"></td>
+        <td><input type="text" name="item_unit[]" value="${d.unit || 'Ton'}" style="text-align:center;"></td>
+        <td><input type="number" name="item_rate[]" step="0.01" value="${d.rate || ''}" oninput="calcTotals()" style="text-align:right;"></td>
+        <td><input type="number" name="item_gst[]" step="0.01" value="${d.gst_pct || 5}" oninput="calcTotals()" style="text-align:center;" ${billType === 'non-tax' ? 'disabled' : ''}></td>
+        <td>
+          <select name="item_vehicle_type[]" style="text-align:center;">
+            <option value="">-</option>
+            <option value="Truck" ${d.vehicle_type === 'Truck' ? 'selected' : ''}>Truck</option>
+            <option value="Tractor" ${d.vehicle_type === 'Tractor' ? 'selected' : ''}>Tractor</option>
+            <option value="Trolly" ${d.vehicle_type === 'Trolly' ? 'selected' : ''}>Trolly</option>
+            <option value="Tempo" ${d.vehicle_type === 'Tempo' ? 'selected' : ''}>Tempo</option>
+            <option value="Other" ${d.vehicle_type === 'Other' ? 'selected' : ''}>Other</option>
+          </select>
+        </td>
+        <td><input type="text" name="item_vehicle_number[]" value="${d.vehicle_number || ''}" style="text-align:center;" placeholder="2646"></td>
+        <td class="total" style="text-align:right;" data-amount>₹0</td>
+        <td style="text-align:center;"><button type="button" class="btn-del" onclick="this.closest('tr').remove();renumber();calcTotals();">×</button></td>
+      `;
+      tbody.appendChild(tr);
+      calcTotals();
     }
-    document.addEventListener("DOMContentLoaded", () => { if (window.renderIcons) window.renderIcons(); calcTotals(); });
+
+    function renumber() {
+      document.querySelectorAll('#itemsBody tr').forEach((tr, i) => tr.querySelector('td').innerText = i + 1);
+      rowCount = document.querySelectorAll('#itemsBody tr').length;
+    }
+
+    function calcTotals() {
+      let sub = 0, cgstT = 0, sgstT = 0;
+      document.querySelectorAll('#itemsBody tr').forEach(tr => {
+        const qty = parseFloat(tr.querySelector('input[name="item_qty[]"]').value) || 0;
+        const rate = parseFloat(tr.querySelector('input[name="item_rate[]"]').value) || 0;
+        const gstInp = tr.querySelector('input[name="item_gst[]"]');
+        const gst = billType === 'non-tax' ? 0 : (parseFloat(gstInp.value) || 0);
+        const amt = qty * rate;
+        tr.querySelector('[data-amount]').innerText = '₹' + amt.toLocaleString('en-IN', {maximumFractionDigits: 2});
+        sub += amt;
+        cgstT += amt * (gst / 2) / 100;
+        sgstT += amt * (gst / 2) / 100;
+      });
+      const total = Math.round(sub + cgstT + sgstT);
+      document.getElementById('tSub').innerText = '₹' + sub.toLocaleString('en-IN', {maximumFractionDigits: 2});
+      document.getElementById('tCgst').innerText = '₹' + cgstT.toLocaleString('en-IN', {maximumFractionDigits: 2});
+      document.getElementById('tSgst').innerText = '₹' + sgstT.toLocaleString('en-IN', {maximumFractionDigits: 2});
+      document.getElementById('tTotal').innerText = '₹' + total.toLocaleString('en-IN');
+    }
+
+    // CUSTOMER CHANGE
+    function onCustomerChange() {
+      const sel = document.getElementById('customerSelect');
+      const cid = sel.value;
+      const box = document.getElementById('customerInfoBox');
+      const chCard = document.getElementById('pendingChallansCard');
+      if (!cid) { box.style.display = 'none'; chCard.style.display = 'none'; return; }
+
+      fetch('/purav/carting/api/customer/' + cid).then(r => r.json()).then(data => {
+        document.getElementById('cbOutstanding').innerText = '₹' + (data.outstanding || 0).toLocaleString('en-IN', {maximumFractionDigits: 0});
+        document.getElementById('cbGstin').innerText = data.gstin || '—';
+        box.style.display = 'block';
+      });
+
+      fetch('/purav/carting/api/pending-challans/' + cid).then(r => r.json()).then(list => {
+        document.getElementById('cbPendingCount').innerText = list.length;
+        const listEl = document.getElementById('pendingChallansList');
+        if (list.length === 0) {
+          listEl.innerHTML = '<div style="padding:15px;text-align:center;color:var(--text-dim);">Koi pending challan nahi 🎉</div>';
+        } else {
+          listEl.innerHTML = list.map(c => `
+            <div style="display:flex;align-items:center;gap:12px;padding:10px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;">
+              <input type="checkbox" class="challan-check" value="${c.id}" data-json='${JSON.stringify(c)}' style="width:auto;margin:0;transform:scale(1.2);">
+              <div style="flex:1;">
+                <div style="font-weight:800;font-size:13px;">${c.challan_no} · ${c.date}</div>
+                <div style="font-size:11px;color:var(--text-dim);">${c.material_name} · ${c.quantity} ${c.unit} × ₹${c.rate} ${c.truck_number ? '· ' + c.truck_number : ''}</div>
+              </div>
+              <div style="font-weight:900;color:#1e3a8a;">₹${c.amount.toLocaleString('en-IN')}</div>
+            </div>
+          `).join('');
+          listEl.querySelectorAll('.challan-check').forEach(cb => cb.addEventListener('change', addChallanToItems));
+        }
+        chCard.style.display = 'block';
+      });
+    }
+
+    function addChallanToItems(e) {
+      const cb = e.target;
+      const data = JSON.parse(cb.getAttribute('data-json'));
+      if (cb.checked) {
+        // Add to items and mark challan
+        const tr = document.createElement('tr');
+        tr.setAttribute('data-challan-id', data.id);
+        rowCount++;
+        tr.innerHTML = `
+          <td style="text-align:center;font-weight:700;">${rowCount}</td>
+          <td>
+            <input type="text" name="item_desc[]" value="${data.material_name} (Challan: ${data.challan_no})" readonly style="background:rgba(30,58,138,0.05);">
+            <input type="hidden" name="challan_ids" value="${data.id}">
+          </td>
+          <td><input type="number" name="item_qty[]" value="${data.quantity}" readonly style="text-align:right;background:rgba(30,58,138,0.05);"></td>
+          <td><input type="text" name="item_unit[]" value="${data.unit}" readonly style="text-align:center;background:rgba(30,58,138,0.05);"></td>
+          <td><input type="number" name="item_rate[]" value="${data.rate}" readonly style="text-align:right;background:rgba(30,58,138,0.05);"></td>
+          <td><input type="number" name="item_gst[]" value="5" readonly style="text-align:center;background:rgba(30,58,138,0.05);"></td>
+          <td><input type="text" name="item_vehicle_type[]" value="Truck" readonly style="text-align:center;background:rgba(30,58,138,0.05);"></td>
+          <td><input type="text" name="item_vehicle_number[]" value="" readonly style="text-align:center;background:rgba(30,58,138,0.05);"></td>
+          <td class="total" style="text-align:right;" data-amount>₹${data.amount.toLocaleString('en-IN')}</td>
+          <td style="text-align:center;"><button type="button" class="btn-del" onclick="removeChallanRow(this);">×</button></td>
+        `;
+        document.getElementById('itemsBody').appendChild(tr);
+        calcTotals();
+      } else {
+        const tr = document.querySelector(`tr[data-challan-id="${data.id}"]`);
+        if (tr) tr.remove();
+        renumber();
+        calcTotals();
+      }
+    }
+
+    function removeChallanRow(btn) {
+      const tr = btn.closest('tr');
+      const cid = tr.getAttribute('data-challan-id');
+      if (cid) {
+        const cb = document.querySelector(`input.challan-check[value="${cid}"]`);
+        if (cb) cb.checked = false;
+      }
+      tr.remove();
+      renumber();
+      calcTotals();
+    }
+
+    // NEW CUSTOMER
+    function openNewCustModal() { document.getElementById('newCustModal').classList.add('active'); }
+    function closeNewCustModal() { document.getElementById('newCustModal').classList.remove('active'); }
+    function createNewCustomer() {
+      const name = document.getElementById('ncName').value.trim();
+      if (!name) { alert('Name required'); return; }
+      fetch('/purav/carting/api/customer/create', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          name: name,
+          phone: document.getElementById('ncPhone').value,
+          gstin: document.getElementById('ncGstin').value,
+          pan: document.getElementById('ncPan').value,
+          state: document.getElementById('ncState').value,
+          address: document.getElementById('ncAddress').value
+        })
+      }).then(r => r.json()).then(data => {
+        const sel = document.getElementById('customerSelect');
+        const opt = document.createElement('option');
+        opt.value = data.id; opt.textContent = data.name; opt.selected = true;
+        sel.appendChild(opt);
+        closeNewCustModal();
+        onCustomerChange();
+        document.getElementById('ncName').value = '';
+        document.getElementById('ncPhone').value = '';
+        document.getElementById('ncGstin').value = '';
+        document.getElementById('ncPan').value = '';
+        document.getElementById('ncAddress').value = '';
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.renderIcons) window.renderIcons();
+      if (IS_EDIT && EDIT_INVOICE) {
+        setBillType(EDIT_INVOICE.bill_type || 'tax');
+        // Wait for customer select to populate
+        setTimeout(() => {
+          document.getElementById('customerSelect').value = EDIT_INVOICE.customer_id;
+          onCustomerChange();
+        }, 100);
+        (EDIT_INVOICE.items || []).forEach(it => addItemRow(it));
+      } else {
+        setBillType('tax');
+        addItemRow(); addItemRow(); addItemRow();
+      }
+    });
   </script>
 
 </body>
