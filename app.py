@@ -1000,7 +1000,7 @@ def purav_purchase_mark_paid(pid):
     return redirect(url_for("purav_purchase_list") + "?success=paid")
 
 # ============================================
-# INVOICE
+# INVOICE (Item-wise)
 # ============================================
 
 @app.route("/purav/carting/invoice")
@@ -1031,6 +1031,7 @@ def purav_invoice_add():
     gsts = request.form.getlist("item_gst[]")
     veh_types = request.form.getlist("item_vehicle_type[]")
     veh_nums = request.form.getlist("item_vehicle_number[]")
+    item_dates = request.form.getlist("item_date[]")
 
     subtotal = 0; total_cgst = 0; total_sgst = 0
 
@@ -1050,13 +1051,15 @@ def purav_invoice_add():
         vt = veh_types[i] if i < len(veh_types) else ""
         vn = veh_nums[i] if i < len(veh_nums) else ""
         vd = f"{vt}-{vn}" if vt and vn else (vn or "")
+        it_date = item_dates[i] if i < len(item_dates) else ""
         items.append({
             "desc": desc, "qty": qty, "unit": units[i] if i < len(units) else "Ton",
             "rate": rate, "amount": amount, "gst_pct": gst_p,
             "cgst_pct": gst_p / 2, "sgst_pct": gst_p / 2,
             "cgst_amt": amount * (gst_p / 2) / 100,
             "sgst_amt": amount * (gst_p / 2) / 100,
-            "vehicle_type": vt, "vehicle_number": vn, "vehicle_display": vd
+            "vehicle_type": vt, "vehicle_number": vn, "vehicle_display": vd,
+            "date": it_date
         })
 
     challan_ids = request.form.getlist("challan_ids")
@@ -1160,6 +1163,7 @@ def purav_invoice_edit(iid):
         gsts = request.form.getlist("item_gst[]")
         veh_types = request.form.getlist("item_vehicle_type[]")
         veh_nums = request.form.getlist("item_vehicle_number[]")
+        item_dates = request.form.getlist("item_date[]")
 
         subtotal = 0; total_cgst = 0; total_sgst = 0
         for i in range(len(descs)):
@@ -1176,11 +1180,13 @@ def purav_invoice_edit(iid):
             vt = veh_types[i] if i < len(veh_types) else ""
             vn = veh_nums[i] if i < len(veh_nums) else ""
             vd = f"{vt}-{vn}" if vt and vn else (vn or "")
+            it_date = item_dates[i] if i < len(item_dates) else ""
             items.append({"desc": desc, "qty": qty, "unit": units[i] if i < len(units) else "Ton",
                           "rate": rate, "amount": amount, "gst_pct": gst_p,
                           "cgst_pct": gst_p/2, "sgst_pct": gst_p/2,
                           "cgst_amt": amount*(gst_p/2)/100, "sgst_amt": amount*(gst_p/2)/100,
-                          "vehicle_type": vt, "vehicle_number": vn, "vehicle_display": vd})
+                          "vehicle_type": vt, "vehicle_number": vn, "vehicle_display": vd,
+                          "date": it_date})
 
         if not items: return redirect(url_for("purav_invoice_edit", iid=iid) + "?error=noitems")
 
