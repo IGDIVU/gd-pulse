@@ -8,18 +8,17 @@
 <link rel="stylesheet" href="/static/style.css">
 <style>
   body { background: #e5e7eb; padding: 20px; }
-  .toolbar { max-width: 210mm; margin: 0 auto 15px; display: flex; gap: 10px; justify-content: flex-end; }
-  .toolbar button, .toolbar a { padding: 10px 20px; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; border: none; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #1e3a8a, #ea580c); color: white; box-shadow: 0 8px 20px rgba(30,58,138,0.3); transition: all 0.25s; }
-  .toolbar button:hover, .toolbar a:hover { transform: translateY(-2px); }
+  .toolbar { max-width: 210mm; margin: 0 auto 15px; display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+  .toolbar button, .toolbar a { padding: 10px 20px; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; border: none; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #1e3a8a, #ea580c); color: white; box-shadow: 0 8px 20px rgba(30,58,138,0.3); }
   .toolbar .btn-back { background: var(--card); color: var(--text); border: 1.5px solid var(--border); box-shadow: none; }
 
-  .a4 { background: white; color: #000; width: 210mm; min-height: 297mm; margin: 0 auto; padding: 10mm 12mm; box-shadow: 0 10px 40px rgba(0,0,0,0.2); font-family: 'Arial', sans-serif; font-size: 10px; line-height: 1.35; box-sizing: border-box; position: relative; }
+  .a4 { background: white; color: #000; width: 210mm; min-height: 297mm; margin: 0 auto 20px; padding: 10mm 12mm; box-shadow: 0 10px 40px rgba(0,0,0,0.2); font-family: 'Book Antiqua', 'Palatino Linotype', 'Georgia', serif; font-size: 10px; line-height: 1.35; box-sizing: border-box; position: relative; }
   .a4 * { box-sizing: border-box; }
 
-  .inv-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 8px; }
-  .inv-header .cname { font-size: 22px; font-weight: 900; letter-spacing: 1px; }
-  .inv-header .csub { font-size: 9px; margin-top: 2px; }
-  .inv-title { text-align: center; font-size: 14px; font-weight: 900; border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 3px 0; margin: 6px 0; letter-spacing: 2px; }
+  .inv-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 8px; }
+  .inv-header .cname { font-size: 26px; font-weight: 900; letter-spacing: 2px; font-family: 'Book Antiqua', serif; color: #1e3a8a; }
+  .inv-header .csub { font-size: 9px; margin-top: 3px; font-family: 'Arial', sans-serif; }
+  .inv-title { text-align: center; font-size: 16px; font-weight: 900; border-top: 2px solid #000; border-bottom: 2px solid #000; padding: 5px 0; margin: 6px 0; letter-spacing: 3px; background: #f5f5f5; }
 
   .info-grid { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid #000; margin-bottom: 6px; font-size: 9px; }
   .info-grid > div { padding: 5px; }
@@ -27,39 +26,44 @@
   .info-row { display: flex; justify-content: space-between; padding: 1px 0; }
   .info-row span:first-child { font-weight: 700; }
 
-  .billed { border: 1px solid #000; padding: 5px; margin-bottom: 6px; font-size: 9px; }
-  .billed .bt { font-weight: 900; font-size: 10px; margin-bottom: 3px; text-transform: uppercase; }
+  .billed { border: 1px solid #000; padding: 6px; margin-bottom: 6px; font-size: 9px; position: relative; }
+  .billed .bt { font-weight: 900; font-size: 11px; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .billed .balance-tag { position: absolute; top: 6px; right: 6px; background: #ea580c; color: white; padding: 3px 10px; border-radius: 12px; font-size: 8px; font-weight: 900; }
 
   .items { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
-  .items th, .items td { border: 1px solid #000; padding: 3px 5px; font-size: 9px; text-align: left; }
-  .items th { background: #f0f0f0; font-weight: 800; text-align: center; }
+  .items th, .items td { border: 1px solid #000; padding: 4px 5px; font-size: 9px; text-align: left; }
+  .items th { background: #f0f0f0; font-weight: 800; text-align: center; font-size: 8.5px; }
   .items td.num { text-align: right; font-weight: 700; }
   .items td.center { text-align: center; }
-  .items tr.total-row td { background: #f0f0f0; font-weight: 900; font-size: 10px; }
+  .items tr.bf-row td, .items tr.cf-row td { background: #f5f5f5; font-weight: 900; font-size: 10px; }
 
   .tax-summary { width: 100%; border-collapse: collapse; margin-top: 4px; }
-  .tax-summary td { border: 1px solid #000; padding: 3px 6px; font-size: 9px; }
+  .tax-summary td { border: 1px solid #000; padding: 4px 6px; font-size: 9.5px; }
   .tax-summary td.num { text-align: right; font-weight: 700; }
-  .tax-summary tr.gross td { background: #e8e8e8; font-weight: 900; font-size: 11px; }
+  .tax-summary tr.gross td { background: #e8e8e8; font-weight: 900; font-size: 12px; }
 
-  .words { border: 1px solid #000; border-top: none; padding: 4px 6px; font-size: 9px; font-weight: 700; }
+  .words { border: 1px solid #000; border-top: none; padding: 5px 6px; font-size: 9px; font-weight: 700; }
 
   .footer-grid { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid #000; border-top: none; font-size: 8.5px; }
-  .footer-grid > div { padding: 5px; border-right: 1px solid #000; }
+  .footer-grid > div { padding: 6px; border-right: 1px solid #000; }
   .footer-grid > div:last-child { border-right: none; }
+  .sign { text-align: right; padding: 25px 5px 5px; font-size: 9px; font-weight: 700; }
 
-  .sign { text-align: right; padding: 20px 5px 5px; font-size: 9px; font-weight: 700; }
+  .page-num { text-align: right; font-size: 8px; margin-top: 4px; color: #666; font-family: Arial, sans-serif; }
+
+  .non-tax-badge { display: inline-block; background: #f59e0b; color: white; padding: 2px 10px; border-radius: 10px; font-size: 8px; font-weight: 900; margin-left: 8px; }
 
   @media print {
     @page { size: A4; margin: 0; }
     body { background: white; padding: 0; }
     .toolbar { display: none; }
-    .a4 { box-shadow: none; margin: 0; }
+    .a4 { box-shadow: none; margin: 0; page-break-after: always; }
+    .a4:last-child { page-break-after: auto; }
   }
   @media (max-width: 800px) {
     body { padding: 5px; }
     .a4 { width: 100%; min-height: auto; padding: 15px; }
-    .cname { font-size: 16px !important; }
+    .inv-header .cname { font-size: 18px; }
   }
 </style>
 </head>
@@ -67,123 +71,193 @@
 
   <div class="toolbar">
     <a href="/purav/carting/invoice/list" class="btn-back">← Back</a>
+    {% if invoice.id %}
+    <a href="/purav/carting/invoice/edit/{{ invoice.id }}" class="btn-back">✏️ Edit</a>
+    {% endif %}
     <button onclick="window.print()">🖨️ Print / Save PDF</button>
   </div>
 
-  <div class="a4">
-    <div class="inv-header">
-      <div class="cname">{{ settings.company_name or 'PURAV CARTING' }}</div>
-      <div class="csub">
-        {% if settings.company_address %}{{ settings.company_address }}<br>{% endif %}
-        {% if settings.company_gst %}<b>GSTIN:</b> {{ settings.company_gst }} &nbsp; {% endif %}
-        {% if settings.company_phone %}<b>Mob:</b> {{ settings.company_phone }}{% endif %}
-      </div>
-    </div>
-
-    <div class="inv-title">TAX INVOICE</div>
-
-    <div class="info-grid">
-      <div>
-        <div class="info-row"><span>Invoice No:</span><span><b>{{ invoice.invoice_no }}</b></span></div>
-        <div class="info-row"><span>Date:</span><span>{{ invoice.date }}</span></div>
-        {% if invoice.due_date %}<div class="info-row"><span>Due Date:</span><span>{{ invoice.due_date }}</span></div>{% endif %}
-      </div>
-      <div>
-        <div class="info-row"><span>Place of Supply:</span><span>{{ invoice.customer_state or 'Gujarat' }}</span></div>
-        <div class="info-row"><span>Challans:</span><span>{{ invoice.challans|length }}</span></div>
-        <div class="info-row"><span>Payment Term:</span><span>Credit</span></div>
-      </div>
-    </div>
-
-    <div class="billed">
-      <div class="bt">Billed To:</div>
-      <div style="font-weight:900;font-size:12px;">{{ invoice.customer_name }}</div>
-      {% if invoice.customer_address %}<div>{{ invoice.customer_address }}</div>{% endif %}
-      {% if invoice.customer_state %}<div><b>State:</b> {{ invoice.customer_state }}</div>{% endif %}
-      {% if invoice.customer_gstin %}<div><b>GSTIN:</b> {{ invoice.customer_gstin }}</div>{% endif %}
-      {% if invoice.customer_pan %}<div><b>PAN:</b> {{ invoice.customer_pan }}</div>{% endif %}
-    </div>
-
-    <table class="items">
-      <thead>
-        <tr>
-          <th style="width:30px;">Sno</th>
-          <th>Description of Goods</th>
-          <th style="width:80px;">HSN/SAC</th>
-          <th style="width:70px;">Qty</th>
-          <th style="width:50px;">Unit</th>
-          <th style="width:60px;">Rate</th>
-          <th style="width:80px;">Amount ₹</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for c in challans %}
-        <tr>
-          <td class="center">{{ loop.index }}</td>
-          <td><b>{{ c.material_name }}</b><br><span style="font-size:8px;color:#666;">Challan: {{ c.challan_no }} · {{ c.date }}</span></td>
-          <td class="center">—</td>
-          <td class="num">{{ c.quantity }}</td>
-          <td class="center">{{ c.unit }}</td>
-          <td class="num">{{ "{:,.2f}".format(c.rate) }}</td>
-          <td class="num">{{ "{:,.2f}".format(c.amount) }}</td>
-        </tr>
-        {% endfor %}
-        <tr class="total-row">
-          <td colspan="6" style="text-align:right;">Subtotal:</td>
-          <td class="num">{{ "{:,.2f}".format(invoice.subtotal) }}</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <table class="tax-summary">
-      <tr><td style="width:60%;">CGST @ {{ (invoice.gst_rate/2)|round(2) }}%</td><td class="num">{{ "{:,.2f}".format(invoice.cgst) }}</td></tr>
-      <tr><td>SGST @ {{ (invoice.gst_rate/2)|round(2) }}%</td><td class="num">{{ "{:,.2f}".format(invoice.sgst) }}</td></tr>
-      <tr><td>Round Off</td><td class="num">{{ "{:,.2f}".format(invoice.round_off) }}</td></tr>
-      <tr class="gross"><td>GRAND TOTAL</td><td class="num">₹ {{ "{:,.2f}".format(invoice.total) }}</td></tr>
-    </table>
-
-    <div class="words">
-      <b>Amount in Words:</b> Rupees <span id="amtWords"></span> Only
-    </div>
-
-    <div class="footer-grid">
-      <div>
-        <div><b>Bank Details:</b></div>
-        <div><b>Bank:</b> {{ settings.bank_name or '—' }}</div>
-        <div><b>A/C No:</b> {{ settings.bank_account or '—' }}</div>
-        <div><b>IFSC:</b> {{ settings.bank_ifsc or '—' }}</div>
-      </div>
-      <div>
-        <div><b>Terms & Conditions:</b></div>
-        <div>• {{ settings.terms or 'Goods once sold will not be taken back.' }}</div>
-        <div>• Payment within due date, otherwise interest charged.</div>
-        <div>• Subject to jurisdiction only.</div>
-        <div class="sign">For {{ settings.company_name or 'Purav Carting' }}<br><br><br>Authorised Signatory</div>
-      </div>
-    </div>
-  </div>
+  <div id="pagesContainer"></div>
 
   <script src="/static/icons.js"></script>
   <script>
+    const INV = {{ invoice|tojson }};
+    const SETTINGS = {{ settings|tojson }};
+    const ITEMS_PER_PAGE = INV.items_per_page || 19;
+    const IS_GST = INV.gst_enabled !== false && INV.bill_type !== 'non-tax';
+
+    function money(n) {
+      if (typeof n !== "number") n = parseFloat(n) || 0;
+      return n.toLocaleString("en-IN", {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
     function numberToWords(num) {
       num = Math.round(num);
       const ones = ["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
       const tens = ["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
-      function two(n) { if (n < 20) return ones[n]; return tens[Math.floor(n/10)] + (n%10 ? " " + ones[n%10] : ""); }
-      function three(n) { let s = ""; if (n > 99) { s += ones[Math.floor(n/100)] + " Hundred"; n %= 100; if (n > 0) s += " "; } if (n > 0) s += two(n); return s; }
-      if (num === 0) return "Zero";
+      function two(n){ if(n<20) return ones[n]; return tens[Math.floor(n/10)]+(n%10?" "+ones[n%10]:""); }
+      function three(n){ let s=""; if(n>99){s+=ones[Math.floor(n/100)]+" Hundred"; n%=100; if(n>0)s+=" ";} if(n>0)s+=two(n); return s; }
+      if(num===0) return "Zero";
       let str = "";
-      const cr = Math.floor(num / 10000000); num %= 10000000;
-      const la = Math.floor(num / 100000); num %= 100000;
-      const th = Math.floor(num / 1000); num %= 1000;
-      if (cr > 0) str += three(cr) + " Crore ";
-      if (la > 0) str += three(la) + " Lakh ";
-      if (th > 0) str += three(th) + " Thousand ";
-      if (num > 0) str += three(num);
+      const cr = Math.floor(num/10000000); num%=10000000;
+      const la = Math.floor(num/100000); num%=100000;
+      const th = Math.floor(num/1000); num%=1000;
+      if(cr>0) str += three(cr)+" Crore ";
+      if(la>0) str += three(la)+" Lakh ";
+      if(th>0) str += three(th)+" Thousand ";
+      if(num>0) str += three(num);
       return str.trim();
     }
-    document.getElementById("amtWords").innerText = numberToWords({{ invoice.total }});
-    document.addEventListener("DOMContentLoaded", () => { if (window.renderIcons) window.renderIcons(); });
+
+    function buildHeader() {
+      return `
+        <div class="inv-header">
+          <div class="cname">${SETTINGS.company_name || 'PURAV CARTING'}</div>
+          <div class="csub">
+            ${SETTINGS.company_address ? SETTINGS.company_address + '<br>' : ''}
+            ${SETTINGS.company_gst ? '<b>GST NO:</b> ' + SETTINGS.company_gst + ' &nbsp; ' : ''}
+            ${SETTINGS.company_phone ? '<b>Mob:</b> ' + SETTINGS.company_phone : ''}
+          </div>
+        </div>
+        <div class="inv-title">${IS_GST ? 'TAX INVOICE' : 'INVOICE'}${!IS_GST ? '<span class="non-tax-badge">NON-GST</span>' : ''}</div>
+      `;
+    }
+
+    function buildInfo() {
+      return `
+        <div class="info-grid">
+          <div>
+            <div class="info-row"><span>Invoice No:</span><span><b>${INV.invoice_no}</b></span></div>
+            <div class="info-row"><span>Date:</span><span>${INV.date}</span></div>
+            ${INV.due_date ? `<div class="info-row"><span>Due Date:</span><span>${INV.due_date}</span></div>` : ''}
+          </div>
+          <div>
+            <div class="info-row"><span>Place of Supply:</span><span>${INV.customer_state || 'Gujarat'}</span></div>
+            <div class="info-row"><span>Payment Term:</span><span>Credit</span></div>
+          </div>
+        </div>
+      `;
+    }
+
+    function buildBilled() {
+      return `
+        <div class="billed">
+          ${INV.customer_balance !== undefined ? `<div class="balance-tag">Balance: ₹${money(INV.customer_balance)}</div>` : ''}
+          <div class="bt">Billed To:</div>
+          <div style="font-weight:900;font-size:13px;">${INV.customer_name}</div>
+          ${INV.customer_address ? '<div>' + INV.customer_address + '</div>' : ''}
+          ${INV.customer_state ? '<div><b>State:</b> ' + INV.customer_state + '</div>' : ''}
+          ${IS_GST && INV.customer_gstin ? '<div><b>GSTIN:</b> ' + INV.customer_gstin + '</div>' : ''}
+          ${INV.customer_pan ? '<div><b>PAN:</b> ' + INV.customer_pan + '</div>' : ''}
+        </div>
+      `;
+    }
+
+    function buildFooter(isLast) {
+      let html = '';
+      if (isLast) {
+        html += `<div class="words"><b>Amount in Words:</b> Rupees ${numberToWords(INV.total)} Only</div>`;
+      } else {
+        html += `<div class="words" style="visibility:hidden;">&nbsp;</div>`;
+      }
+      html += `
+        <div class="footer-grid">
+          <div>
+            <div><b>Bank Details:</b></div>
+            <div><b>Bank:</b> ${SETTINGS.bank_name || '—'}</div>
+            <div><b>A/C No:</b> ${SETTINGS.bank_account || '—'}</div>
+            <div><b>IFSC:</b> ${SETTINGS.bank_ifsc || '—'}</div>
+          </div>
+          <div>
+            <div><b>Terms & Conditions:</b></div>
+            <div>• ${SETTINGS.terms || 'Goods once sold will not be taken back.'}</div>
+            <div>• Subject to jurisdiction only.</div>
+            <div class="sign">For ${SETTINGS.company_name || 'Purav Carting'}<br><br><br>Authorised Signatory</div>
+          </div>
+        </div>
+      `;
+      return html;
+    }
+
+    const items = INV.items || [];
+    const pages = [];
+    for (let i = 0; i < items.length; i += ITEMS_PER_PAGE) pages.push(items.slice(i, i + ITEMS_PER_PAGE));
+    if (pages.length === 0) pages.push([]);
+
+    const container = document.getElementById("pagesContainer");
+    let runningTotal = 0;
+    let sNoGlobal = 1;
+
+    pages.forEach((pageItems, pageIdx) => {
+      const isFirst = pageIdx === 0;
+      const isLast = pageIdx === pages.length - 1;
+      const bfAmount = runningTotal;
+
+      let pageHtml = `<div class="a4">`;
+      pageHtml += buildHeader();
+      pageHtml += buildInfo();
+      if (isFirst) pageHtml += buildBilled();
+
+      pageHtml += `<table class="items"><thead><tr>
+        <th style="width:25px;">Sno</th>
+        <th>Description of Goods</th>
+        <th style="width:55px;">Quantity</th>
+        <th style="width:40px;">Per</th>
+        <th style="width:55px;">Rate ₹</th>
+        ${IS_GST ? '<th style="width:40px;">GST %</th>' : ''}
+        <th style="width:80px;">Vehicle</th>
+        <th style="width:75px;">Amount ₹</th>
+        ${IS_GST ? '<th style="width:40px;">CGST</th><th style="width:40px;">SGST</th>' : ''}
+      </tr></thead><tbody>`;
+
+      if (!isFirst) {
+        const cols = IS_GST ? 8 : 6;
+        pageHtml += `<tr class="bf-row"><td colspan="${cols}" style="text-align:left;"><b>TOTAL B/F :-</b></td><td class="num"><b>${money(bfAmount)}</b></td>${IS_GST ? '<td colspan="2"></td>' : ''}</tr>`;
+      }
+
+      pageItems.forEach((it) => {
+        const amt = (it.qty || 0) * (it.rate || 0);
+        runningTotal += amt;
+        const vd = it.vehicle_display || (it.vehicle_type && it.vehicle_number ? `${it.vehicle_type}-${it.vehicle_number}` : (it.vehicle_number || '—'));
+        pageHtml += `<tr>
+          <td class="center">${sNoGlobal}</td>
+          <td>${it.desc}</td>
+          <td class="num">${(it.qty || 0).toFixed(3)}</td>
+          <td class="center">${it.unit || 'Ton'}</td>
+          <td class="num">${(it.rate || 0).toFixed(2)}</td>
+          ${IS_GST ? `<td class="center">${(it.gst_pct || 0).toFixed(2)}</td>` : ''}
+          <td class="center" style="font-size:8.5px;">${vd}</td>
+          <td class="num">${money(amt)}</td>
+          ${IS_GST ? `<td class="center">${(it.cgst_amt || 0).toFixed(2)}</td><td class="center">${(it.sgst_amt || 0).toFixed(2)}</td>` : ''}
+        </tr>`;
+        sNoGlobal++;
+      });
+
+      if (!isLast) {
+        const cols = IS_GST ? 8 : 6;
+        pageHtml += `<tr class="cf-row"><td colspan="${cols}" style="text-align:left;"><b>TOTAL C/F :-</b></td><td class="num"><b>${money(runningTotal)}</b></td>${IS_GST ? '<td colspan="2"></td>' : ''}</tr>`;
+      }
+      pageHtml += `</tbody></table>`;
+
+      if (isLast) {
+        pageHtml += `<table class="tax-summary">
+          <tr><td style="width:60%;">Subtotal</td><td class="num">${money(INV.subtotal)}</td></tr>`;
+        if (IS_GST) {
+          pageHtml += `<tr><td>CGST</td><td class="num">${money(INV.cgst)}</td></tr>
+            <tr><td>SGST</td><td class="num">${money(INV.sgst)}</td></tr>`;
+        }
+        pageHtml += `<tr><td>Round Off</td><td class="num">${money(INV.round_off)}</td></tr>
+          <tr class="gross"><td>GRAND TOTAL</td><td class="num">₹ ${money(INV.total)}</td></tr>
+        </table>`;
+      }
+
+      pageHtml += buildFooter(isLast);
+      pageHtml += `<div class="page-num">Page ${pageIdx + 1} of ${pages.length}</div>`;
+      pageHtml += `</div>`;
+
+      container.insertAdjacentHTML("beforeend", pageHtml);
+    });
+
+    if (window.renderIcons) window.renderIcons();
   </script>
 
 </body>
